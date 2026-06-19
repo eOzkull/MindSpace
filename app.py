@@ -12,10 +12,15 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
 import seaborn as sns
 
+# Add local nltk_data to search path for offline container deployments
+local_nltk_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
+if local_nltk_path not in nltk.data.path:
+    nltk.data.path.append(local_nltk_path)
+
 try:
     nltk.data.find('sentiment/vader_lexicon.zip')
 except LookupError:
-    nltk.download('vader_lexicon')
+    nltk.download('vader_lexicon', download_dir=local_nltk_path)
 
 sia = SentimentIntensityAnalyzer()
 
