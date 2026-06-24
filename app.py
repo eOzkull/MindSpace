@@ -117,46 +117,6 @@ def upload():
             flash("Invalid file format. Please upload a CSV file.", "danger")
     return redirect(url_for('index'))
 
-
-    class_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
-    y_encoded = y.map(class_mapping)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
-    
-    model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
-    model.fit(X_train, y_train)
-
-    y_pred = model.predict(X_test)
-    y_prob = model.predict_proba(X_test)
-
-    cm = confusion_matrix(y_test, y_pred, labels=[0, 1, 2]).tolist()
-    
-    from sklearn.metrics import classification_report
-    report = classification_report(y_test, y_pred, target_names=['Low', 'Medium', 'High'], output_dict=True, zero_division=0)
-
-    # Save cm plot
-    plot_dir = get_writable_dir(os.path.join(app.static_folder, 'plots'))
-    plt.figure(figsize=(6, 5))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Low', 'Medium', 'High'], yticklabels=['Low', 'Medium', 'High'])
-    plt.title('Confusion Matrix')
-    plt.ylabel('Actual')
-    plt.xlabel('Predicted')
-    plt.tight_layout()
-    plt.savefig(os.path.join(plot_dir, 'confusion_matrix.png'))
-    plt.close('all')
-
-    eval_metrics = {
-        'accuracy': accuracy_score(y_test, y_pred),
-        'precision': round(precision_score(y_test, y_pred, average='weighted', zero_division=0), 3),
-        'recall': round(recall_score(y_test, y_pred, average='weighted', zero_division=0), 3),
-        'f1': round(f1_score(y_test, y_pred, average='weighted', zero_division=0), 3),
-        'roc_auc': round(roc_auc_score(y_test, y_prob, multi_class='ovr'), 3),
-        'confusion_matrix': cm,
-        'class_names': ['Low', 'Medium', 'High'],
-        'n_test': len(y_test),
-        'report': report
-    }
-
 def process_data():
     global data_df, corr_matrix, eval_metrics
     if data_df is None:
