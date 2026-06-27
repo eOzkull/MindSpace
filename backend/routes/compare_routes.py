@@ -33,17 +33,10 @@ def compare_upload():
             if col in cdf.columns:
                 cdf[col] = pd.to_numeric(cdf[col], errors='coerce').fillna(0)
                 cdf[col] = cdf[col].apply(lambda x: max(x, 0))
-        cdf['burnout_score'] = cdf.apply(
-            lambda r: ((r.get('study_hours', 0) / r.get('sleep_hours', 1)
-                        if r.get('sleep_hours', 0) > 0 else 0) * r.get('stress_level', 0)) * 10,
-            axis=1
-        )
-        cdf['burnout_score'] = np.clip(cdf['burnout_score'], 0, 100)
-        cdf['risk'] = pd.cut(cdf['burnout_score'], bins=[-1, 33, 66, 101], labels=['Low', 'Medium', 'High'])
-        if 'feedback' in cdf.columns:
-            cdf['sentiment_score'] = cdf['feedback'].apply(
-                lambda x: state.get_sia().polarity_scores(str(x))['compound']
-            )
+        from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
+        cdf = calculate_burnout(cdf)
+        cdf = assign_risk(cdf)
+        cdf = calculate_sentiment(cdf, state.get_sia())
 
         state.compare_df = cdf
         state.compare_meta = {'filename': file.filename, 'records': len(cdf)}
@@ -70,8 +63,15 @@ def compare_results():
     )
     label_b = state.compare_meta.get('filename', 'Dataset B')
 
-    stats_a = _build_stats(state.data_df.copy(), state.get_sia())
-    stats_b = _build_stats(state.compare_df.copy(), state.get_sia())
+    if getattr(state, '_last_data_df_id', None) != id(state.data_df):
+        state.primary_stats = _build_stats(state.data_df.copy(), state.get_sia())
+        state._last_data_df_id = id(state.data_df)
+    stats_a = state.primary_stats
+
+    if getattr(state, '_last_compare_df_id', None) != id(state.compare_df):
+        state.compare_stats = _build_stats(state.compare_df.copy(), state.get_sia())
+        state._last_compare_df_id = id(state.compare_df)
+    stats_b = state.compare_stats
 
     plot_dir = os.path.join(current_app.static_folder, 'plots')
     _generate_compare_plots(stats_a, stats_b, label_a, label_b, plot_dir)

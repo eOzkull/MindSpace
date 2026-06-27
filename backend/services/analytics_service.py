@@ -3,21 +3,14 @@ import numpy as np
 
 def _build_stats(df, sia):
     """Compute summary stats dict for one dataset."""
-    if 'feedback' in df.columns:
-        df = df.copy()
-        df['sentiment_score'] = df['feedback'].apply(lambda x: sia.polarity_scores(str(x))['compound'])
+    from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
+    df = df.copy()
+    df = calculate_sentiment(df, sia)
     for col in ['sleep_hours', 'study_hours', 'stress_level']:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-    if 'burnout_score' not in df.columns:
-        df['burnout_score'] = df.apply(
-            lambda r: ((r.get('study_hours', 0) / r.get('sleep_hours', 1)
-                        if r.get('sleep_hours', 0) > 0 else 0) * r.get('stress_level', 0)) * 10,
-            axis=1
-        )
-        df['burnout_score'] = np.clip(df['burnout_score'], 0, 100)
-    if 'risk' not in df.columns:
-        df['risk'] = pd.cut(df['burnout_score'], bins=[-1, 33, 66, 101], labels=['Low', 'Medium', 'High'])
+    df = calculate_burnout(df)
+    df = assign_risk(df)
     risk_counts = df['risk'].value_counts().reindex(['Low', 'Medium', 'High'], fill_value=0)
     return {
         'n': len(df),
