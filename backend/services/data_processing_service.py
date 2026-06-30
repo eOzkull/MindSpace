@@ -34,23 +34,10 @@ def process_data(data_df, plot_dir, sia):
             data_df[target] = pd.to_numeric(data_df[actual], errors='coerce').fillna(0)
             data_df[target] = data_df[target].apply(lambda x: max(x, 0))
 
-    data_df['burnout_score'] = data_df.apply(
-        lambda row: ((row.get('study_hours', 0) / row.get('sleep_hours', 1)
-                      if row.get('sleep_hours', 0) > 0 else 0) * row.get('stress_level', 0)) * 10,
-        axis=1
-    )
-    data_df['burnout_score'] = np.clip(data_df['burnout_score'], 0, 100)
-
-    data_df['risk'] = pd.cut(
-        data_df['burnout_score'], bins=[-1, 33, 66, 101], labels=['Low', 'Medium', 'High']
-    )
-
-    if 'feedback' in data_df.columns:
-        data_df['sentiment_score'] = data_df['feedback'].apply(
-            lambda x: sia.polarity_scores(str(x))['compound']
-        )
-    else:
-        data_df['sentiment_score'] = 0
+    from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
+    data_df = calculate_burnout(data_df)
+    data_df = assign_risk(data_df)
+    data_df = calculate_sentiment(data_df, sia)
 
     available_cols = [c for c in ['sleep_hours', 'study_hours', 'stress_level', 'burnout_score'] if c in data_df.columns]
     corr_matrix = data_df[available_cols].corr()
