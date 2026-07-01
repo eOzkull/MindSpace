@@ -8,3 +8,4 @@ scikit-learn
 python-dotenv==1.2.2
 gunicorn
 flask-cors
+pydantic>=2.0.0

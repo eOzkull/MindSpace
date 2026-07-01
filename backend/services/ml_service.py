@@ -1,5 +1,6 @@
 import os
 import matplotlib.pyplot as plt
+from utils.logger import logger
 
 def _auto_train(df, plot_dir, target='primary'):
     """Train a RandomForest on the specified dataset and return metrics."""
@@ -93,5 +94,5 @@ def _auto_train(df, plot_dir, target='primary'):
         return metrics
 
     except Exception as e:
-        print(f"[Auto-train error] {e}")
-        return None
+        logger.error(f"[Auto-train error] {e}", exc_info=True)
+        return None

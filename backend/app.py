@@ -5,8 +5,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
+
+from config import Config
+from utils.logger import logger
+from middleware.error_handlers import register_error_handlers
 
 # ── Blueprints ────────────────────────────────────────────────────────────────
 from routes.history_routes    import history_bp
@@ -16,36 +20,50 @@ from routes.evaluation_routes import evaluation_bp
 from routes.edit_routes       import edit_bp
 from routes.compare_routes    import compare_bp
 
-# ── Application factory ───────────────────────────────────────────────────────
-app = Flask(__name__, static_folder='static', static_url_path='/static')
+def create_app(config_class=Config):
+    """Application factory for the MindSpace Flask backend."""
+    app = Flask(__name__, static_folder='static', static_url_path='/static')
+    app.config.from_object(config_class)
 
-CORS(app, supports_credentials=True)
+    # Initialize CORS with explicit whitelisted origins
+    CORS(app, origins=config_class.CORS_ALLOWED_ORIGINS, supports_credentials=True)
 
-is_prod = os.environ.get('FLASK_ENV') == 'production'
-secret_key = os.environ.get('SECRET_KEY')
-if is_prod and not secret_key:
-    raise ValueError("No SECRET_KEY set for production environment!")
-app.config['SECRET_KEY'] = secret_key or 'dev_secret_key_mindspace'
+    # Register exception and error handling middleware
+    register_error_handlers(app)
 
-# Drive cookie security via COOKIE_SECURE if set, fallback to FLASK_ENV=production
-is_secure = os.environ.get('COOKIE_SECURE', str(is_prod)).lower() in ('true', '1', 'yes')
-app.config['SESSION_COOKIE_SAMESITE'] = 'None' if is_secure else 'Lax'
-app.config['SESSION_COOKIE_SECURE']   = is_secure
+    # Handle temporary plot directory (production uses /tmp due to serverless read-only disk)
+    is_prod = config_class.FLASK_ENV == 'production'
+    if is_prod:
+        plot_dir = '/tmp/plots'
+        # Serve plots from /tmp in production environment
+        @app.route('/static/plots/<path:filename>')
+        def serve_plots(filename):
+            return send_from_directory('/tmp/plots', filename)
+    else:
+        plot_dir = os.path.join(app.static_folder, 'plots')
 
-# Clear old plots on startup
-plot_dir = os.path.join(app.static_folder, 'plots')
-if os.path.exists(plot_dir):
-    shutil.rmtree(plot_dir)
-os.makedirs(plot_dir, exist_ok=True)
+    # Recreate plots directory safely on startup
+    if os.path.exists(plot_dir):
+        try:
+            shutil.rmtree(plot_dir)
+        except Exception as e:
+            logger.warning(f"Could not clear plot directory: {e}")
+    os.makedirs(plot_dir, exist_ok=True)
 
-# ── Register Blueprints ───────────────────────────────────────────────────────
-app.register_blueprint(history_bp)
-app.register_blueprint(upload_bp)
-app.register_blueprint(dashboard_bp)
-app.register_blueprint(evaluation_bp)
-app.register_blueprint(edit_bp)
-app.register_blueprint(compare_bp)
+    # Register route blueprints
+    app.register_blueprint(history_bp)
+    app.register_blueprint(upload_bp)
+    app.register_blueprint(dashboard_bp)
+    app.register_blueprint(evaluation_bp)
+    app.register_blueprint(edit_bp)
+    app.register_blueprint(compare_bp)
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+    logger.info(f"MindSpace application initialized in '{config_class.FLASK_ENV}' mode.")
+    return app
+
+# Instantiate app for WSGI / Serverless runner compatibility
+app = create_app()
+
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False, port=5000)
+    # Local development server running on port 5000
+    app.run(debug=(Config.FLASK_ENV == 'development'), use_reloader=False, port=5000)
