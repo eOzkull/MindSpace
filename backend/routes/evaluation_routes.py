@@ -12,27 +12,31 @@ def evaluate():
     if target not in ['primary', 'compare']:
         target = 'primary'
 
-    metrics = state.eval_metrics.get(target)
+    eval_metrics = state.eval_metrics
+    metrics = eval_metrics.get(target)
 
-    if metrics is None and state.data_df is None:
+    data_df = state.data_df
+
+    if metrics is None and data_df is None:
         return jsonify({'error': 'No dataset loaded yet. Upload a CSV from the Home page first.'}), 400
 
     if metrics is None:
         plot_dir = os.path.join(current_app.static_folder, 'plots')
-        df_to_train = state.data_df if target == 'primary' else state.compare_df
+        df_to_train = data_df if target == 'primary' else state.compare_df
         metrics = _auto_train(df_to_train, plot_dir, target)
         if metrics:
-            em = state.eval_metrics
-            em[target] = metrics
-            state.eval_metrics = em
-        metrics = state.eval_metrics.get(target)
+            eval_metrics[target] = metrics
+            state.eval_metrics = eval_metrics
+        metrics = eval_metrics.get(target)
 
     if metrics is None:
         return jsonify({'error': f'Could not train model on the {target} dataset.'}), 400
 
+    latest_metrics = state.eval_metrics
+
     return jsonify({
         'metrics': metrics,
-        'primary_exists': (state.eval_metrics['primary'] is not None),
-        'compare_exists': (state.eval_metrics['compare'] is not None),
+        'primary_exists': (latest_metrics['primary'] is not None),
+        'compare_exists': (latest_metrics['compare'] is not None),
         'plot': get_static_url(f'confusion_matrix_{target}.png')
     })

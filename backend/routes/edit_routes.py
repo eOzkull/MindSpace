@@ -62,7 +62,4 @@ def edit():
         em['primary'] = metrics
         state.eval_metrics = em
 
-    os.makedirs('data', exist_ok=True)
-    state.data_df.to_csv('data/updated_sample.csv', index=False)
-
     return jsonify({'success': True, 'message': 'Dataset updated successfully.'})

@@ -7,10 +7,10 @@ dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/api/dashboard', methods=['GET'])
 def dashboard():
-    if state.data_df is None:
+    df = state.data_df
+    if df is None:
         return jsonify({'error': 'No dataset loaded'}), 400
 
-    df = state.data_df
     stats = {
         'avg_burnout':    round(df['burnout_score'].mean(), 1),
         'median_burnout': round(df['burnout_score'].median(), 1),
@@ -43,12 +43,13 @@ def dashboard():
 
 @dashboard_bp.route('/api/results', methods=['GET'])
 def results():
-    if state.data_df is None:
-        return jsonify({'error': 'No dataset loaded'}), 400
     df = state.data_df
+    if df is None:
+        return jsonify({'error': 'No dataset loaded'}), 400
+    eval_metrics = state.eval_metrics
     return jsonify({
         'avg_burnout':   round(df['burnout_score'].mean(), 2) if 'burnout_score' in df.columns else None,
         'high_risk_pct': round(len(df[df['risk'] == 'High']) / len(df) * 100, 1) if 'risk' in df.columns else None,
         'avg_sentiment': round(df['sentiment_score'].mean(), 2) if 'sentiment_score' in df.columns else None,
-        'metrics':       state.eval_metrics['primary']
+        'metrics':       eval_metrics['primary']
     })

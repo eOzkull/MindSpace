@@ -9,12 +9,12 @@ if os.path.exists(env_path):
 class Config:
     FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev_secret_key_mindspace')
-    
+
     # Parse cookie secure setting, defaults to True if production
     is_prod = FLASK_ENV == 'production'
     cookie_secure_str = os.environ.get('COOKIE_SECURE', str(is_prod)).lower()
     COOKIE_SECURE = cookie_secure_str in ('true', '1', 'yes')
-    
+
     # Session cookies parameters
     SESSION_COOKIE_SAMESITE = 'None' if COOKIE_SECURE else 'Lax'
     SESSION_COOKIE_SECURE = COOKIE_SECURE
@@ -25,3 +25,20 @@ class Config:
 
     # Static plot directory relative to backend app
     STATIC_PLOT_DIR = os.environ.get('STATIC_PLOT_DIR', 'static/plots')
+
+    # Database Configuration
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        
+    if not db_url:
+        if FLASK_ENV == 'production':
+            SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/mindspace.db'
+        else:
+            SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'mindspace.db')
+    else:
+        SQLALCHEMY_DATABASE_URI = db_url
+        
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
