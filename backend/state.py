@@ -12,7 +12,7 @@ import uuid
 import pandas as pd
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from flask import session
+from flask import session, has_app_context, g
 
 SESSION_DIR = os.path.join(os.path.dirname(__file__), 'data', 'sessions')
 os.makedirs(SESSION_DIR, exist_ok=True)
@@ -58,30 +58,52 @@ class StateManager:
         if df is None:
             if os.path.exists(path):
                 os.remove(path)
+            if has_app_context():
+                g.pop(f"_state_df_{name}", None)
         else:
             df.to_pickle(path)
+            if has_app_context():
+                setattr(g, f"_state_df_{name}", df)
 
     def _load_df(self, name):
+        if has_app_context() and hasattr(g, f"_state_df_{name}"):
+            return getattr(g, f"_state_df_{name}")
+            
         path = os.path.join(_get_user_dir(), f"{name}.pkl")
+        df = None
         if os.path.exists(path):
-            return pd.read_pickle(path)
-        return None
+            df = pd.read_pickle(path)
+            
+        if has_app_context():
+            setattr(g, f"_state_df_{name}", df)
+        return df
 
     def _save_json(self, name, data):
         path = os.path.join(_get_user_dir(), f"{name}.json")
         if data is None:
             if os.path.exists(path):
                 os.remove(path)
+            if has_app_context():
+                g.pop(f"_state_json_{name}", None)
         else:
             with open(path, 'w') as f:
                 json.dump(data, f)
+            if has_app_context():
+                setattr(g, f"_state_json_{name}", data)
 
     def _load_json(self, name, default=None):
+        if has_app_context() and hasattr(g, f"_state_json_{name}"):
+            return getattr(g, f"_state_json_{name}")
+            
         path = os.path.join(_get_user_dir(), f"{name}.json")
+        data = default
         if os.path.exists(path):
             with open(path, 'r') as f:
-                return json.load(f)
-        return default
+                data = json.load(f)
+                
+        if has_app_context():
+            setattr(g, f"_state_json_{name}", data)
+        return data
 
     # --- Properties mapping to disk ---
 

@@ -1,13 +1,5 @@
 import os
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score,
-    f1_score, roc_auc_score, confusion_matrix, classification_report
-)
 from utils.logger import logger
 
 def _auto_train(df, plot_dir, target='primary'):
@@ -16,6 +8,14 @@ def _auto_train(df, plot_dir, target='primary'):
         return None
 
     try:
+        import seaborn as sns
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.model_selection import train_test_split
+        from sklearn.preprocessing import LabelEncoder
+        from sklearn.metrics import (
+            accuracy_score, precision_score, recall_score,
+            f1_score, roc_auc_score, confusion_matrix, classification_report
+        )
         feature_cols = [c for c in ['sleep_hours', 'study_hours', 'stress_level'] if c in df.columns]
         if 'risk' not in df.columns or len(feature_cols) < 2:
             return None

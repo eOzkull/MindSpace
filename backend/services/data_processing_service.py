@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
+from utils.csv_normalize import normalize_dataframe
 
 def process_data(data_df, plot_dir, sia):
     if data_df is None:
@@ -11,29 +12,7 @@ def process_data(data_df, plot_dir, sia):
 
     os.makedirs(plot_dir, exist_ok=True)
 
-    # Fuzzy column mapping
-    col_map = {
-        'sleep_hours': ['sleep_hours', 'sleep hours', 'sleep', 'sleeping_hours'],
-        'study_hours': ['study_hours', 'study hours', 'study', 'studying_hours'],
-        'stress_level': ['stress_level', 'stress level', 'stress', 'stress_score']
-    }
-    
-    actual_map = {}
-    for target, variations in col_map.items():
-        found = False
-        for col in data_df.columns:
-            if col.lower().strip() in variations:
-                actual_map[target] = col
-                found = True
-                break
-        if not found:
-            actual_map[target] = target # Default to target name
-
-    numeric_cols = ['sleep_hours', 'study_hours', 'stress_level']
-    for target, actual in actual_map.items():
-        if actual in data_df.columns:
-            data_df[target] = pd.to_numeric(data_df[actual], errors='coerce').fillna(0)
-            data_df[target] = data_df[target].apply(lambda x: max(x, 0))
+    data_df = normalize_dataframe(data_df)
 
     data_df = calculate_burnout(data_df)
     data_df = assign_risk(data_df)

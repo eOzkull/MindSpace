@@ -1,5 +1,4 @@
 import os
-import shutil
 from flask import Blueprint, request, jsonify, session, current_app
 from werkzeug.utils import secure_filename
 import pandas as pd
@@ -10,6 +9,7 @@ from services.visualisation_service import _generate_compare_plots
 from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
 from services.file_service import get_static_url
 from utils.validators import validate_csv
+from utils.csv_normalize import normalize_dataframe
 
 compare_bp = Blueprint('compare', __name__)
 
@@ -42,10 +42,7 @@ def compare_upload():
         if not is_valid:
             return jsonify({'error': error_msg}), 400
 
-        for col in ['sleep_hours', 'study_hours', 'stress_level']:
-            if col in cdf.columns:
-                cdf[col] = pd.to_numeric(cdf[col], errors='coerce').fillna(0)
-                cdf[col] = cdf[col].apply(lambda x: max(x, 0))
+        cdf = normalize_dataframe(cdf)
 
         cdf = calculate_burnout(cdf)
         cdf = assign_risk(cdf)
@@ -55,7 +52,7 @@ def compare_upload():
         state.compare_meta = {'filename': safe_filename, 'records': len(cdf)}
 
         plot_dir = os.path.join(current_app.static_folder, 'plots')
-        metrics = _auto_train(state.compare_df, plot_dir, 'compare')
+        metrics = _auto_train(cdf, plot_dir, 'compare')
         if metrics:
             em = state.eval_metrics
             em['compare'] = metrics
@@ -72,7 +69,10 @@ def compare_upload():
 
 @compare_bp.route('/api/compare/results', methods=['GET'])
 def compare_results():
-    if state.data_df is None or state.compare_df is None:
+    data_df = state.data_df
+    compare_df = state.compare_df
+
+    if data_df is None or compare_df is None:
         return jsonify({'error': 'Datasets not loaded'}), 400
 
     label_a = (
@@ -82,8 +82,9 @@ def compare_results():
     label_b = (state.compare_meta or {}).get('filename', 'Dataset B')
 
     # Always recompute stats fresh (disk-based state, no in-memory caching)
-    stats_a = _build_stats(state.data_df.copy(), state.get_sia())
-    stats_b = _build_stats(state.compare_df.copy(), state.get_sia())
+    sia = state.get_sia()
+    stats_a = _build_stats(data_df.copy(), sia)
+    stats_b = _build_stats(compare_df.copy(), sia)
 
     plot_dir = os.path.join(current_app.static_folder, 'plots')
     _generate_compare_plots(stats_a, stats_b, label_a, label_b, plot_dir)

@@ -28,6 +28,17 @@ class Config:
 
     # Database Configuration
     basedir = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'mindspace.db')
+    
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        
+    if not db_url:
+        if FLASK_ENV == 'production':
+            SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/mindspace.db'
+        else:
+            SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'mindspace.db')
+    else:
+        SQLALCHEMY_DATABASE_URI = db_url
+        
     SQLALCHEMY_TRACK_MODIFICATIONS = False
