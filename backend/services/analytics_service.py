@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
+from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
 
 def _build_stats(df, sia):
     """Compute summary stats dict for one dataset."""
-    from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
     df = df.copy()
     df = calculate_sentiment(df, sia)
     for col in ['sleep_hours', 'study_hours', 'stress_level']:

@@ -11,6 +11,8 @@ from flask_cors import CORS
 from config import Config
 from utils.logger import logger
 from middleware.error_handlers import register_error_handlers
+from extensions import db, migrate
+import models
 
 # ── Blueprints ────────────────────────────────────────────────────────────────
 from routes.history_routes    import history_bp
@@ -24,6 +26,10 @@ def create_app(config_class=Config):
     """Application factory for the MindSpace Flask backend."""
     app = Flask(__name__, static_folder='static', static_url_path='/static')
     app.config.from_object(config_class)
+
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
 
     # Initialize CORS with explicit whitelisted origins
     CORS(app, origins=config_class.CORS_ALLOWED_ORIGINS, supports_credentials=True)

@@ -48,6 +48,10 @@ class StateManager:
             self._sia = SentimentIntensityAnalyzer()
         return self._sia
 
+    def get_user_dir(self):
+        """Public wrapper for the module-level _get_user_dir helper."""
+        return _get_user_dir()
+
     # --- Disk IO Helpers ---
     def _save_df(self, name, df):
         path = os.path.join(_get_user_dir(), f"{name}.pkl")

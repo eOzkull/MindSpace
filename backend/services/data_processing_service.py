@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
 
 def process_data(data_df, plot_dir, sia):
     if data_df is None:
@@ -34,7 +35,6 @@ def process_data(data_df, plot_dir, sia):
             data_df[target] = pd.to_numeric(data_df[actual], errors='coerce').fillna(0)
             data_df[target] = data_df[target].apply(lambda x: max(x, 0))
 
-    from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
     data_df = calculate_burnout(data_df)
     data_df = assign_risk(data_df)
     data_df = calculate_sentiment(data_df, sia)
@@ -137,6 +137,7 @@ def process_data(data_df, plot_dir, sia):
         fig, ax = _dark_fig(6, 4)
         sns.boxplot(
             data=data_df, x='risk', y='burnout_score',
+            hue='risk', legend=False,
             palette={'Low': '#28c76f', 'Medium': '#4facfe', 'High': '#ff4b5c'},
             ax=ax,
             boxprops={'alpha': 0.7, 'edgecolor': 'none'},

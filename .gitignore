@@ -2,3 +2,7 @@ __pycache__/
 venv/
 .env
 *.pyc
+
+backend/mindspace.db
+backend/data/sessions/
+backend/static/plots/
