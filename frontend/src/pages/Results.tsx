@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchResults } from '../api';
+import { fetchResults, type ResultsResponse } from '../api';
 
 const Results: React.FC = () => {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<ResultsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Results: React.FC = () => {
     load();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading || !data) return <div>Loading...</div>;
   if (error) return <div className="card flash-alert flash-danger"><i className="ph-duotone ph-warning-octagon"></i>{error}</div>;
 
   return (

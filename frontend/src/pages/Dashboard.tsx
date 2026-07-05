@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchDashboard } from '../api';
+import { fetchDashboard, type DashboardStats, type DashboardPlots, type DataRow } from '../api';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
-  const [data, setData] = useState<any[]>([]);
-  const [plots, setPlots] = useState<any>(null);
+  const [data, setData] = useState<DataRow[]>([]);
+  const [plots, setPlots] = useState<DashboardPlots | null>(null);
 
   // Pagination & Filtering
   const [search, setSearch] = useState('');
@@ -24,10 +24,10 @@ const Dashboard: React.FC = () => {
         if (res.error) {
           setError(res.error);
         } else {
-          setStats(res.stats);
-          setColumns(res.columns);
-          setData(res.data);
-          setPlots(res.plots);
+          if (res.stats) setStats(res.stats);
+          if (res.columns) setColumns(res.columns);
+          if (res.data) setData(res.data);
+          if (res.plots) setPlots(res.plots);
         }
       } catch (err) {
         setError('Failed to load dashboard.');
@@ -37,11 +37,11 @@ const Dashboard: React.FC = () => {
     load();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading || !stats || !plots) return <div>Loading...</div>;
   if (error) return <div className="card flash-alert flash-danger"><i className="ph-duotone ph-warning-octagon"></i>{error}</div>;
 
   const filteredData = data.filter(row => {
-    const riskMatch = riskFilter === 'All' || row.risk === riskFilter;
+    const riskMatch = riskFilter === 'All' || row['risk'] === riskFilter;
     const searchMatch = !search || Object.values(row).some(v => String(v).toLowerCase().includes(search.toLowerCase()));
     return riskMatch && searchMatch;
   });
@@ -50,7 +50,17 @@ const Dashboard: React.FC = () => {
   const start = (currentPage - 1) * recordsPerPage;
   const currentData = filteredData.slice(start, start + recordsPerPage);
 
-  const ChartCard = ({ icon, title, desc, takeaway, img_url, img_alt, reverse = false }: any) => (
+  interface ChartCardProps {
+    icon: string;
+    title: string;
+    desc: string;
+    takeaway: string;
+    img_url: string;
+    img_alt: string;
+    reverse?: boolean;
+  }
+
+  const ChartCard = ({ icon, title, desc, takeaway, img_url, img_alt, reverse = false }: ChartCardProps) => (
     <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
       <div className="insight-text-col">
         <h3 className="insight-title"><i className={`ph-duotone ${icon}`}></i> {title}</h3>
@@ -146,7 +156,7 @@ const Dashboard: React.FC = () => {
                       {columns.map(c => (
                         <td key={c}>
                           {c === 'risk' ? (
-                            <span className={`badge badge-${(row[c] || '').toLowerCase()}`}>{row[c]}</span>
+                            <span className={`badge badge-${String(row[c] || '').toLowerCase()}`}>{row[c]}</span>
                           ) : (
                             row[c]
                           )}

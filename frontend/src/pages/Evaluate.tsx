@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { fetchEvaluate } from '../api';
+import { fetchEvaluate, type EvaluateResponse } from '../api';
 
 const Evaluate: React.FC = () => {
   const [searchParams] = useSearchParams();
   const target = searchParams.get('dataset') || 'primary';
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EvaluateResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -28,7 +28,7 @@ const Evaluate: React.FC = () => {
     load();
   }, [target]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading || !data || !data.metrics) return <div>Loading...</div>;
 
   if (error) {
     return (
@@ -121,7 +121,7 @@ const Evaluate: React.FC = () => {
             <i className="ph-duotone ph-grid-four"></i> Confusion Matrix
           </h3>
           {metrics.confusion_matrix && (
-            <div className="cm-grid" style={{ '--cm-cols': metrics.class_names.length } as any}>
+            <div className="cm-grid" style={{ '--cm-cols': metrics.class_names.length } as React.CSSProperties}>
               <div className="cm-corner"></div>
               {metrics.class_names.map((name: string) => (
                 <div key={name} className="cm-head">Predicted<br /><strong style={{ color: 'var(--text-primary)' }}>{name}</strong></div>

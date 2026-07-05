@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory, resetSession, uploadFile } from '../api';
+import { fetchHistory, resetSession, uploadFile, type HistoryEntry } from '../api';
 
 const Home: React.FC = () => {
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -175,25 +175,25 @@ const Home: React.FC = () => {
           <i className="ph-duotone ph-list-checks"></i> System Requirements
         </h3>
         <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div className="card feature-pill" style={{ '--accent': 'var(--info)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--info)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--info)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <i className="ph-duotone ph-moon-stars"></i> Sleep
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Average nightly sleep duration (hours).</p>
           </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--brand-primary)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--brand-primary)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <i className="ph-duotone ph-book-open-text"></i> Study
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Daily focused learning hours.</p>
           </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--danger)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--danger)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--danger)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <i className="ph-duotone ph-warning-circle"></i> Stress
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Self-reported level (scale 1–10).</p>
           </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--success)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--success)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--success)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <i className="ph-duotone ph-chat-centered-text"></i> Feedback
             </h4>

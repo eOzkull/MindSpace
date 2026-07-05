@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCompareStatus, uploadCompareFile, fetchCompareResults, clearCompare } from '../api';
+import { fetchCompareStatus, uploadCompareFile, fetchCompareResults, clearCompare, type CompareStatusResponse, type CompareResultsResponse } from '../api';
 
 const Compare: React.FC = () => {
-  const [status, setStatus] = useState<any>(null);
-  const [results, setResults] = useState<any>(null);
+  const [status, setStatus] = useState<CompareStatusResponse | null>(null);
+  const [results, setResults] = useState<CompareResultsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
@@ -90,7 +90,16 @@ const Compare: React.FC = () => {
 
   const { label_a, label_b, stats_a, stats_b, deltas, plots } = results;
 
-  const CmpChart = ({ icon, title, desc, insight, img_url, reverse = false }: any) => (
+  interface CmpChartProps {
+    icon: string;
+    title: string;
+    desc: string;
+    insight: string;
+    img_url: string;
+    reverse?: boolean;
+  }
+
+  const CmpChart = ({ icon, title, desc, insight, img_url, reverse = false }: CmpChartProps) => (
     <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
       <div className="insight-text-col">
         <h3 className="insight-title"><i className={`ph-duotone ${icon}`}></i> {title}</h3>

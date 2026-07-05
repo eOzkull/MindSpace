@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDashboard, updateData } from '../api';
+import { fetchDashboard, updateData, type DataRow, type UpdatePayload } from '../api';
 
 const Edit: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<DataRow[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -17,8 +17,8 @@ const Edit: React.FC = () => {
         if (res.error) {
           setError(res.error);
         } else {
-          setData(res.data);
-          setColumns(res.columns);
+          if (res.data) setData(res.data);
+          if (res.columns) setColumns(res.columns);
         }
       } catch (err) {
         setError('Failed to load dataset.');
@@ -29,7 +29,7 @@ const Edit: React.FC = () => {
   }, []);
 
   const handleAddRow = () => {
-    const newRow = columns.reduce((acc, col) => ({ ...acc, [col]: '' }), {});
+    const newRow = columns.reduce<DataRow>((acc, col) => ({ ...acc, [col]: '' }), {});
     setData([...data, newRow]);
   };
 
@@ -42,7 +42,7 @@ const Edit: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updates: any[] = [];
+      const updates: UpdatePayload[] = [];
       data.forEach((row, rIdx) => {
         columns.forEach(col => {
           if (row[col] !== undefined) {
