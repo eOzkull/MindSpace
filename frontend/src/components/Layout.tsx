@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
     Brain, House, ChartPie, ListChecks, Crosshair, GitCompare, Moon, Sun,
+    Sparkles, ShieldAlert, Lightbulb
 } from 'lucide-react';
 import { useAppStore, selectTheme, selectIsDarkMode } from '../store/appStore';
 
@@ -56,6 +57,24 @@ const Layout: React.FC = () => {
                 return {
                     title: 'Compare',
                     subtitle: 'Compare multiple datasets.',
+                };
+
+            case '/predict':
+                return {
+                    title: 'Student Predictor',
+                    subtitle: 'Run single-student burnout diagnostic evaluations.',
+                };
+
+            case '/anomalies':
+                return {
+                    title: 'Anomaly Detection',
+                    subtitle: 'Identify statistical outliers and behavioral anomalies.',
+                };
+
+            case '/recommendations':
+                return {
+                    title: 'Action Guidelines',
+                    subtitle: 'Actionable intervention protocols for student cohort welfare.',
                 };
 
             default:
@@ -134,6 +153,42 @@ const Layout: React.FC = () => {
                         >
                             <GitCompare size={18} />
                             <span>Compare</span>
+                        </NavLink>
+                    </li>
+
+                    <li className="nav-item">
+                        <NavLink
+                            to="/predict"
+                            className={({ isActive }) =>
+                                `nav-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <Sparkles size={18} />
+                            <span>Predictor</span>
+                        </NavLink>
+                    </li>
+
+                    <li className="nav-item">
+                        <NavLink
+                            to="/anomalies"
+                            className={({ isActive }) =>
+                                `nav-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <ShieldAlert size={18} />
+                            <span>Anomalies</span>
+                        </NavLink>
+                    </li>
+
+                    <li className="nav-item">
+                        <NavLink
+                            to="/recommendations"
+                            className={({ isActive }) =>
+                                `nav-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <Lightbulb size={18} />
+                            <span>Guidelines</span>
                         </NavLink>
                     </li>
                 </ul>
