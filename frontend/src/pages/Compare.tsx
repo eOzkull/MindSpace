@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCompareStatus, uploadCompareFile, fetchCompareResults, clearCompare, type CompareStatusResponse, type CompareResultsResponse } from '../api';
+import { fetchCompareStatus, uploadCompareFile, fetchCompareResults, clearCompare } from '../api/compare';
+import type { CompareStatusResponse, CompareResultsResponse } from '../types/common';
 
 const Compare: React.FC = () => {
   const [status, setStatus] = useState<CompareStatusResponse | null>(null);

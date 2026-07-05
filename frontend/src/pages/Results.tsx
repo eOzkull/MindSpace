@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchResults, type ResultsResponse } from '../api';
+import { fetchResults } from '../api/prediction';
+import type { ResultsResponse } from '../types/prediction';
 
 const Results: React.FC = () => {
   const [data, setData] = useState<ResultsResponse | null>(null);

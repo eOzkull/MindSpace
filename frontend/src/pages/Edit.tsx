@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDashboard, updateData, type DataRow, type UpdatePayload } from '../api';
+import { fetchDashboard, updateData } from '../api/dashboard';
+import type { DataRow } from '../types/dashboard';
+import type { UpdatePayload } from '../types/common';
 
 const Edit: React.FC = () => {
   const [data, setData] = useState<DataRow[]>([]);

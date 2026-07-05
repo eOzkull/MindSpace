@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchDashboard, type DashboardStats, type DashboardPlots, type DataRow } from '../api';
+import { fetchDashboard } from '../api/dashboard';
+import type { DashboardStats, DashboardPlots, DataRow } from '../types/dashboard';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);

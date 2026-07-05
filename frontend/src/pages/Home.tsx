@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory, resetSession, uploadFile, type HistoryEntry } from '../api';
+import { fetchHistory, resetSession, uploadFile } from '../api/upload';
+import type { HistoryEntry } from '../types/common';
 
 const Home: React.FC = () => {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
