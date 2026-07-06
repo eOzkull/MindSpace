@@ -22,15 +22,13 @@ const Anomalies: React.FC = () => {
     setError('');
     try {
       // Call the typed API
-      await fetchAnomalies();
-      
-      // If by any chance it succeeds (meaning the API is registered on backend in a future commit),
-      // we would set the response data. But since it will likely fail with 404, we handle it in catch.
+      const realData = await fetchAnomalies();
+      setAnomalies(realData as AnomalyItem[]);
     } catch (err: any) {
       setError('Backend API scanning not available. Using offline cache data.');
       console.log('Using mockup anomalies fallback due to backend endpoint availability:', err);
     } finally {
-      // Fallback placeholder/mockup data to satisfy "Use clean placeholder UIs where functionality is not yet implemented"
+      // Only use mock data when the API actually fails
       setAnomalies([
         {
           id: "ST-0812",

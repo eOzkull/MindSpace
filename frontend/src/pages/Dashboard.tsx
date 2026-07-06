@@ -96,8 +96,8 @@ const Dashboard: React.FC = () => {
     load();
   }, []);
 
-  if (loading || !stats || !plots) return <div>Loading...</div>;
   if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
+  if (loading || !stats || !plots) return <div>Loading...</div>;
 
   const filteredData = data.filter(row => {
     const riskMatch = riskFilter === 'All' || row['risk'] === riskFilter;
