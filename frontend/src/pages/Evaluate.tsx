@@ -1,11 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { fetchEvaluate } from '../api';
+import { fetchEvaluate } from '../api/prediction';
+import type { EvaluateResponse } from '../types/evaluate';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Database,
+  ArrowLeftRight,
+  CheckCircle2,
+  Target,
+  Scale,
+  Crosshair,
+  ZoomIn,
+  Grid,
+  Info,
+  List,
+  Lightbulb,
+  GraduationCap,
+  Network,
+  Activity,
+  Zap,
+  Image,
+  AlertCircle
+} from 'lucide-react';
 
 const Evaluate: React.FC = () => {
   const [searchParams] = useSearchParams();
   const target = searchParams.get('dataset') || 'primary';
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EvaluateResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -28,18 +50,18 @@ const Evaluate: React.FC = () => {
     load();
   }, [target]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading || !data || !data.metrics) return <div>Loading...</div>;
 
   if (error) {
     return (
       <div className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center' }}>
-        <i className="ph-duotone ph-warning-octagon" style={{ fontSize: '4rem', color: 'var(--danger)', marginBottom: '1rem' }}></i>
+        <AlertCircle size={64} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
         <h3 style={{ marginBottom: '0.5rem' }}>Model Not Ready</h3>
         <p className="insight-desc">{error}</p>
         {target === 'compare' && (
           <p className="insight-desc" style={{ marginTop: '1rem' }}>
             <Link to="/evaluate?dataset=primary" className="btn btn-outline" style={{ margin: '0 auto' }}>
-              <i className="ph ph-arrow-left"></i> Back to Primary Dataset
+              <ArrowLeft size={16} /> Back to Primary Dataset
             </Link>
           </p>
         )}
@@ -57,10 +79,10 @@ const Evaluate: React.FC = () => {
         <div className="card" style={{ marginBottom: '2rem', padding: '0.75rem', display: 'flex', justifyContent: 'center', background: 'var(--input-bg)' }}>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <Link to="/evaluate?dataset=primary" className={`btn ${target === 'primary' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem' }}>
-              <i className="ph ph-database"></i> Primary Dataset
+              <Database size={16} /> Primary Dataset
             </Link>
             <Link to="/evaluate?dataset=compare" className={`btn ${target === 'compare' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem' }}>
-              <i className="ph ph-arrows-left-right"></i> Comparison Dataset
+              <ArrowLeftRight size={16} /> Comparison Dataset
             </Link>
           </div>
         </div>
@@ -73,7 +95,11 @@ const Evaluate: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
           <div style={{ padding: '1rem', background: 'var(--input-bg)', borderRadius: '50%', border: '1px solid var(--card-border)' }}>
-            <i className={`ph-duotone ${isReady ? 'ph-check-circle' : 'ph-warning-circle'} verdict-icon ${readyStatus}`} style={{ fontSize: '2.5rem', color: `var(--${isReady ? 'success' : 'warning'})` }}></i>
+            {isReady ? (
+              <CheckCircle2 size={40} style={{ color: 'var(--success)' }} className={`verdict-icon ${readyStatus}`} />
+            ) : (
+              <AlertTriangle size={40} style={{ color: 'var(--warning)' }} className={`verdict-icon ${readyStatus}`} />
+            )}
           </div>
           <div>
             <h3 className={`verdict-title ${readyStatus}`} style={{ marginBottom: '0.5rem', fontSize: '1.4rem', color: `var(--${isReady ? 'success' : 'warning'})` }}>
@@ -90,26 +116,34 @@ const Evaluate: React.FC = () => {
 
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
         <div className="card stat-card-inner">
-          <i className="ph-fill ph-target bg-icon"></i>
-          <div className="stat-label"><i className="ph ph-target" style={{ color: 'var(--success)' }}></i> Accuracy</div>
+          <Target size={112} className="bg-icon" />
+          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Target size={20} style={{ color: 'var(--success)' }} /> Accuracy
+          </div>
           <div className="stat-val" style={{ color: 'var(--success)' }}>{(metrics.accuracy * 100).toFixed(2)}%</div>
           <div className="stat-sub">{metrics.n_test} test samples</div>
         </div>
         <div className="card stat-card-inner">
-          <i className="ph-fill ph-scales bg-icon"></i>
-          <div className="stat-label"><i className="ph ph-scales" style={{ color: 'var(--brand-primary)' }}></i> F1 Score (weighted)</div>
+          <Scale size={112} className="bg-icon" />
+          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Scale size={20} style={{ color: 'var(--brand-primary)' }} /> F1 Score (weighted)
+          </div>
           <div className="stat-val" style={{ color: 'var(--brand-primary)' }}>{metrics.f1}</div>
           <div className="stat-sub">precision × recall balance</div>
         </div>
         <div className="card stat-card-inner">
-          <i className="ph-fill ph-crosshair-simple bg-icon"></i>
-          <div className="stat-label"><i className="ph ph-crosshair-simple" style={{ color: 'var(--info)' }}></i> Precision</div>
+          <Crosshair size={112} className="bg-icon" />
+          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Crosshair size={20} style={{ color: 'var(--info)' }} /> Precision
+          </div>
           <div className="stat-val" style={{ color: 'var(--info)' }}>{metrics.precision}</div>
           <div className="stat-sub">weighted average</div>
         </div>
         <div className="card stat-card-inner">
-          <i className="ph-fill ph-magnifying-glass-plus bg-icon"></i>
-          <div className="stat-label"><i className="ph ph-magnifying-glass-plus" style={{ color: 'var(--warning)' }}></i> Recall</div>
+          <ZoomIn size={112} className="bg-icon" />
+          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ZoomIn size={20} style={{ color: 'var(--warning)' }} /> Recall
+          </div>
           <div className="stat-val" style={{ color: 'var(--warning)' }}>{metrics.recall}</div>
           <div className="stat-sub">weighted average</div>
         </div>
@@ -118,10 +152,10 @@ const Evaluate: React.FC = () => {
       <div className="metrics-grid" style={{ marginBottom: '2.5rem', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
         <div className="card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
           <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <i className="ph-duotone ph-grid-four"></i> Confusion Matrix
+            <Grid size={20} /> Confusion Matrix
           </h3>
           {metrics.confusion_matrix && (
-            <div className="cm-grid" style={{ '--cm-cols': metrics.class_names.length } as any}>
+            <div className="cm-grid" style={{ '--cm-cols': metrics.class_names.length } as React.CSSProperties}>
               <div className="cm-corner"></div>
               {metrics.class_names.map((name: string) => (
                 <div key={name} className="cm-head">Predicted<br /><strong style={{ color: 'var(--text-primary)' }}>{name}</strong></div>
@@ -137,13 +171,13 @@ const Evaluate: React.FC = () => {
             </div>
           )}
           <p className="insight-desc" style={{ marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center' }}>
-            <i className="ph-fill ph-info"></i> Diagonal cells = correct predictions.<br />Off-diagonal = misclassifications.
+            <Info size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> Diagonal cells = correct predictions.<br />Off-diagonal = misclassifications.
           </p>
         </div>
 
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-            <i className="ph-duotone ph-list-dashes"></i> Per-Class Breakdown
+            <List size={20} /> Per-Class Breakdown
           </h3>
           <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
             <table>
@@ -174,8 +208,8 @@ const Evaluate: React.FC = () => {
           </div>
 
           <div className="takeaway-box" style={{ margin: '1.5rem', borderRadius: 'var(--radius-sm)', borderLeftColor: 'var(--brand-primary)', background: 'rgba(139, 92, 246, 0.05)' }}>
-            <strong style={{ color: 'var(--text-primary)', fontSize: '1.05rem' }}>
-              <i className="ph-fill ph-lightbulb" style={{ color: 'var(--brand-primary)' }}></i> Translating Model Efficacy to Student Welfare
+            <strong style={{ color: 'var(--text-primary)', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Lightbulb size={16} /> Translating Model Efficacy to Student Welfare
             </strong>
             <ul style={{ marginTop: '1rem', lineHeight: 1.8, color: 'var(--text-secondary)', fontSize: '0.95rem', paddingLeft: '1.2rem' }}>
               <li><strong style={{ color: 'var(--info)' }}>Precision:</strong> Of the students proactively flagged, what percentage were truly at risk? Low precision wastes counselling resources on false alarms.</li>
@@ -188,23 +222,23 @@ const Evaluate: React.FC = () => {
 
       <div className="card" style={{ marginBottom: '2.5rem', background: 'rgba(139, 92, 246, 0.02)' }}>
         <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <i className="ph-duotone ph-student"></i> Methodology & Theoretical Framework
+          <GraduationCap size={24} /> Methodology & Theoretical Framework
         </h3>
         <div className="insights-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
           <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-            <h4 style={{ color: 'var(--brand-primary)', marginBottom: '0.75rem' }}><i className="ph-fill ph-tree-structure"></i> The Algorithm</h4>
+            <h4 style={{ color: 'var(--brand-primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Network size={20} /> The Algorithm</h4>
             <p className="insight-desc" style={{ fontSize: '0.95rem' }}>
               MindSpace utilizes a <strong>Random Forest Classifier</strong>. Unlike simple linear models, Random Forest builds an ensemble of decision trees, each voting on the risk level. This handles the "Non-Linear Spikes" in burnout—where stress levels of 8 or 9 combined with low sleep create a risk level significantly higher than the sum of its parts.
             </p>
           </div>
           <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-            <h4 style={{ color: 'var(--info)', marginBottom: '0.75rem' }}><i className="ph-fill ph-intersect"></i> Evaluation Mode</h4>
+            <h4 style={{ color: 'var(--info)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Activity size={20} /> Evaluation Mode</h4>
             <p className="insight-desc" style={{ fontSize: '0.95rem' }}>
               We employ a <strong>80/20 Supervised Split</strong>. The uploaded dataset is partitioned: 80% is used for training (learning the patterns) and 20% is reserved as a "Blind Test." The metrics shown above reflect how well the model performed on the blind test—data it had never seen before—ensuring a realistic measure of its diagnostic accuracy.
             </p>
           </div>
           <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-            <h4 style={{ color: 'var(--warning)', marginBottom: '0.75rem' }}><i className="ph-fill ph-lightning"></i> Diagnostic Success</h4>
+            <h4 style={{ color: 'var(--warning)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Zap size={20} /> Diagnostic Success</h4>
             <p className="insight-desc" style={{ fontSize: '0.95rem' }}>
               Our model "spared" through the data by identifying <strong>Multivariate Clusters</strong>. It doesn't just look at high study hours; it analyzes the <em>ratio</em> of effort to recovery. This allows MindSpace to differentiate between "High-Performance Achievers" (high study, high sleep) and "Burnout Candidates" (high study, low sleep).
             </p>
@@ -226,7 +260,7 @@ const Evaluate: React.FC = () => {
 
       <div className="card">
         <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className="ph-duotone ph-image"></i> Visual Confusion Matrix
+          <Image size={20} /> Visual Confusion Matrix
         </h3>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <img src={data.plot} alt="Confusion Matrix Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', background: 'var(--input-bg)' }} />

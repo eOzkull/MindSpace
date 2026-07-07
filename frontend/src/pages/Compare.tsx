@@ -1,10 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCompareStatus, uploadCompareFile, fetchCompareResults, clearCompare } from '../api';
+import { fetchCompareStatus, uploadCompareFile, fetchCompareResults, clearCompare } from '../api/compare';
+import type { CompareStatusResponse, CompareResultsResponse } from '../types/common';
+import {
+  Loader2,
+  FolderMinus,
+  Upload,
+  CheckCircle2,
+  Files,
+  Lightbulb,
+  RotateCw,
+  Circle,
+  ArrowLeftRight,
+  ListOrdered,
+  TrendingUp,
+  TrendingDown,
+  BarChart2,
+  Presentation,
+  Brain,
+  Scale,
+  Waves,
+  BarChart3,
+  SlidersHorizontal,
+  MessageSquare,
+  HelpCircle
+} from 'lucide-react';
+
+const getLucideIcon = (name: string) => {
+  switch (name) {
+    case 'ph-waves':
+      return Waves;
+    case 'ph-chart-polar':
+      return BarChart3;
+    case 'ph-sliders-horizontal':
+      return SlidersHorizontal;
+    case 'ph-chat-teardrop-text':
+      return MessageSquare;
+    default:
+      return HelpCircle;
+  }
+};
 
 const Compare: React.FC = () => {
-  const [status, setStatus] = useState<any>(null);
-  const [results, setResults] = useState<any>(null);
+  const [status, setStatus] = useState<CompareStatusResponse | null>(null);
+  const [results, setResults] = useState<CompareResultsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
@@ -45,7 +84,7 @@ const Compare: React.FC = () => {
   if (loading || uploading) {
     return (
       <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <i className="ph-duotone ph-spinner ph-spin" style={{ fontSize: '4rem', color: 'var(--brand-secondary)', marginBottom: '1.5rem' }}></i>
+        <Loader2 className="animate-spin" size={64} style={{ color: 'var(--brand-secondary)', marginBottom: '1.5rem' }} />
         <h2 style={{ marginBottom: '0.5rem' }}>Comparing Datasets...</h2>
         <p style={{ color: 'var(--text-secondary)' }}>Generating comparison metrics and plotting delta charts. Please wait.</p>
       </div>
@@ -55,13 +94,13 @@ const Compare: React.FC = () => {
   if (!status?.primary_loaded) {
     return (
       <div className="card" style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center', padding: '3rem' }}>
-        <i className="ph-duotone ph-folder-dashed" style={{ fontSize: '4rem', color: 'var(--text-muted)', marginBottom: '1rem' }}></i>
+        <FolderMinus size={64} style={{ color: 'var(--text-muted)', marginBottom: '1rem', display: 'inline-block' }} />
         <h3 style={{ marginBottom: '0.75rem' }}>No primary dataset loaded</h3>
         <p className="insight-desc" style={{ marginBottom: '1.5rem' }}>
           Upload a primary dataset from the Home page first. Once that is done, come back here to compare it against a second CSV.
         </p>
         <Link to="/" className="btn btn-primary" style={{ margin: '0 auto' }}>
-          <i className="ph ph-upload-simple"></i> Go to Upload
+          <Upload size={16} /> Go to Upload
         </Link>
       </div>
     );
@@ -71,13 +110,13 @@ const Compare: React.FC = () => {
     return (
       <div className="card" style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center' }}>
         <h3 style={{ marginBottom: '0.5rem', color: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <i className="ph-fill ph-check-circle"></i> Primary dataset loaded
+          <CheckCircle2 size={20} style={{ color: 'var(--success)' }} /> Primary dataset loaded
         </h3>
         <p className="insight-desc" style={{ marginBottom: '2rem' }}>
           Your primary dataset is in memory. Upload a second CSV below to run the comparison.
         </p>
         <label className="upload-zone" style={{ padding: '3rem 1.5rem', cursor: 'pointer', display: 'block' }}>
-          <i className="ph-duotone ph-files" style={{ fontSize: '3rem', color: 'var(--brand-secondary)', marginBottom: '1rem' }}></i>
+          <Files size={48} style={{ color: 'var(--brand-secondary)', marginBottom: '1rem', display: 'inline-block' }} />
           <h4 style={{ marginBottom: '0.5rem' }}>Select Dataset B</h4>
           <p className="insight-desc" style={{ marginBottom: '1.5rem' }}>Click to browse your files</p>
           <input type="file" accept=".csv" onChange={handleUpload} style={{ display: 'none' }} />
@@ -90,40 +129,54 @@ const Compare: React.FC = () => {
 
   const { label_a, label_b, stats_a, stats_b, deltas, plots } = results;
 
-  const CmpChart = ({ icon, title, desc, insight, img_url, reverse = false }: any) => (
-    <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
-      <div className="insight-text-col">
-        <h3 className="insight-title"><i className={`ph-duotone ${icon}`}></i> {title}</h3>
-        <p className="insight-desc">{desc}</p>
-        <div className="takeaway-box">
-          <strong><i className="ph-fill ph-magnifying-glass"></i> What to look for</strong>
-          <p style={{ marginTop: '6px' }}>{insight}</p>
+  interface CmpChartProps {
+    icon: string;
+    title: string;
+    desc: string;
+    insight: string;
+    img_url: string;
+    reverse?: boolean;
+  }
+
+  const CmpChart = ({ icon, title, desc, insight, img_url, reverse = false }: CmpChartProps) => {
+    const IconComponent = getLucideIcon(icon);
+    return (
+      <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
+        <div className="insight-text-col">
+          <h3 className="insight-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <IconComponent size={24} style={{ color: 'var(--brand-primary)' }} /> {title}
+          </h3>
+          <p className="insight-desc">{desc}</p>
+          <div className="takeaway-box">
+            <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Lightbulb size={16} /> What to look for</strong>
+            <p style={{ marginTop: '6px' }}>{insight}</p>
+          </div>
+        </div>
+        <div className="insight-visual-col">
+          <img src={img_url} alt={title} loading="lazy" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', background: 'var(--input-bg)' }} />
         </div>
       </div>
-      <div className="insight-visual-col">
-        <img src={img_url} alt={title} loading="lazy" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', background: 'var(--input-bg)' }} />
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <>
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
         <button className="btn btn-outline" onClick={handleClear}>
-          <i className="ph ph-arrows-clockwise"></i> Clear Dataset B
+          <RotateCw size={16} /> Clear Dataset B
         </button>
       </div>
 
       <div className="card" style={{ marginBottom: '2rem', padding: '1.25rem 1.75rem' }}>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem' }}>
-            <i className="ph-fill ph-circle" style={{ color: 'var(--info)', fontSize: '1.2rem' }}></i>
+            <Circle size={16} fill="var(--info)" style={{ color: 'var(--info)' }} />
             <strong>{label_a}</strong>
             <span className="badge badge-low" style={{ background: 'var(--input-bg)', color: 'var(--text-muted)' }}>{stats_a.n} students</span>
           </div>
-          <i className="ph ph-arrows-left-right" style={{ color: 'var(--text-muted)', fontSize: '1.5rem' }}></i>
+          <ArrowLeftRight size={20} style={{ color: 'var(--text-muted)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem' }}>
-            <i className="ph-fill ph-circle" style={{ color: 'var(--warning)', fontSize: '1.2rem' }}></i>
+            <Circle size={16} fill="var(--warning)" style={{ color: 'var(--warning)' }} />
             <strong>{label_b}</strong>
             <span className="badge badge-low" style={{ background: 'var(--input-bg)', color: 'var(--text-muted)' }}>{stats_b.n} students</span>
           </div>
@@ -132,7 +185,7 @@ const Compare: React.FC = () => {
 
       <div className="card" style={{ marginBottom: '2rem', padding: 0, overflow: 'hidden' }}>
         <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className="ph-duotone ph-list-numbers"></i> Metric-by-Metric Summary
+          <ListOrdered size={20} /> Metric-by-Metric Summary
         </h3>
         <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
           <table>
@@ -164,7 +217,7 @@ const Compare: React.FC = () => {
                     <td style={{ color: 'var(--info)', fontWeight: 500 }}>{row.va}{row.unit}</td>
                     <td style={{ color: 'var(--warning)', fontWeight: 500 }}>{row.vb}{row.unit}</td>
                     <td>
-                      {row.d === null ? <span className="stat-sub">—</span> : neutral ? <span className="badge" style={{ background: 'var(--input-bg)', color: 'var(--text-secondary)' }}>= flat</span> : <span className={`badge ${good ? 'badge-low' : 'badge-high'}`}>{positive ? '+' : ''}{row.d}{row.unit} <i className={`ph ${positive ? 'ph-trend-up' : 'ph-trend-down'}`}></i></span>}
+                      {row.d === null ? <span className="stat-sub">—</span> : neutral ? <span className="badge" style={{ background: 'var(--input-bg)', color: 'var(--text-secondary)' }}>= flat</span> : <span className={`badge ${good ? 'badge-low' : 'badge-high'}`}>{positive ? '+' : ''}{row.d}{row.unit} {positive ? <TrendingUp size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /> : <TrendingDown size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />}</span>}
                     </td>
                     <td className="insight-desc" style={{ fontSize: '0.85rem', margin: 0 }}>{row.note}</td>
                   </tr>
@@ -177,7 +230,7 @@ const Compare: React.FC = () => {
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className="ph-duotone ph-chart-bar"></i> Risk Tier Breakdown
+          <BarChart2 size={20} /> Risk Tier Breakdown
         </h3>
         <p className="insight-desc" style={{ marginBottom: '1.5rem' }}>How many students fall into each burnout risk category in each dataset.</p>
 
@@ -225,7 +278,7 @@ const Compare: React.FC = () => {
       </div>
 
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <i className="ph-duotone ph-presentation-chart"></i> Visual Comparisons
+        <Presentation size={24} /> Visual Comparisons
       </h2>
 
       <CmpChart icon="ph-waves" title="Burnout Score Distributions — Overlaid" desc={`Both datasets overlaid on the same axis. Blue = ${label_a}, Orange = ${label_b}.`} insight="If the orange waveform is shifted right of blue, Dataset B has structurally higher burnout. Overlap in the middle means similar distributions." img_url={plots.cmp_burnout_hist} />
@@ -235,11 +288,11 @@ const Compare: React.FC = () => {
 
       <div className="card" style={{ marginBottom: '2rem', border: '2px solid var(--brand-primary)', background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, rgba(24, 24, 27, 0) 100%)' }}>
         <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--brand-primary)' }}>
-          <i className="ph-fill ph-brain"></i> Key Findings Summary
+          <Brain size={20} /> Key Findings Summary
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
           <div>
-            <h4 style={{ color: 'var(--info)', marginBottom: '0.75rem', fontSize: '1.1rem' }}><i className="ph-fill ph-circle"></i> {label_a}</h4>
+            <h4 style={{ color: 'var(--info)', marginBottom: '0.75rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Circle size={12} fill="var(--info)" style={{ color: 'var(--info)' }} /> {label_a}</h4>
             <ul className="insight-desc" style={{ paddingLeft: '1.5rem', lineHeight: 2 }}>
               <li>{stats_a.n} students &mdash; Avg burnout <strong>{stats_a.avg_burnout}</strong></li>
               <li>High-risk cohort: <strong style={{ color: 'var(--danger)' }}>{stats_a.pct_high}%</strong> ({stats_a.high_risk} students)</li>
@@ -248,7 +301,7 @@ const Compare: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h4 style={{ color: 'var(--warning)', marginBottom: '0.75rem', fontSize: '1.1rem' }}><i className="ph-fill ph-circle"></i> {label_b}</h4>
+            <h4 style={{ color: 'var(--warning)', marginBottom: '0.75rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Circle size={12} fill="var(--warning)" style={{ color: 'var(--warning)' }} /> {label_b}</h4>
             <ul className="insight-desc" style={{ paddingLeft: '1.5rem', lineHeight: 2 }}>
               <li>{stats_b.n} students &mdash; Avg burnout <strong>{stats_b.avg_burnout}</strong></li>
               <li>High-risk cohort: <strong style={{ color: 'var(--danger)' }}>{stats_b.pct_high}%</strong> ({stats_b.high_risk} students)</li>
@@ -258,7 +311,7 @@ const Compare: React.FC = () => {
           </div>
         </div>
         <div className="takeaway-box" style={{ marginTop: '1.5rem', borderColor: 'var(--brand-primary)', background: 'rgba(139, 92, 246, 0.1)' }}>
-          <strong style={{ color: 'var(--text-primary)' }}><i className="ph-fill ph-scales"></i> Overall verdict</strong>
+          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Scale size={16} /> Overall verdict</strong>
           {deltas.avg_burnout !== null && (
             deltas.avg_burnout > 3 ? (
               <p style={{ marginTop: '6px' }}><strong>{label_b}</strong> is notably more burned out (+{deltas.avg_burnout} pts avg). If these represent the same cohort at different times, the situation has worsened and requires attention. If different cohorts, {label_b} needs priority support.</p>

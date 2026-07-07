@@ -1,24 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
     Brain, House, ChartPie, ListChecks, Crosshair, GitCompare, Moon, Sun,
+    Sparkles, ShieldAlert, Lightbulb
 } from 'lucide-react';
+import { useAppStore, selectTheme, selectIsDarkMode } from '../store/appStore';
 
 const Layout: React.FC = () => {
-    const [theme, setTheme] = useState(
-        localStorage.getItem('theme') || 'dark'
-    );
+    const theme = useAppStore(selectTheme);
+    const isDark = useAppStore(selectIsDarkMode);
+    const toggleDarkMode = useAppStore((s) => s.toggleDarkMode);
+    const setTheme = useAppStore((s) => s.setTheme);
 
     const location = useLocation();
+
+    useEffect(() => {
+        const stored = localStorage.getItem('theme') as 'dark' | 'light' | null;
+        if (stored && stored !== theme) {
+            setTheme(stored);
+        }
+    }, []);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
-
-    const toggleTheme = () => {
-        setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-    };
 
     const getPageTitle = (path: string) => {
         switch (path) {
@@ -51,6 +57,24 @@ const Layout: React.FC = () => {
                 return {
                     title: 'Compare',
                     subtitle: 'Compare multiple datasets.',
+                };
+
+            case '/predict':
+                return {
+                    title: 'Student Predictor',
+                    subtitle: 'Run single-student burnout diagnostic evaluations.',
+                };
+
+            case '/anomalies':
+                return {
+                    title: 'Anomaly Detection',
+                    subtitle: 'Identify statistical outliers and behavioral anomalies.',
+                };
+
+            case '/recommendations':
+                return {
+                    title: 'Action Guidelines',
+                    subtitle: 'Actionable intervention protocols for student cohort welfare.',
                 };
 
             default:
@@ -131,17 +155,53 @@ const Layout: React.FC = () => {
                             <span>Compare</span>
                         </NavLink>
                     </li>
+
+                    <li className="nav-item">
+                        <NavLink
+                            to="/predict"
+                            className={({ isActive }) =>
+                                `nav-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <Sparkles size={18} />
+                            <span>Predictor</span>
+                        </NavLink>
+                    </li>
+
+                    <li className="nav-item">
+                        <NavLink
+                            to="/anomalies"
+                            className={({ isActive }) =>
+                                `nav-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <ShieldAlert size={18} />
+                            <span>Anomalies</span>
+                        </NavLink>
+                    </li>
+
+                    <li className="nav-item">
+                        <NavLink
+                            to="/recommendations"
+                            className={({ isActive }) =>
+                                `nav-link ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <Lightbulb size={18} />
+                            <span>Guidelines</span>
+                        </NavLink>
+                    </li>
                 </ul>
 
                 <div className="sidebar-footer">
                     <span className="version-tag">v2.1 Stable</span>
 
                     <button
-                        onClick={toggleTheme}
+                        onClick={toggleDarkMode}
                         className="theme-toggle-btn"
                         aria-label="Toggle theme"
                     >
-                        {theme === 'dark' ? (
+                        {isDark ? (
                             <Moon size={18} />
                         ) : (
                             <Sun size={18} />

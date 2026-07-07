@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchResults } from '../api';
+import { fetchResults } from '../api/prediction';
+import type { ResultsResponse } from '../types/prediction';
+import {
+  AlertTriangle,
+  Printer,
+  Building2,
+  Flame,
+  MessageSquare,
+  Lightbulb,
+  Moon,
+  TrendingUp,
+  MessageSquareOff,
+  Users,
+  Info,
+  ArrowRight
+} from 'lucide-react';
 
 const Results: React.FC = () => {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<ResultsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -25,20 +40,20 @@ const Results: React.FC = () => {
     load();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="card flash-alert flash-danger"><i className="ph-duotone ph-warning-octagon"></i>{error}</div>;
+  if (loading || !data) return <div>Loading...</div>;
+  if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
 
   return (
     <div className="results-container">
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
         <button className="btn btn-outline" onClick={() => window.print()}>
-          <i className="ph-duotone ph-printer"></i> Export Report
+          <Printer size={16} /> Export Report
         </button>
       </div>
 
       <div className="card executive-summary">
-        <div className="insight-title">
-          <i className="ph-duotone ph-buildings" style={{ color: 'var(--brand-primary)', fontSize: '1.8rem' }}></i>
+        <div className="insight-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Building2 size={24} style={{ color: 'var(--brand-primary)' }} />
           Executive Summary
         </div>
         <p className="summary-text" style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.1rem', marginBottom: '2rem' }}>
@@ -48,9 +63,9 @@ const Results: React.FC = () => {
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-card-inner">
-              <i className="ph-duotone ph-fire bg-icon"></i>
-              <div className="stat-label">
-                <i className="ph-duotone ph-fire" style={{ color: 'var(--warning)' }}></i> Avg Burnout
+              <Flame size={112} className="bg-icon" />
+              <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Flame size={20} style={{ color: 'var(--warning)' }} /> Avg Burnout
               </div>
               <div className="stat-val">{data.avg_burnout ?? 'N/A'}</div>
               <div className="stat-sub">Out of 100</div>
@@ -59,9 +74,9 @@ const Results: React.FC = () => {
 
           <div className="stat-card">
             <div className="stat-card-inner">
-              <i className="ph-duotone ph-warning-octagon bg-icon"></i>
-              <div className="stat-label">
-                <i className="ph-duotone ph-warning-octagon" style={{ color: 'var(--danger)' }}></i> High Risk
+              <AlertTriangle size={112} className="bg-icon" />
+              <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertTriangle size={20} style={{ color: 'var(--danger)' }} /> High Risk
               </div>
               <div className="stat-val">{data.high_risk_pct ?? 'N/A'}%</div>
               <div className="stat-sub">Of student population</div>
@@ -70,9 +85,9 @@ const Results: React.FC = () => {
 
           <div className="stat-card">
             <div className="stat-card-inner">
-              <i className="ph-duotone ph-chat-centered-text bg-icon"></i>
-              <div className="stat-label">
-                <i className="ph-duotone ph-chat-centered-text" style={{ color: 'var(--info)' }}></i> Avg Sentiment
+              <MessageSquare size={112} className="bg-icon" />
+              <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MessageSquare size={20} style={{ color: 'var(--info)' }} /> Avg Sentiment
               </div>
               <div className="stat-val">{data.avg_sentiment ?? 'N/A'}</div>
               <div className="stat-sub">VADER Compound Score</div>
@@ -82,14 +97,14 @@ const Results: React.FC = () => {
       </div>
 
       <h3 style={{ margin: '3rem 0 1.5rem', color: 'var(--text-primary)', borderBottom: '1px solid var(--card-border)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <i className="ph-duotone ph-lightbulb"></i> Critical Conclusions
+        <Lightbulb size={20} /> Critical Conclusions
       </h3>
 
       <div className="insights-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
         <div className="card insight-card" style={{ transition: 'transform 0.3s ease, boxShadow 0.3s ease' }}>
           <div className="insight-header" style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
             <div className="icon-bulb" style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="ph-duotone ph-moon-stars" style={{ color: 'var(--brand-primary)', fontSize: '1.5rem' }}></i>
+              <Moon size={24} style={{ color: 'var(--brand-primary)' }} />
             </div>
             <div>
               <h4 style={{ margin: '0 0 5px', color: 'var(--text-primary)' }}>The Sleep-Stress Paradigm</h4>
@@ -107,7 +122,7 @@ const Results: React.FC = () => {
         <div className="card insight-card" style={{ transition: 'transform 0.3s ease, boxShadow 0.3s ease' }}>
           <div className="insight-header" style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
             <div className="icon-bulb" style={{ background: 'rgba(255, 75, 92, 0.1)', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="ph-duotone ph-trend-up" style={{ color: 'var(--danger)', fontSize: '1.5rem' }}></i>
+              <TrendingUp size={24} style={{ color: 'var(--danger)' }} />
             </div>
             <div>
               <h4 style={{ margin: '0 0 5px', color: 'var(--text-primary)' }}>Tipping Point Identified</h4>
@@ -125,7 +140,7 @@ const Results: React.FC = () => {
         <div className="card insight-card" style={{ transition: 'transform 0.3s ease, boxShadow 0.3s ease' }}>
           <div className="insight-header" style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
             <div className="icon-bulb" style={{ background: 'rgba(79, 172, 254, 0.1)', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="ph-duotone ph-chat-teardrop-slash" style={{ color: 'var(--info)', fontSize: '1.5rem' }}></i>
+              <MessageSquareOff size={24} style={{ color: 'var(--info)' }} />
             </div>
             <div>
               <h4 style={{ margin: '0 0 5px', color: 'var(--text-primary)' }}>Hidden Sentiment Deficit</h4>
@@ -142,7 +157,7 @@ const Results: React.FC = () => {
       </div>
 
       <h3 style={{ margin: '3rem 0 1.5rem', color: 'var(--text-primary)', borderBottom: '1px solid var(--card-border)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <i className="ph-duotone ph-users-four"></i> Cohort Behavioral Breakdown
+        <Users size={20} /> Cohort Behavioral Breakdown
       </h3>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem' }}>
@@ -187,7 +202,7 @@ const Results: React.FC = () => {
           </table>
         </div>
         <div className="takeaway-box" style={{ margin: '1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)' }}>
-          <i className="ph-fill ph-info" style={{ color: 'var(--brand-primary)' }}></i>
+          <Info size={16} style={{ color: 'var(--brand-primary)', marginRight: '6px', verticalAlign: 'middle', display: 'inline-block' }} />
           <strong>Synthesized Conclusion:</strong> The "High" risk group exhibits a dangerous "Workplace Substitution" pattern—trading physiological recovery (sleep) for academic effort (study). This trade-off leads to exponential stress growth, making immediate counseling the only viable pathway to prevent systemic burnout.
         </div>
       </div>
@@ -195,7 +210,7 @@ const Results: React.FC = () => {
       <div style={{ marginTop: '3rem', textAlign: 'center' }}>
         <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Proceed to the evaluation module to see how effectively our internal models can predict these high-risk candidates based on their data.</p>
         <button onClick={() => navigate('/evaluate')} className="btn btn-primary" style={{ padding: '14px 28px', fontSize: '1.1rem', borderRadius: '30px' }}>
-          Evaluate Prediction Model <i className="ph-duotone ph-arrow-right"></i>
+          Evaluate Prediction Model <ArrowRight size={16} />
         </button>
       </div>
     </div>

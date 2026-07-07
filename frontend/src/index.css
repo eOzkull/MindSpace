@@ -414,7 +414,7 @@ tbody tr:hover td { background: var(--row-hover); }
     overflow: hidden;
 }
 
-.stat-card-inner i.bg-icon {
+.stat-card-inner .bg-icon {
     position: absolute;
     right: -10px;
     bottom: -20px;
@@ -579,4 +579,17 @@ tbody tr:hover td { background: var(--row-hover); }
     .main-content { margin-left: 0; }
     .sidebar { transform: translateX(-100%); }
     .fab-group { right: 1.5rem; bottom: 1.5rem; }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

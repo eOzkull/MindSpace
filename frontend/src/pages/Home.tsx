@@ -1,9 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory, resetSession, uploadFile } from '../api';
+import { fetchHistory, resetSession, uploadFile } from '../api/upload';
+import type { HistoryEntry } from '../types/common';
+import { 
+  Loader2, 
+  Upload, 
+  CloudUpload, 
+  Sparkles, 
+  CheckCircle2, 
+  History, 
+  Trash2, 
+  FileSpreadsheet, 
+  LayoutDashboard, 
+  CheckSquare, 
+  Moon, 
+  BookOpen, 
+  AlertTriangle, 
+  MessageSquare 
+} from 'lucide-react';
 
 const Home: React.FC = () => {
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,7 +92,7 @@ const Home: React.FC = () => {
     <>
       {loading && (
         <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <i className="ph-duotone ph-spinner ph-spin" style={{ fontSize: '4rem', color: 'var(--brand-primary)', marginBottom: '1.5rem' }}></i>
+          <Loader2 className="animate-spin" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
           <h2 style={{ marginBottom: '0.5rem' }}>Analyzing Your Data...</h2>
           <p style={{ color: 'var(--text-secondary)' }}>Recalculating burnout metrics and training ML models. Please wait.</p>
         </div>
@@ -85,7 +102,7 @@ const Home: React.FC = () => {
         <div className="card" style={{ gridColumn: 'span 2', padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '1.75rem 1.75rem 0.5rem 1.75rem' }}>
             <h2 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <i className="ph-duotone ph-upload-simple" style={{ color: 'var(--brand-primary)' }}></i> New Session
+              <Upload size={24} style={{ color: 'var(--brand-primary)' }} /> New Session
             </h2>
             <p className="text-secondary">Upload a student dataset in CSV format to begin analysis.</p>
           </div>
@@ -100,7 +117,7 @@ const Home: React.FC = () => {
               onDrop={onDrop}
             >
               <div className="upload-zone-content">
-                <i className="ph-duotone ph-cloud-arrow-up upload-icon"></i>
+                <CloudUpload className="upload-icon" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
                 <h3 style={{ marginBottom: '8px' }}>Drag and drop your CSV</h3>
                 <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>or click to browse from your computer</p>
 
@@ -113,11 +130,11 @@ const Home: React.FC = () => {
                   style={{ display: 'none' }} 
                 />
                 <span className="btn btn-primary" style={{ margin: '0 auto' }}>
-                  <i className="ph ph-magic-wand"></i> Analyze Data
+                  <Sparkles size={16} /> Analyze Data
                 </span>
                 {selectedFile && (
                   <p style={{ marginTop: '1.5rem', color: 'var(--success)', fontWeight: 500 }}>
-                    <i className="ph-fill ph-check-circle"></i> {selectedFile.name}
+                    <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> {selectedFile.name}
                   </p>
                 )}
               </div>
@@ -129,10 +146,10 @@ const Home: React.FC = () => {
           <div className="card" style={{ gridColumn: 'span 2' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className="ph-duotone ph-clock-counter-clockwise"></i> Recent Logs
+                <History size={20} /> Recent Logs
               </h3>
               <button onClick={handleClear} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                <i className="ph-duotone ph-trash"></i> Clear All
+                <Trash2 size={16} /> Clear All
               </button>
             </div>
             <div className="table-wrapper">
@@ -148,14 +165,14 @@ const Home: React.FC = () => {
                   {history.map((entry, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 500 }}>
-                        <i className="ph-duotone ph-file-csv" style={{ color: 'var(--brand-secondary)', marginRight: '6px' }}></i>
+                        <FileSpreadsheet size={16} style={{ color: 'var(--brand-secondary)', marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} />
                         {entry.filename}
                       </td>
                       <td>{entry.records} rows</td>
                       <td>
                         {idx === 0 ? (
                           <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>
-                            <i className="ph-duotone ph-chart-line-up"></i> View Dashboard
+                            <LayoutDashboard size={16} /> View Dashboard
                           </button>
                         ) : (
                           <span className="badge badge-medium">Archived</span>
@@ -172,30 +189,30 @@ const Home: React.FC = () => {
 
       <div className="card">
         <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className="ph-duotone ph-list-checks"></i> System Requirements
+          <CheckSquare size={20} /> System Requirements
         </h3>
         <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div className="card feature-pill" style={{ '--accent': 'var(--info)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--info)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--info)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <i className="ph-duotone ph-moon-stars"></i> Sleep
+              <Moon size={20} /> Sleep
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Average nightly sleep duration (hours).</p>
           </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--brand-primary)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--brand-primary)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <i className="ph-duotone ph-book-open-text"></i> Study
+              <BookOpen size={20} /> Study
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Daily focused learning hours.</p>
           </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--danger)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--danger)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--danger)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <i className="ph-duotone ph-warning-circle"></i> Stress
+              <AlertTriangle size={20} /> Stress
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Self-reported level (scale 1–10).</p>
           </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--success)' } as any}>
+          <div className="card feature-pill" style={{ '--accent': 'var(--success)' } as React.CSSProperties}>
             <h4 style={{ color: 'var(--success)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <i className="ph-duotone ph-chat-centered-text"></i> Feedback
+              <MessageSquare size={20} /> Feedback
             </h4>
             <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Natural language student comments.</p>
           </div>

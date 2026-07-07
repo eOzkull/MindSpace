@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDashboard, updateData } from '../api';
+import { fetchDashboard, updateData } from '../api/dashboard';
+import type { DataRow } from '../types/dashboard';
+import type { UpdatePayload } from '../types/common';
+import {
+  Loader2,
+  AlertTriangle,
+  Save,
+  X,
+  Table,
+  PlusCircle
+} from 'lucide-react';
 
 const Edit: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<DataRow[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -17,8 +27,8 @@ const Edit: React.FC = () => {
         if (res.error) {
           setError(res.error);
         } else {
-          setData(res.data);
-          setColumns(res.columns);
+          if (res.data) setData(res.data);
+          if (res.columns) setColumns(res.columns);
         }
       } catch (err) {
         setError('Failed to load dataset.');
@@ -29,7 +39,7 @@ const Edit: React.FC = () => {
   }, []);
 
   const handleAddRow = () => {
-    const newRow = columns.reduce((acc, col) => ({ ...acc, [col]: '' }), {});
+    const newRow = columns.reduce<DataRow>((acc, col) => ({ ...acc, [col]: '' }), {});
     setData([...data, newRow]);
   };
 
@@ -42,7 +52,7 @@ const Edit: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updates: any[] = [];
+      const updates: UpdatePayload[] = [];
       data.forEach((row, rIdx) => {
         columns.forEach(col => {
           if (row[col] !== undefined) {
@@ -66,33 +76,33 @@ const Edit: React.FC = () => {
   if (loading || saving) {
     return (
       <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <i className="ph-duotone ph-spinner ph-spin" style={{ fontSize: '4rem', color: 'var(--brand-primary)', marginBottom: '1.5rem' }}></i>
+        <Loader2 className="animate-spin" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
         <h2 style={{ marginBottom: '0.5rem' }}>{saving ? 'Recalculating Analysis...' : 'Loading Data...'}</h2>
         <p style={{ color: 'var(--text-secondary)' }}>{saving ? 'Updating records and retraining the model. Please wait.' : 'Please wait.'}</p>
       </div>
     );
   }
 
-  if (error) return <div className="card flash-alert flash-danger"><i className="ph-duotone ph-warning-octagon"></i>{error}</div>;
+  if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
 
   return (
     <>
       <div className="top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '1.5rem' }}>
         <button onClick={handleSave} className="btn btn-primary">
-          <i className="ph ph-floppy-disk"></i> Save & Analyze
+          <Save size={16} /> Save & Analyze
         </button>
         <button onClick={() => navigate('/dashboard')} className="btn btn-outline">
-          <i className="ph ph-x"></i> Cancel
+          <X size={16} /> Cancel
         </button>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)' }}>
           <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <i className="ph-duotone ph-table"></i> Interactive Grid
+            <Table size={20} /> Interactive Grid
           </h3>
           <button type="button" onClick={handleAddRow} className="btn btn-outline" style={{ padding: '6px 14px', fontSize: '0.85rem' }}>
-            <i className="ph ph-plus-circle"></i> Add Row
+            <PlusCircle size={16} /> Add Row
           </button>
         </div>
 
@@ -127,7 +137,7 @@ const Edit: React.FC = () => {
 
         <div style={{ padding: '1.5rem', background: 'var(--card-bg)', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', gap: '12px', position: 'sticky', bottom: 0 }}>
           <button onClick={() => navigate('/dashboard')} className="btn btn-outline">Cancel</button>
-          <button onClick={handleSave} className="btn btn-primary"><i className="ph ph-floppy-disk"></i> Save Changes</button>
+          <button onClick={handleSave} className="btn btn-primary"><Save size={16} /> Save Changes</button>
         </div>
       </div>
     </>
