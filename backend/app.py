@@ -1,9 +1,22 @@
 import os
+import sys
 import shutil
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
+
+# Fix module resolution (sys.path) so local imports work in Vercel Serverless environment
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.append(backend_dir)
+
+import nltk
+# Add root-level nltk_data to search path for offline access
+root_dir = os.path.dirname(backend_dir)
+local_nltk_path = os.path.join(root_dir, 'nltk_data')
+if local_nltk_path not in nltk.data.path:
+    nltk.data.path.append(local_nltk_path)
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -30,6 +43,10 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # Automatically create database tables if they do not exist
+    with app.app_context():
+        db.create_all()
 
     # Initialize CORS with explicit whitelisted origins
     CORS(app, origins=config_class.CORS_ALLOWED_ORIGINS, supports_credentials=True)
