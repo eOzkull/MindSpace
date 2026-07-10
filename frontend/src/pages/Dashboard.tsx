@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchDashboard } from '../api/dashboard';
+import { useDashboard } from '../hooks/useDashboard';
 import type { DashboardStats, DashboardPlots, DataRow } from '../types/dashboard';
 import { useAppStore, selectSearchQuery, selectRiskFilter } from '../store/appStore';
 import type { RiskFilter } from '../store/appStore';
@@ -59,12 +59,17 @@ const getLucideIcon = (name: string) => {
 };
 
 const Dashboard: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [data, setData] = useState<DataRow[]>([]);
-  const [plots, setPlots] = useState<DashboardPlots | null>(null);
+
+const {
+  data: dashboard,
+  isLoading: loading,
+  error,
+} = useDashboard();
+
+const stats = dashboard?.stats;
+const columns = dashboard?.columns ?? [];
+const data = dashboard?.data ?? [];
+const plots = dashboard?.plots;
 
   const search = useAppStore(selectSearchQuery);
   const riskFilter = useAppStore(selectRiskFilter);
@@ -76,27 +81,14 @@ const Dashboard: React.FC = () => {
   const recordsPerPage = 10;
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetchDashboard();
-        if (res.error) {
-          setError(res.error);
-        } else {
-          if (res.stats) setStats(res.stats);
-          if (res.columns) setColumns(res.columns);
-          if (res.data) setData(res.data);
-          if (res.plots) setPlots(res.plots);
-        }
-      } catch (err) {
-        setError('Failed to load dashboard.');
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
 
-  if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
+  if (error)
+  return (
+    <div className="card flash-alert flash-danger">
+      <AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+      {error.message}
+    </div>
+  );
   if (loading || !stats || !plots) return <div>Loading...</div>;
 
   const filteredData = data.filter(row => {
