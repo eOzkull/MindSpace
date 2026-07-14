@@ -13,9 +13,9 @@ export const useUploadCompareFile = () => {
   const queryClient = useQueryClient();
   return useMutation<UploadResponse, Error, File>({
     mutationFn: uploadCompareFile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['compareStatus'] });
-      queryClient.invalidateQueries({ queryKey: ['compareResults'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['compareStatus'] });
+      await queryClient.invalidateQueries({ queryKey: ['compareResults'] });
     },
   });
 };
@@ -24,6 +24,7 @@ export const useCompareResults = () => {
   return useQuery<CompareResultsResponse, Error>({
     queryKey: ['compareResults'],
     queryFn: fetchCompareResults,
+    enabled: false,
   });
 };
 
