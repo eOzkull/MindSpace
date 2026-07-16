@@ -47,7 +47,9 @@ function App() {
         </ErrorBoundary>
       </Router>
 
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV && (
+  <ReactQueryDevtools initialIsOpen={false} />
+)}
     </QueryClientProvider>
   );
 }
