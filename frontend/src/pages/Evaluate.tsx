@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { fetchEvaluate } from '../api/prediction';
+import { useEvaluate } from '../hooks/usePrediction';
 import type { EvaluateResponse } from '../types/evaluate';
 import {
   AlertTriangle,
@@ -27,28 +27,12 @@ import {
 const Evaluate: React.FC = () => {
   const [searchParams] = useSearchParams();
   const target = searchParams.get('dataset') || 'primary';
-  const [data, setData] = useState<EvaluateResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data: response, isLoading: loading, isError } = useEvaluate(target);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await fetchEvaluate(target);
-        if (res.error) {
-          setError(res.error);
-        } else {
-          setData(res);
-        }
-      } catch (err) {
-        setError('Failed to load evaluation metrics.');
-      }
-      setLoading(false);
-    };
-    load();
-  }, [target]);
+  const error = isError
+    ? 'Failed to load evaluation metrics.'
+    : (response?.error ?? '');
+  const data: EvaluateResponse | null = response?.error ? null : (response ?? null);
 
   if (loading || !data || !data.metrics) return <div>Loading...</div>;
 

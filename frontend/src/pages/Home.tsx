@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory, resetSession, uploadFile } from '../api/upload';
-import type { HistoryEntry } from '../types/common';
+import { useHistory } from '../hooks/useUpload';
+import { resetSession, uploadFile } from '../api/upload';
 import { 
   Loader2, 
   Upload, 
@@ -20,29 +20,16 @@ import {
 } from 'lucide-react';
 
 const Home: React.FC = () => {
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const { data: historyData } = useHistory();
+  const history = historyData?.history ?? [];
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
-  const loadHistory = async () => {
-    try {
-      const data = await fetchHistory();
-      if (data.history) setHistory(data.history);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handleClear = async () => {
     await resetSession();
-    setHistory([]);
   };
 
   const onDragOver = (e: React.DragEvent) => {

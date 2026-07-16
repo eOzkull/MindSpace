@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDashboard, updateData } from '../api/dashboard';
+import { useDashboard } from '../hooks/useDashboard';
+import { updateData } from '../api/dashboard';
 import type { DataRow } from '../types/dashboard';
 import type { UpdatePayload } from '../types/common';
 import {
@@ -13,47 +14,36 @@ import {
 } from 'lucide-react';
 
 const Edit: React.FC = () => {
-  const [data, setData] = useState<DataRow[]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: dashboard, isLoading: loading, error: queryError } = useDashboard();
+  const columns: string[] = dashboard?.columns ?? [];
+  const error = queryError ? (queryError as Error).message || 'Failed to load dataset.' : '';
+
+  const [editRows, setEditRows] = useState<DataRow[]>([]);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetchDashboard();
-        if (res.error) {
-          setError(res.error);
-        } else {
-          if (res.data) setData(res.data);
-          if (res.columns) setColumns(res.columns);
-        }
-      } catch (err) {
-        setError('Failed to load dataset.');
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
+    if (dashboard?.data) {
+      setEditRows(dashboard.data);
+    }
+  }, [dashboard?.data]);
 
   const handleAddRow = () => {
     const newRow = columns.reduce<DataRow>((acc, col) => ({ ...acc, [col]: '' }), {});
-    setData([...data, newRow]);
+    setEditRows([...editRows, newRow]);
   };
 
   const handleChange = (rowIndex: number, col: string, value: string) => {
-    const newData = [...data];
+    const newData = [...editRows];
     newData[rowIndex][col] = value;
-    setData(newData);
+    setEditRows(newData);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const updates: UpdatePayload[] = [];
-      data.forEach((row, rIdx) => {
+      editRows.forEach((row, rIdx) => {
         columns.forEach(col => {
           if (row[col] !== undefined) {
             updates.push({ row: rIdx, col, value: row[col] });
@@ -115,7 +105,7 @@ const Edit: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((row, i) => (
+              {editRows.map((row, i) => (
                 <tr key={i}>
                   <td className="row-num" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{i + 1}</td>
                   {columns.map(col => (
