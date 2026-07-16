@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDashboard } from '../hooks/useDashboard';
-import type { DashboardStats, DashboardPlots, DataRow } from '../types/dashboard';
+
 import { useAppStore, selectSearchQuery, selectRiskFilter } from '../store/appStore';
 import type { RiskFilter } from '../store/appStore';
 import {

@@ -1,35 +1,37 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useHistory } from '../hooks/useUpload';
-import { resetSession, uploadFile } from '../api/upload';
-import { 
-  Loader2, 
-  Upload, 
-  CloudUpload, 
-  Sparkles, 
-  CheckCircle2, 
-  History, 
-  Trash2, 
-  FileSpreadsheet, 
-  LayoutDashboard, 
-  CheckSquare, 
-  Moon, 
-  BookOpen, 
-  AlertTriangle, 
-  MessageSquare 
+import { useHistory, useUploadFile, useResetSession } from '../hooks/useUpload';
+import {
+  Loader2,
+  Upload,
+  CloudUpload,
+  Sparkles,
+  CheckCircle2,
+  History,
+  Trash2,
+  FileSpreadsheet,
+  LayoutDashboard,
+  CheckSquare,
+  Moon,
+  BookOpen,
+  AlertTriangle,
+  MessageSquare
 } from 'lucide-react';
 
 const Home: React.FC = () => {
   const { data: historyData } = useHistory();
   const history = historyData?.history ?? [];
-  const [loading, setLoading] = useState(false);
+  const uploadMutation = useUploadFile();
+  const resetMutation = useResetSession();
+
+  const loading = uploadMutation.isPending;
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleClear = async () => {
-    await resetSession();
+    resetMutation.mutate();
   };
 
   const onDragOver = (e: React.DragEvent) => {
@@ -61,18 +63,18 @@ const Home: React.FC = () => {
   };
 
   const handleUpload = async (file: File) => {
-    setLoading(true);
-    try {
-      const res = await uploadFile(file);
-      if (res.success) {
-        navigate('/dashboard');
-      } else {
-        alert(res.error || 'Upload failed');
+    uploadMutation.mutate(file, {
+      onSuccess: (res) => {
+        if (res.success) {
+          navigate('/dashboard');
+        } else {
+          alert(res.error || 'Upload failed');
+        }
+      },
+      onError: () => {
+        alert('Error uploading file');
       }
-    } catch (err) {
-      alert('Error uploading file');
-    }
-    setLoading(false);
+    });
   };
 
   return (
@@ -95,9 +97,9 @@ const Home: React.FC = () => {
           </div>
 
           <div style={{ padding: '1.75rem' }}>
-            <label 
-              className={`upload-zone ${dragOver ? 'dragover' : ''}`} 
-              id="drop-zone" 
+            <label
+              className={`upload-zone ${dragOver ? 'dragover' : ''}`}
+              id="drop-zone"
               htmlFor="file-upload"
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
@@ -108,13 +110,13 @@ const Home: React.FC = () => {
                 <h3 style={{ marginBottom: '8px' }}>Drag and drop your CSV</h3>
                 <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>or click to browse from your computer</p>
 
-                <input 
-                  type="file" 
-                  id="file-upload" 
-                  accept=".csv" 
+                <input
+                  type="file"
+                  id="file-upload"
+                  accept=".csv"
                   ref={fileInputRef}
-                  onChange={handleFileChange} 
-                  style={{ display: 'none' }} 
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
                 />
                 <span className="btn btn-primary" style={{ margin: '0 auto' }}>
                   <Sparkles size={16} /> Analyze Data

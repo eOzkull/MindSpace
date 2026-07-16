@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDashboard } from '../hooks/useDashboard';
-import { updateData } from '../api/dashboard';
+import { useDashboard, useUpdateDashboard } from '../hooks/useDashboard';
 import type { DataRow } from '../types/dashboard';
 import type { UpdatePayload } from '../types/common';
 import {
@@ -19,7 +18,8 @@ const Edit: React.FC = () => {
   const error = queryError ? (queryError as Error).message || 'Failed to load dataset.' : '';
 
   const [editRows, setEditRows] = useState<DataRow[]>([]);
-  const [saving, setSaving] = useState(false);
+  const updateMutation = useUpdateDashboard();
+  const saving = updateMutation.isPending;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,27 +40,27 @@ const Edit: React.FC = () => {
   };
 
   const handleSave = async () => {
-    setSaving(true);
-    try {
-      const updates: UpdatePayload[] = [];
-      editRows.forEach((row, rIdx) => {
-        columns.forEach(col => {
-          if (row[col] !== undefined) {
-            updates.push({ row: rIdx, col, value: row[col] });
-          }
-        });
+    const updates: UpdatePayload[] = [];
+    editRows.forEach((row, rIdx) => {
+      columns.forEach(col => {
+        if (row[col] !== undefined) {
+          updates.push({ row: rIdx, col, value: row[col] });
+        }
       });
-      const res = await updateData(updates);
-      if (res.success) {
-        navigate('/dashboard');
-      } else {
-        alert(res.error || 'Failed to save.');
-        setSaving(false);
+    });
+    
+    updateMutation.mutate(updates, {
+      onSuccess: (res) => {
+        if (res.success) {
+          navigate('/dashboard');
+        } else {
+          alert(res.error || 'Failed to save.');
+        }
+      },
+      onError: () => {
+        alert('Error saving data.');
       }
-    } catch (err) {
-      alert('Error saving data.');
-      setSaving(false);
-    }
+    });
   };
 
   if (loading || saving) {
