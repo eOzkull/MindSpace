@@ -7,8 +7,7 @@ export const useCompareStatus = () => {
     queryKey: ['compareStatus'],
     queryFn: fetchCompareStatus,
   });
-};SSSS
-SS
+};
 export const useUploadCompareFile = () => {
   const queryClient = useQueryClient();
   return useMutation<UploadResponse, Error, File>({
