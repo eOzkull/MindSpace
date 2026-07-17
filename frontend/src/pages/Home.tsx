@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchHistory, resetSession, uploadFile } from '../api/upload';
+import { ErrorBanner } from '../components/Banner/ErrorBanner';
+import { Spinner } from '../components/Spinner/Spinner';
 import type { HistoryEntry } from '../types/common';
-import { 
-  Loader2, 
+import {  
   Upload, 
   CloudUpload, 
   Sparkles, 
@@ -22,6 +23,7 @@ import {
 const Home: React.FC = () => {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,29 +76,42 @@ const Home: React.FC = () => {
   };
 
   const handleUpload = async (file: File) => {
-    setLoading(true);
-    try {
-      const res = await uploadFile(file);
-      if (res.success) {
-        navigate('/dashboard');
-      } else {
-        alert(res.error || 'Upload failed');
-      }
-    } catch (err) {
-      alert('Error uploading file');
+  setLoading(true);
+  setError('');
+
+  try {
+    const res = await uploadFile(file);
+
+
+    if (res.success) {
+      navigate('/dashboard');
+    } else {
+      setError(res.error || 'Upload failed');
     }
+  } catch (err) {
+    console.error(err);
+    setError('Error uploading file');
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   return (
     <>
       {loading && (
         <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Loader2 className="animate-spin" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
-          <h2 style={{ marginBottom: '0.5rem' }}>Analyzing Your Data...</h2>
+          <Spinner size={64} label="Analyzing Your Data..."/>
           <p style={{ color: 'var(--text-secondary)' }}>Recalculating burnout metrics and training ML models. Please wait.</p>
         </div>
       )}
+
+      {error && (
+  <ErrorBanner
+    title="Upload Failed"
+    message={error}
+    variant="danger"
+  />
+)}
 
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
         <div className="card" style={{ gridColumn: 'span 2', padding: 0, overflow: 'hidden' }}>

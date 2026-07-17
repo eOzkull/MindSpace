@@ -27,8 +27,6 @@ const Anomalies: React.FC = () => {
     } catch (err: any) {
       setError('Backend API scanning not available. Using offline cache data.');
       console.log('Using mockup anomalies fallback due to backend endpoint availability:', err);
-    } finally {
-      // Only use mock data when the API actually fails
       setAnomalies([
         {
           id: "ST-0812",
@@ -37,7 +35,7 @@ const Anomalies: React.FC = () => {
           value: "Dissonant Feedback",
           confidence: "94%",
           description: "Student reports extreme subjective stress but feedback text compound sentiment is highly positive. Suggests defensive mask and potential burnout concealment.",
-          severity: "High"
+          severity: "High",
         },
         {
           id: "ST-0931",
@@ -46,7 +44,7 @@ const Anomalies: React.FC = () => {
           value: "Outlier Sleep Duration",
           confidence: "88%",
           description: "Sleep duration is below 3 standard deviations from cohort mean. Study hours remain high (9.5h), indicating high critical exhaustion risk.",
-          severity: "High"
+          severity: "High",
         },
         {
           id: "ST-0245",
@@ -55,7 +53,7 @@ const Anomalies: React.FC = () => {
           value: "Inconsistent Telemetry",
           confidence: "75%",
           description: "Low subjective stress reported but calculated ML burnout score is extremely elevated. Subject may be in cognitive denial or misinterpreting the survey parameters.",
-          severity: "Medium"
+          severity: "Medium",
         },
         {
           id: "ST-0477",
@@ -64,9 +62,10 @@ const Anomalies: React.FC = () => {
           value: "Workload Outlier",
           confidence: "91%",
           description: "Workload exceeds study recommendations by 2.2x. Burnout scores are rising steadily over the last three weekly logs.",
-          severity: "Medium"
-        }
+          severity: "Medium",
+        },
       ]);
+    } finally {
       setLoading(false);
     }
   };

@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { fetchDashboard, updateData } from '../api/dashboard';
 import type { DataRow } from '../types/dashboard';
 import type { UpdatePayload } from '../types/common';
+import { ErrorBanner } from '../components/Banner/ErrorBanner';
+import { Spinner } from '../components/Spinner/Spinner';
 import {
-  Loader2,
-  AlertTriangle,
   Save,
   X,
   Table,
@@ -21,22 +21,26 @@ const Edit: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetchDashboard();
-        if (res.error) {
-          setError(res.error);
-        } else {
-          if (res.data) setData(res.data);
-          if (res.columns) setColumns(res.columns);
-        }
-      } catch (err) {
-        setError('Failed to load dataset.');
+  const load = async () => {
+    try {
+      const res = await fetchDashboard();
+
+      if (res.error) {
+        setError(res.error);
+      } else {
+        if (res.data) setData(res.data);
+        if (res.columns) setColumns(res.columns);
       }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load dataset.');
+    } finally {
       setLoading(false);
-    };
-    load();
-  }, []);
+    }
+  };
+
+  load();
+}, []);
 
   const handleAddRow = () => {
     const newRow = columns.reduce<DataRow>((acc, col) => ({ ...acc, [col]: '' }), {});
@@ -50,40 +54,60 @@ const Edit: React.FC = () => {
   };
 
   const handleSave = async () => {
-    setSaving(true);
-    try {
-      const updates: UpdatePayload[] = [];
-      data.forEach((row, rIdx) => {
-        columns.forEach(col => {
-          if (row[col] !== undefined) {
-            updates.push({ row: rIdx, col, value: row[col] });
-          }
-        });
+  setSaving(true);
+  setError('');
+
+  try {
+    const updates: UpdatePayload[] = [];
+
+    data.forEach((row, rIdx) => {
+      columns.forEach((col) => {
+        if (row[col] !== undefined) {
+          updates.push({
+            row: rIdx,
+            col,
+            value: row[col],
+          });
+        }
       });
-      const res = await updateData(updates);
-      if (res.success) {
-        navigate('/dashboard');
-      } else {
-        alert(res.error || 'Failed to save.');
-        setSaving(false);
-      }
-    } catch (err) {
-      alert('Error saving data.');
-      setSaving(false);
+    });
+
+    const res = await updateData(updates);
+
+    if (res.success) {
+      navigate('/dashboard');
+    } else {
+      setError(res.error || 'Failed to save.');
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError('Error saving data.');
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading || saving) {
     return (
       <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <Loader2 className="animate-spin" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
-        <h2 style={{ marginBottom: '0.5rem' }}>{saving ? 'Recalculating Analysis...' : 'Loading Data...'}</h2>
+        <Spinner
+  size={64}
+  label={saving ? 'Recalculating Analysis...' : 'Loading Data...'}
+/>
         <p style={{ color: 'var(--text-secondary)' }}>{saving ? 'Updating records and retraining the model. Please wait.' : 'Please wait.'}</p>
       </div>
     );
   }
 
-  if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
+  if (error) {
+  return (
+    <ErrorBanner
+      title="Save Failed"
+      message={error}
+      variant="danger"
+    />
+  );
+}
 
   return (
     <>
