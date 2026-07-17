@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { fetchRecommendations } from '../api/recommendations';
+import React, { useState } from 'react';
+import { useInsights } from '../hooks/useInsights';
 import { ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface RecommendationItem {
@@ -12,65 +12,52 @@ interface RecommendationItem {
   status: 'Pending' | 'Active' | 'Resolved';
 }
 
+const MOCK_RECOMMENDATIONS: RecommendationItem[] = [
+  {
+    id: "REC-01",
+    title: "Workplace Substitution Restructuring",
+    category: "Policy / Scheduling",
+    impact: "High",
+    cohort: "High Risk Students (Sleep < 5h, Study > 9h)",
+    actionablePlan: "Establish a late-night assignment submission lock-out (e.g. no submissions accepted between 12:00 AM and 6:00 AM) to force physiological recovery and sleep.",
+    status: "Pending"
+  },
+  {
+    id: "REC-02",
+    title: "Mandatory Wellness Check-ins",
+    category: "Counseling Outreach",
+    impact: "High",
+    cohort: "Students self-reporting stress level 7 or higher",
+    actionablePlan: "Automatically schedule a 15-minute informal check-in with a peer mentor or mental health staff advisor within 48 hours of logging stress levels >= 7.",
+    status: "Active"
+  },
+  {
+    id: "REC-03",
+    title: "Dissonance & Masking Outreach Protocol",
+    category: "Alternative Assessment",
+    impact: "Medium",
+    cohort: "Students flagged with telemetry/sentiment anomalies",
+    actionablePlan: "Engage students using indirect wellness metrics. Do not confront with analytical risk indicators. Offer non-academic counseling workshops.",
+    status: "Pending"
+  },
+  {
+    id: "REC-04",
+    title: "Workload Adjustments and Extensions",
+    category: "Academic Support",
+    impact: "Medium",
+    cohort: "Medium Risk students showing increasing burnout index",
+    actionablePlan: "Recommend course load adjustments or automatic 2-day submission extensions on major assignments to provide brief intervals of relief.",
+    status: "Resolved"
+  }
+];
+
 const Recommendations: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+  const { isLoading, isError, refetch } = useInsights();
 
-  const loadData = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      await fetchRecommendations();
-    } catch (err: any) {
-      setError('Could not connect to live recommendations API. Running in offline evaluation mode.');
-      console.log('Using mockup recommendations fallback due to backend availability:', err);
-    } finally {
-      setRecommendations([
-        {
-          id: "REC-01",
-          title: "Workplace Substitution Restructuring",
-          category: "Policy / Scheduling",
-          impact: "High",
-          cohort: "High Risk Students (Sleep < 5h, Study > 9h)",
-          actionablePlan: "Establish a late-night assignment submission lock-out (e.g. no submissions accepted between 12:00 AM and 6:00 AM) to force physiological recovery and sleep.",
-          status: "Pending"
-        },
-        {
-          id: "REC-02",
-          title: "Mandatory Wellness Check-ins",
-          category: "Counseling Outreach",
-          impact: "High",
-          cohort: "Students self-reporting stress level 7 or higher",
-          actionablePlan: "Automatically schedule a 15-minute informal check-in with a peer mentor or mental health staff advisor within 48 hours of logging stress levels >= 7.",
-          status: "Active"
-        },
-        {
-          id: "REC-03",
-          title: "Dissonance & Masking Outreach Protocol",
-          category: "Alternative Assessment",
-          impact: "Medium",
-          cohort: "Students flagged with telemetry/sentiment anomalies",
-          actionablePlan: "Engage students using indirect wellness metrics. Do not confront with analytical risk indicators. Offer non-academic counseling workshops.",
-          status: "Pending"
-        },
-        {
-          id: "REC-04",
-          title: "Workload Adjustments and Extensions",
-          category: "Academic Support",
-          impact: "Medium",
-          cohort: "Medium Risk students showing increasing burnout index",
-          actionablePlan: "Recommend course load adjustments or automatic 2-day submission extensions on major assignments to provide brief intervals of relief.",
-          status: "Resolved"
-        }
-      ]);
-      setLoading(false);
-    }
-  };
+  const loading = isLoading;
+  const error = isError ? 'Could not connect to live recommendations API. Running in offline evaluation mode.' : '';
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>(MOCK_RECOMMENDATIONS);
 
   const handleToggleStatus = (id: string) => {
     setRecommendations(prev =>
@@ -91,7 +78,7 @@ const Recommendations: React.FC = () => {
   return (
     <div className="recommendations-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={loadData} className="btn btn-outline" disabled={loading}>
+        <button onClick={() => refetch()} className="btn btn-outline" disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : ""} size={16} /> Re-evaluate Recommendations
         </button>
       </div>

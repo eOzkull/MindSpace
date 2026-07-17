@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { fetchAnomalies } from '../api/anomalies';
+import React from 'react';
+import { useAnomalies } from '../hooks/useAnomalies';
 import { ShieldAlert, RefreshCw, Info, AlertTriangle, AlertOctagon } from 'lucide-react';
 
 interface AnomalyItem {
@@ -12,73 +12,57 @@ interface AnomalyItem {
   severity: 'High' | 'Medium' | 'Low';
 }
 
+const MOCK_ANOMALIES: AnomalyItem[] = [
+  {
+    id: "ST-0812",
+    type: "Masking Pattern",
+    metric: "Stress (8/10) vs Sentiment (+0.65)",
+    value: "Dissonant Feedback",
+    confidence: "94%",
+    description: "Student reports extreme subjective stress but feedback text compound sentiment is highly positive. Suggests defensive mask and potential burnout concealment.",
+    severity: "High"
+  },
+  {
+    id: "ST-0931",
+    type: "Sleep Deprivation Extreme",
+    metric: "Sleep Hours (3.5h / night)",
+    value: "Outlier Sleep Duration",
+    confidence: "88%",
+    description: "Sleep duration is below 3 standard deviations from cohort mean. Study hours remain high (9.5h), indicating high critical exhaustion risk.",
+    severity: "High"
+  },
+  {
+    id: "ST-0245",
+    type: "Telemetry Dissonance",
+    metric: "Stress (2/10) vs Burnout Score (74/100)",
+    value: "Inconsistent Telemetry",
+    confidence: "75%",
+    description: "Low subjective stress reported but calculated ML burnout score is extremely elevated. Subject may be in cognitive denial or misinterpreting the survey parameters.",
+    severity: "Medium"
+  },
+  {
+    id: "ST-0477",
+    type: "Chronic Study Load",
+    metric: "Study Hours (13.5h / day)",
+    value: "Workload Outlier",
+    confidence: "91%",
+    description: "Workload exceeds study recommendations by 2.2x. Burnout scores are rising steadily over the last three weekly logs.",
+    severity: "Medium"
+  }
+];
+
 const Anomalies: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [anomalies, setAnomalies] = useState<AnomalyItem[]>([]);
+  const { data: fetchedAnomalies, isLoading: loading, isError, refetch } = useAnomalies();
 
-  const loadData = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      // Call the typed API
-      const realData = await fetchAnomalies();
-      setAnomalies(realData as AnomalyItem[]);
-    } catch (err: any) {
-      setError('Backend API scanning not available. Using offline cache data.');
-      console.log('Using mockup anomalies fallback due to backend endpoint availability:', err);
-    } finally {
-      // Only use mock data when the API actually fails
-      setAnomalies([
-        {
-          id: "ST-0812",
-          type: "Masking Pattern",
-          metric: "Stress (8/10) vs Sentiment (+0.65)",
-          value: "Dissonant Feedback",
-          confidence: "94%",
-          description: "Student reports extreme subjective stress but feedback text compound sentiment is highly positive. Suggests defensive mask and potential burnout concealment.",
-          severity: "High"
-        },
-        {
-          id: "ST-0931",
-          type: "Sleep Deprivation Extreme",
-          metric: "Sleep Hours (3.5h / night)",
-          value: "Outlier Sleep Duration",
-          confidence: "88%",
-          description: "Sleep duration is below 3 standard deviations from cohort mean. Study hours remain high (9.5h), indicating high critical exhaustion risk.",
-          severity: "High"
-        },
-        {
-          id: "ST-0245",
-          type: "Telemetry Dissonance",
-          metric: "Stress (2/10) vs Burnout Score (74/100)",
-          value: "Inconsistent Telemetry",
-          confidence: "75%",
-          description: "Low subjective stress reported but calculated ML burnout score is extremely elevated. Subject may be in cognitive denial or misinterpreting the survey parameters.",
-          severity: "Medium"
-        },
-        {
-          id: "ST-0477",
-          type: "Chronic Study Load",
-          metric: "Study Hours (13.5h / day)",
-          value: "Workload Outlier",
-          confidence: "91%",
-          description: "Workload exceeds study recommendations by 2.2x. Burnout scores are rising steadily over the last three weekly logs.",
-          severity: "Medium"
-        }
-      ]);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  const error = isError ? 'Backend API scanning not available. Using offline cache data.' : '';
+  const anomalies: AnomalyItem[] = isError
+    ? MOCK_ANOMALIES
+    : ((fetchedAnomalies as AnomalyItem[] | undefined) ?? []);
 
   return (
     <div className="anomalies-container">
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={loadData} className="btn btn-outline" disabled={loading}>
+        <button onClick={() => refetch()} className="btn btn-outline" disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : ""} size={16} /> Re-scan Database
         </button>
       </div>
