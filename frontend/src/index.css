@@ -38,6 +38,10 @@
     --input-bg: rgba(255, 255, 255, 0.04);
     --input-border: rgba(255, 255, 255, 0.08);
     --row-hover: rgba(255, 255, 255, 0.025);
+
+    /* Shadow variables */
+    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    --card-hover-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.05);
 }
 
 [data-theme="light"] {
@@ -57,6 +61,9 @@
     --input-bg: #f1f5f9;
     --input-border: #e2e8f0;
     --row-hover: #f8fafc;
+
+    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+    --card-hover-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08);
 }
 
 *, *::before, *::after { 
@@ -190,10 +197,15 @@ body {
     padding: 2rem;
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: var(--card-shadow, 0 10px 30px -5px rgba(0, 0, 0, 0.3));
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card:hover { border-color: var(--card-hover-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.card:hover { 
+    border-color: var(--card-hover-border); 
+    box-shadow: var(--card-hover-shadow, 0 20px 40px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.05)); 
+    transform: translateY(-2px);
+}
 
 
 .btn {
@@ -592,4 +604,129 @@ tbody tr:hover td { background: var(--row-hover); }
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Mobile Header & Responsive Sidebar */
+.mobile-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--card-border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 99;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.mobile-brand {
+    font-size: 1.25rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.menu-toggle-btn, .theme-toggle-btn-mobile, .sidebar-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.menu-toggle-btn:hover, .theme-toggle-btn-mobile:hover, .sidebar-close-btn:hover {
+    color: var(--brand-primary);
+}
+
+.sidebar-close-btn {
+    display: none;
+}
+
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(9, 9, 11, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 98;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Sidebar transitions */
+.sidebar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, border-color 0.3s;
+}
+
+.sidebar.open {
+    transform: translateX(0) !important;
+}
+
+/* Form Input Focus states */
+.filter-input:focus, .filter-select:focus, textarea:focus, input[type="text"]:focus {
+    outline: none !important;
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18) !important;
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+    .mobile-header {
+        display: flex;
+    }
+    .sidebar-close-btn {
+        display: flex;
+        margin-left: auto;
+    }
+    .main-content {
+        margin-left: 0;
+        padding-top: 5.5rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* Glassmorphism Loading Overlay */
+.loading-overlay {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    animation: fadeIn 0.3s ease-out;
+}
+
+[data-theme="light"] .loading-overlay {
+    background: rgba(248, 250, 252, 0.85);
 }

@@ -7,6 +7,7 @@ import {
   RiskPieChart,
   SleepScatterChart,
 } from '../components/charts';
+import LoadingScreen from '../components/LoadingScreen';
 
 import { useAppStore, selectSearchQuery, selectRiskFilter } from '../store/appStore';
 import type { RiskFilter } from '../store/appStore';
@@ -95,7 +96,7 @@ const plots = dashboard?.plots;
       {error.message}
     </div>
   );
-  if (loading || !stats || !plots) return <div>Loading...</div>;
+  if (loading || !stats || !plots) return <LoadingScreen message="Loading Dashboard..." subtitle="Assembling cohort stats and rendering visual insights." />;
 
   const filteredData = data.filter(row => {
     const riskMatch = riskFilter === 'All' || row['risk'] === riskFilter;

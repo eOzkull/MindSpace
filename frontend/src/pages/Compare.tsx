@@ -85,31 +85,14 @@ const Compare = () => {
 
   if (isBusy) {
     return (
-      <div
-        id="loading-overlay"
-        style={{
-          display: 'flex',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 9999,
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-        }}
-      >
+      <div id="loading-overlay" className="loading-overlay">
         <Loader2
           className="animate-spin"
-          size={64}
-          style={{ color: 'var(--brand-secondary)', marginBottom: '1.5rem' }}
+          size={54}
+          style={{ color: 'var(--brand-secondary)', marginBottom: '1.25rem' }}
         />
         <h2 style={{ marginBottom: '0.5rem' }}>Comparing Datasets...</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>
+        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '0 1rem' }}>
           Generating comparison metrics and plotting delta charts. Please wait.
         </p>
       </div>
@@ -437,7 +420,7 @@ const Compare = () => {
         reverse
       />
 
-      <div className="card" style={{ marginBottom: '2rem', border: '2px solid var(--brand-primary)', background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, rgba(24, 24, 27, 0) 100%)' }}>
+      <div className="card" style={{ marginBottom: '2rem', border: '2px solid var(--brand-primary)', background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, transparent 100%)' }}>
         <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--brand-primary)' }}>
           <Brain size={20} /> Key Findings Summary
         </h3>

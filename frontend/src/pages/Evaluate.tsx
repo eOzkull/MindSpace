@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useEvaluate } from '../hooks/usePrediction';
+import { ConfusionMatrixHeatmap } from '../components/charts';
+import LoadingScreen from '../components/LoadingScreen';
 import type { EvaluateResponse } from '../types/evaluate';
 import {
   AlertTriangle,
@@ -34,7 +36,7 @@ const Evaluate: React.FC = () => {
     : (response?.error ?? '');
   const data: EvaluateResponse | null = response?.error ? null : (response ?? null);
 
-  if (loading || !data || !data.metrics) return <div>Loading...</div>;
+  if (loading || !data || !data.metrics) return <LoadingScreen message="Evaluating Model..." subtitle="Reading accuracy, recall, and computing validation metrics." />;
 
   if (error) {
     return (
@@ -73,7 +75,7 @@ const Evaluate: React.FC = () => {
       )}
 
       <div className={`card verdict-card ${readyStatus}`} style={{ 
-        background: 'linear-gradient(135deg, rgba(40, 199, 111, 0.05) 0%, rgba(24, 24, 27, 0) 100%)', 
+        background: 'linear-gradient(135deg, rgba(40, 199, 111, 0.05) 0%, transparent 100%)', 
         marginBottom: '2.5rem',
         border: `2px solid var(--${isReady ? 'success' : 'warning'})`
       }}>
@@ -139,20 +141,7 @@ const Evaluate: React.FC = () => {
             <Grid size={20} /> Confusion Matrix
           </h3>
           {metrics.confusion_matrix && (
-            <div className="cm-grid" style={{ '--cm-cols': metrics.class_names.length } as React.CSSProperties}>
-              <div className="cm-corner"></div>
-              {metrics.class_names.map((name: string) => (
-                <div key={name} className="cm-head">Predicted<br /><strong style={{ color: 'var(--text-primary)' }}>{name}</strong></div>
-              ))}
-              {metrics.confusion_matrix.map((row: number[], i: number) => (
-                <React.Fragment key={i}>
-                  <div className="cm-side">Actual <strong style={{ color: 'var(--text-primary)', marginLeft: '4px' }}>{metrics.class_names[i]}</strong></div>
-                  {row.map((val: number, j: number) => (
-                    <div key={`${i}-${j}`} className={`cm-cell ${i === j ? 'cm-correct' : 'cm-wrong'}`}>{val}</div>
-                  ))}
-                </React.Fragment>
-              ))}
-            </div>
+            <ConfusionMatrixHeatmap matrix={metrics.confusion_matrix} labels={metrics.class_names} title="" />
           )}
           <p className="insight-desc" style={{ marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center' }}>
             <Info size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> Diagonal cells = correct predictions.<br />Off-diagonal = misclassifications.

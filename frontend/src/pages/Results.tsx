@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResults } from '../hooks/usePrediction';
+import LoadingScreen from '../components/LoadingScreen';
 import type { ResultsResponse } from '../types/prediction';
 import {
   AlertTriangle,
@@ -26,7 +27,7 @@ const Results: React.FC = () => {
     : (response?.error ?? '');
   const data: ResultsResponse | null = response?.error ? null : (response ?? null);
 
-  if (loading || !data) return <div>Loading...</div>;
+  if (loading || !data) return <LoadingScreen message="Summarizing Cohort Results..." subtitle="Reviewing clinical patterns and synthesizing recommendations." />;
   if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
 
   return (

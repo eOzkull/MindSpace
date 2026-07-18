@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useInsights } from '../hooks/useInsights';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
+import LoadingScreen from '../components/LoadingScreen';
 import { ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
 
 type RecommendationItem = {
@@ -146,9 +146,7 @@ const Recommendations: React.FC = () => {
       )}
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
-          <Spinner size={48} label="Loading recommendations..." />
-        </div>
+        <LoadingScreen message="Loading Recommendations..." subtitle="Analyzing student cohort stats to determine action guidelines." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem' }}>
           {recommendations.map((item) => (

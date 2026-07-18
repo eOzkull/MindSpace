@@ -2,7 +2,7 @@ import React from 'react';
 import { useAnomalies } from '../hooks/useAnomalies';
 import { ShieldAlert, RefreshCw, Info, AlertOctagon } from 'lucide-react';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
+import LoadingScreen from '../components/LoadingScreen';
 
 interface AnomalyItem {
   id: string;
@@ -69,7 +69,7 @@ const Anomalies: React.FC = () => {
         </button>
       </div>
 
-      <div className="card Executive-verdict" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(24, 24, 27, 0) 100%)', border: '1px solid var(--card-border)', marginBottom: '2.5rem' }}>
+      <div className="card Executive-verdict" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%)', border: '1px solid var(--card-border)', marginBottom: '2.5rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
           <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', color: 'var(--danger)' }}>
             <AlertOctagon size={32} />
@@ -92,9 +92,7 @@ const Anomalies: React.FC = () => {
       )}
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
-          <Spinner size={48} label="Loading anomalies..." />
-        </div>
+        <LoadingScreen message="Scanning Anomalies..." subtitle="Looking for telemetry mismatch and masking patterns in cohort." />
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
