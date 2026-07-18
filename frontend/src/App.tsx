@@ -14,6 +14,7 @@ import Recommendations from './pages/Recommendations';
 import NotFound from './pages/NotFound';
 import ErrorBoundary from './pages/ErrorBoundary';
 import './index.css';
+import './styles/charts.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
