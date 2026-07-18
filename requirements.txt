@@ -2,8 +2,6 @@ Flask
 pandas
 numpy
 nltk
-matplotlib
-seaborn
 scikit-learn
 python-dotenv==1.2.2
 gunicorn

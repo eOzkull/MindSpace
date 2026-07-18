@@ -28,4 +28,9 @@ export interface DashboardResponse {
   columns?: string[];
   data?: DataRow[];
   plots?: DashboardPlots;
+  corr_matrix?: {
+    columns: string[];
+    index: string[];
+    data: number[][];
+  };
 }

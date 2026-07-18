@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
     Brain, House, ChartPie, ListChecks, Crosshair, GitCompare, Moon, Sun,
-    Sparkles, ShieldAlert, Lightbulb
+    Sparkles, ShieldAlert, Lightbulb, Menu, X
 } from 'lucide-react';
 import { useAppStore, selectTheme, selectIsDarkMode } from '../store/appStore';
 
@@ -11,6 +11,10 @@ const Layout: React.FC = () => {
     const isDark = useAppStore(selectIsDarkMode);
     const toggleDarkMode = useAppStore((s) => s.toggleDarkMode);
     const setTheme = useAppStore((s) => s.setTheme);
+
+    const isSidebarOpen = useAppStore((s) => s.isSidebarOpen);
+    const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+    const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
     const location = useLocation();
 
@@ -25,6 +29,10 @@ const Layout: React.FC = () => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
+
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [location.pathname, setSidebarOpen]);
 
     const getPageTitle = (path: string) => {
         switch (path) {
@@ -89,10 +97,34 @@ const Layout: React.FC = () => {
 
     return (
         <div className="app-container">
-            <aside className="sidebar">
-                <div className="brand">
-                    <Brain size={24} />
+            {/* Mobile Header */}
+            <header className="mobile-header">
+                <button className="menu-toggle-btn" onClick={toggleSidebar} aria-label="Toggle Menu">
+                    <Menu size={22} />
+                </button>
+                <div className="mobile-brand">
+                    <Brain size={20} style={{ color: 'var(--brand-primary)' }} />
                     <span>MindSpace</span>
+                </div>
+                <button onClick={toggleDarkMode} className="theme-toggle-btn-mobile" aria-label="Toggle theme">
+                    {isDark ? <Moon size={18} /> : <Sun size={18} />}
+                </button>
+            </header>
+
+            {/* Sidebar Backdrop overlay on mobile */}
+            {isSidebarOpen && (
+                <div className="sidebar-backdrop" onClick={toggleSidebar} />
+            )}
+
+            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+                <div className="brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Brain size={24} />
+                        <span>MindSpace</span>
+                    </div>
+                    <button className="sidebar-close-btn" onClick={toggleSidebar} aria-label="Close Menu">
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <ul className="nav-menu">

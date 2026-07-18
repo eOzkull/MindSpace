@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
@@ -7,11 +8,14 @@ export type Theme = 'dark' | 'light';
 
 export interface UIState {
   theme: Theme;
+  isDarkMode: boolean;
   riskFilter: RiskFilter;
   searchQuery: string;
   isSidebarOpen: boolean;
   isGlobalLoading: boolean;
   loadingMessage: string;
+  dashboardCurrentPage: number;
+  dashboardExpanded: boolean;
 }
 
 export interface UIActions {
@@ -24,9 +28,13 @@ export interface UIActions {
   toggleSidebar: () => void;
   setGlobalLoading: (loading: boolean, message?: string) => void;
   resetUIFilters: () => void;
+  setDashboardCurrentPage: (page: number) => void;
+  setDashboardExpanded: (expanded: boolean) => void;
 }
 
+
 export interface SelectionState {
+
   selectedDataset: DatasetTarget;
   selectedStudentRows: number[];
   isComparisonActive: boolean;
@@ -49,13 +57,17 @@ export interface SelectionActions {
 
 export type AppStore = UIState & UIActions & SelectionState & SelectionActions;
 
+
 const DEFAULT_UI: UIState = {
   theme: 'dark',
+  isDarkMode: true,
   riskFilter: 'All',
   searchQuery: '',
   isSidebarOpen: false,
   isGlobalLoading: false,
   loadingMessage: '',
+  dashboardCurrentPage: 1,
+  dashboardExpanded: false,
 };
 
 const DEFAULT_SELECTION: SelectionState = {
@@ -66,23 +78,30 @@ const DEFAULT_SELECTION: SelectionState = {
   selectedPredictionDataset: 'primary',
 };
 
+
 export const useAppStore = create<AppStore>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       ...DEFAULT_UI,
 
       setTheme: (theme) =>
-        set({ theme }, false, 'ui/setTheme'),
+        set({ theme, isDarkMode: theme === 'dark' }, false, 'ui/setTheme'),
 
       setDarkMode: (enabled) =>
-        set({ theme: enabled ? 'dark' : 'light' }, false, 'ui/setDarkMode'),
-
-      toggleDarkMode: () =>
         set(
-          (s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }),
+          { isDarkMode: enabled, theme: enabled ? 'dark' : 'light' },
+          false,
+          'ui/setDarkMode',
+        ),
+
+      toggleDarkMode: () => {
+        const next = !get().isDarkMode;
+        set(
+          { isDarkMode: next, theme: next ? 'dark' : 'light' },
           false,
           'ui/toggleDarkMode',
-        ),
+        );
+      },
 
       setRiskFilter: (filter) =>
         set({ riskFilter: filter }, false, 'ui/setRiskFilter'),
@@ -94,22 +113,43 @@ export const useAppStore = create<AppStore>()(
         set({ isSidebarOpen: open }, false, 'ui/setSidebarOpen'),
 
       toggleSidebar: () =>
-        set((s) => ({ isSidebarOpen: !s.isSidebarOpen }), false, 'ui/toggleSidebar'),
+        set(
+          (s) => ({ isSidebarOpen: !s.isSidebarOpen }),
+          false,
+          'ui/toggleSidebar',
+        ),
 
       setGlobalLoading: (loading, message = '') =>
-        set({ isGlobalLoading: loading, loadingMessage: message }, false, 'ui/setGlobalLoading'),
+        set(
+          { isGlobalLoading: loading, loadingMessage: message },
+          false,
+          'ui/setGlobalLoading',
+        ),
 
       resetUIFilters: () =>
         set(
-          { riskFilter: DEFAULT_UI.riskFilter, searchQuery: DEFAULT_UI.searchQuery },
+          {
+            riskFilter: DEFAULT_UI.riskFilter,
+            searchQuery: DEFAULT_UI.searchQuery,
+          },
           false,
           'ui/resetUIFilters',
         ),
 
+      setDashboardCurrentPage: (page) =>
+        set({ dashboardCurrentPage: page }, false, 'ui/setDashboardCurrentPage'),
+
+      setDashboardExpanded: (expanded) =>
+        set({ dashboardExpanded: expanded }, false, 'ui/setDashboardExpanded'),
+
       ...DEFAULT_SELECTION,
 
       setSelectedDataset: (dataset) =>
-        set({ selectedDataset: dataset }, false, 'selection/setSelectedDataset'),
+        set(
+          { selectedDataset: dataset },
+          false,
+          'selection/setSelectedDataset',
+        ),
 
       selectStudentRow: (rowIndex) =>
         set(
@@ -125,22 +165,26 @@ export const useAppStore = create<AppStore>()(
       deselectStudentRow: (rowIndex) =>
         set(
           (s) => ({
-            selectedStudentRows: s.selectedStudentRows.filter((i) => i !== rowIndex),
+            selectedStudentRows: s.selectedStudentRows.filter(
+              (i) => i !== rowIndex,
+            ),
           }),
           false,
           'selection/deselectStudentRow',
         ),
 
-      toggleStudentRow: (rowIndex) =>
+      toggleStudentRow: (rowIndex) => {
+        const rows = get().selectedStudentRows;
         set(
-          (s) => ({
-            selectedStudentRows: s.selectedStudentRows.includes(rowIndex)
-              ? s.selectedStudentRows.filter((i) => i !== rowIndex)
-              : [...s.selectedStudentRows, rowIndex],
-          }),
+          {
+            selectedStudentRows: rows.includes(rowIndex)
+              ? rows.filter((i) => i !== rowIndex)
+              : [...rows, rowIndex],
+          },
           false,
           'selection/toggleStudentRow',
-        ),
+        );
+      },
 
       selectAllStudentRows: (indices) =>
         set(
@@ -150,10 +194,18 @@ export const useAppStore = create<AppStore>()(
         ),
 
       clearStudentSelection: () =>
-        set({ selectedStudentRows: [] }, false, 'selection/clearStudentSelection'),
+        set(
+          { selectedStudentRows: [] },
+          false,
+          'selection/clearStudentSelection',
+        ),
 
       setComparisonActive: (active) =>
-        set({ isComparisonActive: active }, false, 'selection/setComparisonActive'),
+        set(
+          { isComparisonActive: active },
+          false,
+          'selection/setComparisonActive',
+        ),
 
       setSessionId: (id) =>
         set({ sessionId: id }, false, 'selection/setSessionId'),
@@ -172,45 +224,74 @@ export const useAppStore = create<AppStore>()(
   ),
 );
 
+
+// UI selectors
 export const selectTheme = (s: AppStore): Theme => s.theme;
-export const selectIsDarkMode = (s: AppStore): boolean => s.theme === 'dark';
+export const selectIsDarkMode = (s: AppStore): boolean => s.isDarkMode;
 export const selectRiskFilter = (s: AppStore): RiskFilter => s.riskFilter;
 export const selectSearchQuery = (s: AppStore): string => s.searchQuery;
 export const selectIsSidebarOpen = (s: AppStore): boolean => s.isSidebarOpen;
-export const selectIsGlobalLoading = (s: AppStore): boolean => s.isGlobalLoading;
+export const selectIsGlobalLoading = (s: AppStore): boolean =>
+  s.isGlobalLoading;
 export const selectLoadingMessage = (s: AppStore): string => s.loadingMessage;
+export const selectDashboardCurrentPage = (s: AppStore): number => s.dashboardCurrentPage;
+export const selectDashboardExpanded = (s: AppStore): boolean => s.dashboardExpanded;
 
-export const selectSelectedDataset = (s: AppStore): DatasetTarget => s.selectedDataset;
-export const selectSelectedStudentRows = (s: AppStore): number[] => s.selectedStudentRows;
-export const selectIsComparisonActive = (s: AppStore): boolean => s.isComparisonActive;
+// Selection selectors
+export const selectSelectedDataset = (s: AppStore): DatasetTarget =>
+  s.selectedDataset;
+export const selectSelectedStudentRows = (s: AppStore): number[] =>
+  s.selectedStudentRows;
+export const selectIsComparisonActive = (s: AppStore): boolean =>
+  s.isComparisonActive;
 export const selectSessionId = (s: AppStore): string | null => s.sessionId;
 export const selectSelectedPredictionDataset = (s: AppStore): DatasetTarget =>
   s.selectedPredictionDataset;
 
+// Derived selectors
 export const selectHasStudentSelection = (s: AppStore): boolean =>
   s.selectedStudentRows.length > 0;
 export const selectStudentSelectionCount = (s: AppStore): number =>
   s.selectedStudentRows.length;
 
+
 export const appActions = {
-  setTheme: (t: Theme) => useAppStore.getState().setTheme(t),
-  setDarkMode: (e: boolean) => useAppStore.getState().setDarkMode(e),
+  // UI
+  setTheme: (theme: Theme) => useAppStore.getState().setTheme(theme),
+  setDarkMode: (enabled: boolean) =>
+    useAppStore.getState().setDarkMode(enabled),
   toggleDarkMode: () => useAppStore.getState().toggleDarkMode(),
-  setRiskFilter: (f: RiskFilter) => useAppStore.getState().setRiskFilter(f),
-  setSearchQuery: (q: string) => useAppStore.getState().setSearchQuery(q),
-  setSidebarOpen: (o: boolean) => useAppStore.getState().setSidebarOpen(o),
+  setRiskFilter: (filter: RiskFilter) =>
+    useAppStore.getState().setRiskFilter(filter),
+  setSearchQuery: (query: string) =>
+    useAppStore.getState().setSearchQuery(query),
+  setSidebarOpen: (open: boolean) =>
+    useAppStore.getState().setSidebarOpen(open),
   toggleSidebar: () => useAppStore.getState().toggleSidebar(),
-  setGlobalLoading: (l: boolean, m?: string) => useAppStore.getState().setGlobalLoading(l, m),
+  setGlobalLoading: (loading: boolean, message?: string) =>
+    useAppStore.getState().setGlobalLoading(loading, message),
   resetUIFilters: () => useAppStore.getState().resetUIFilters(),
-  setSelectedDataset: (d: DatasetTarget) => useAppStore.getState().setSelectedDataset(d),
-  selectStudentRow: (i: number) => useAppStore.getState().selectStudentRow(i),
-  deselectStudentRow: (i: number) => useAppStore.getState().deselectStudentRow(i),
-  toggleStudentRow: (i: number) => useAppStore.getState().toggleStudentRow(i),
-  selectAllStudentRows: (is: number[]) => useAppStore.getState().selectAllStudentRows(is),
+  setDashboardCurrentPage: (page: number) =>
+    useAppStore.getState().setDashboardCurrentPage(page),
+  setDashboardExpanded: (expanded: boolean) =>
+    useAppStore.getState().setDashboardExpanded(expanded),
+
+  // Selection
+  setSelectedDataset: (dataset: DatasetTarget) =>
+    useAppStore.getState().setSelectedDataset(dataset),
+  selectStudentRow: (rowIndex: number) =>
+    useAppStore.getState().selectStudentRow(rowIndex),
+  deselectStudentRow: (rowIndex: number) =>
+    useAppStore.getState().deselectStudentRow(rowIndex),
+  toggleStudentRow: (rowIndex: number) =>
+    useAppStore.getState().toggleStudentRow(rowIndex),
+  selectAllStudentRows: (indices: number[]) =>
+    useAppStore.getState().selectAllStudentRows(indices),
   clearStudentSelection: () => useAppStore.getState().clearStudentSelection(),
-  setComparisonActive: (a: boolean) => useAppStore.getState().setComparisonActive(a),
+  setComparisonActive: (active: boolean) =>
+    useAppStore.getState().setComparisonActive(active),
   setSessionId: (id: string | null) => useAppStore.getState().setSessionId(id),
-  setSelectedPredictionDataset: (d: DatasetTarget) =>
-    useAppStore.getState().setSelectedPredictionDataset(d),
+  setSelectedPredictionDataset: (dataset: DatasetTarget) =>
+    useAppStore.getState().setSelectedPredictionDataset(dataset),
   resetSelection: () => useAppStore.getState().resetSelection(),
 };

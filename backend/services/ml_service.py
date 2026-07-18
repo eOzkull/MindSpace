@@ -1,14 +1,11 @@
-import os
-import matplotlib.pyplot as plt
 from utils.logger import logger
 
-def _auto_train(df, plot_dir, target='primary'):
+def _auto_train(df, target='primary'):
     """Train a RandomForest on the specified dataset and return metrics."""
     if df is None:
         return None
 
     try:
-        import seaborn as sns
         from sklearn.ensemble import RandomForestClassifier
         from sklearn.model_selection import train_test_split
         from sklearn.preprocessing import LabelEncoder
@@ -67,31 +64,9 @@ def _auto_train(df, plot_dir, target='primary'):
             'report': report,
             'confusion_matrix': cm,
         }
-        # Save specific confusion matrix plot
-        os.makedirs(plot_dir, exist_ok=True)
-        img_filename = f'confusion_matrix_{target}.png'
-        
-        dark_bg = '#0f1117'
-        text_col = '#c9d1d9'
-        fig, ax = plt.subplots(figsize=(6, 5), dpi=150)
-        fig.patch.set_facecolor(dark_bg)
-        ax.set_facecolor(dark_bg)
-        sns.heatmap(
-            confusion_matrix(y_test, y_pred),
-            annot=True, fmt='d', cmap='Blues',
-            xticklabels=class_names, yticklabels=class_names,
-            ax=ax, linewidths=0.5
-        )
-        ax.set_title(f'Confusion Matrix ({target.capitalize()})', color=text_col)
-        ax.tick_params(colors=text_col)
-        ax.set_xlabel('Predicted', color=text_col)
-        ax.set_ylabel('Actual', color=text_col)
-        plt.tight_layout()
-        plt.savefig(os.path.join(plot_dir, img_filename))
-        plt.close('all')
 
         return metrics
 
     except Exception as e:
         logger.error(f"[Auto-train error] {e}", exc_info=True)
-        return None
+        return None

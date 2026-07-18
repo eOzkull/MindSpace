@@ -51,12 +51,13 @@ export interface CompareDeltas {
   avg_sentiment: number | null;
 }
 
-export interface ComparePlots {
-  cmp_risk_bar: string;
-  cmp_burnout_hist: string;
-  cmp_boxplot: string;
-  cmp_features: string;
-  cmp_sentiment: string;
+export interface CompareDataRecord {
+  burnout_score?: number;
+  sentiment_score?: number;
+  risk?: string;
+  sleep_hours?: number;
+  study_hours?: number;
+  stress_level?: number;
 }
 
 export interface CompareResultsResponse {
@@ -65,5 +66,7 @@ export interface CompareResultsResponse {
   stats_a: CompareStats;
   stats_b: CompareStats;
   deltas: CompareDeltas;
-  plots: ComparePlots;
+  data_a: CompareDataRecord[];
+  data_b: CompareDataRecord[];
 }
+

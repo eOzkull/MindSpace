@@ -1,6 +1,9 @@
 import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useEvaluate } from '../hooks/usePrediction';
+import { ConfusionMatrixHeatmap } from '../components/charts';
+import LoadingScreen from '../components/LoadingScreen';
+import { StatCard } from '../components/cards';
 import type { EvaluateResponse } from '../types/evaluate';
 import {
   AlertTriangle,
@@ -34,7 +37,7 @@ const Evaluate: React.FC = () => {
     : (response?.error ?? '');
   const data: EvaluateResponse | null = response?.error ? null : (response ?? null);
 
-  if (loading || !data || !data.metrics) return <div>Loading...</div>;
+  if (loading || !data || !data.metrics) return <LoadingScreen message="Evaluating Model..." subtitle="Reading accuracy, recall, and computing validation metrics." />;
 
   if (error) {
     return (
@@ -73,7 +76,7 @@ const Evaluate: React.FC = () => {
       )}
 
       <div className={`card verdict-card ${readyStatus}`} style={{ 
-        background: 'linear-gradient(135deg, rgba(40, 199, 111, 0.05) 0%, rgba(24, 24, 27, 0) 100%)', 
+        background: 'linear-gradient(135deg, rgba(40, 199, 111, 0.05) 0%, transparent 100%)', 
         marginBottom: '2.5rem',
         border: `2px solid var(--${isReady ? 'success' : 'warning'})`
       }}>
@@ -99,38 +102,38 @@ const Evaluate: React.FC = () => {
       </div>
 
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-        <div className="card stat-card-inner">
-          <Target size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Target size={20} style={{ color: 'var(--success)' }} /> Accuracy
-          </div>
-          <div className="stat-val" style={{ color: 'var(--success)' }}>{(metrics.accuracy * 100).toFixed(2)}%</div>
-          <div className="stat-sub">{metrics.n_test} test samples</div>
-        </div>
-        <div className="card stat-card-inner">
-          <Scale size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Scale size={20} style={{ color: 'var(--brand-primary)' }} /> F1 Score (weighted)
-          </div>
-          <div className="stat-val" style={{ color: 'var(--brand-primary)' }}>{metrics.f1}</div>
-          <div className="stat-sub">precision × recall balance</div>
-        </div>
-        <div className="card stat-card-inner">
-          <Crosshair size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Crosshair size={20} style={{ color: 'var(--info)' }} /> Precision
-          </div>
-          <div className="stat-val" style={{ color: 'var(--info)' }}>{metrics.precision}</div>
-          <div className="stat-sub">weighted average</div>
-        </div>
-        <div className="card stat-card-inner">
-          <ZoomIn size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ZoomIn size={20} style={{ color: 'var(--warning)' }} /> Recall
-          </div>
-          <div className="stat-val" style={{ color: 'var(--warning)' }}>{metrics.recall}</div>
-          <div className="stat-sub">weighted average</div>
-        </div>
+        <StatCard
+          labelIcon={Target}
+          bgIcon={Target}
+          label="Accuracy"
+          value={`${(metrics.accuracy * 100).toFixed(2)}%`}
+          subtext={`${metrics.n_test} test samples`}
+          themeColor="success"
+        />
+        <StatCard
+          labelIcon={Scale}
+          bgIcon={Scale}
+          label="F1 Score (weighted)"
+          value={metrics.f1}
+          subtext="precision × recall balance"
+          themeColor="brand-primary"
+        />
+        <StatCard
+          labelIcon={Crosshair}
+          bgIcon={Crosshair}
+          label="Precision"
+          value={metrics.precision}
+          subtext="weighted average"
+          themeColor="info"
+        />
+        <StatCard
+          labelIcon={ZoomIn}
+          bgIcon={ZoomIn}
+          label="Recall"
+          value={metrics.recall}
+          subtext="weighted average"
+          themeColor="warning"
+        />
       </div>
 
       <div className="metrics-grid" style={{ marginBottom: '2.5rem', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
@@ -139,20 +142,7 @@ const Evaluate: React.FC = () => {
             <Grid size={20} /> Confusion Matrix
           </h3>
           {metrics.confusion_matrix && (
-            <div className="cm-grid" style={{ '--cm-cols': metrics.class_names.length } as React.CSSProperties}>
-              <div className="cm-corner"></div>
-              {metrics.class_names.map((name: string) => (
-                <div key={name} className="cm-head">Predicted<br /><strong style={{ color: 'var(--text-primary)' }}>{name}</strong></div>
-              ))}
-              {metrics.confusion_matrix.map((row: number[], i: number) => (
-                <React.Fragment key={i}>
-                  <div className="cm-side">Actual <strong style={{ color: 'var(--text-primary)', marginLeft: '4px' }}>{metrics.class_names[i]}</strong></div>
-                  {row.map((val: number, j: number) => (
-                    <div key={`${i}-${j}`} className={`cm-cell ${i === j ? 'cm-correct' : 'cm-wrong'}`}>{val}</div>
-                  ))}
-                </React.Fragment>
-              ))}
-            </div>
+            <ConfusionMatrixHeatmap matrix={metrics.confusion_matrix} labels={metrics.class_names} title="" />
           )}
           <p className="insight-desc" style={{ marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center' }}>
             <Info size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> Diagonal cells = correct predictions.<br />Off-diagonal = misclassifications.

@@ -1,7 +1,6 @@
 import numpy as np
 from flask import Blueprint, jsonify
 import state
-from services.file_service import get_static_url
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -23,22 +22,15 @@ def dashboard():
 
     safe_df = df.replace({np.nan: None})
 
+    # Compute correlation matrix for the numeric features
+    available_cols = [c for c in ['sleep_hours', 'study_hours', 'stress_level', 'burnout_score'] if c in df.columns]
+    corr_matrix = df[available_cols].corr().round(2).replace({np.nan: None}).to_dict('split')
+
     return jsonify({
         'stats': stats,
         'columns': df.columns.tolist(),
         'data': safe_df.to_dict('records')[:100],
-        'plots': {
-            'score_hist':           get_static_url('score_hist.png'),
-            'risk_pie':             get_static_url('risk_pie.png'),
-            'stress_vs_burnout':    get_static_url('stress_vs_burnout.png'),
-            'correlation_heatmap':  get_static_url('correlation_heatmap.png'),
-            'sleep_vs_burnout':     get_static_url('sleep_vs_burnout.png'),
-            'burnout_boxplot':      get_static_url('burnout_boxplot.png'),
-            'study_vs_burnout':     get_static_url('study_vs_burnout.png'),
-            'stress_vs_sleep':      get_static_url('stress_vs_sleep.png'),
-            'sentiment_dist':       get_static_url('sentiment_dist.png'),
-            'sentiment_vs_burnout': get_static_url('sentiment_vs_burnout.png'),
-        }
+        'corr_matrix': corr_matrix
     })
 
 @dashboard_bp.route('/api/results', methods=['GET'])

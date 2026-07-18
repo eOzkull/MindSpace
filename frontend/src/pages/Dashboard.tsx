@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDashboard } from '../hooks/useDashboard';
+import {
+  BurnoutAreaChart,
+  StressBarChart,
+  RiskPieChart,
+  SleepScatterChart,
+  StudyBurnoutChart,
+  StressSleepChart,
+  SentimentDistChart,
+  SentimentBurnoutChart,
+  BurnoutBoxChart,
+  ConfusionMatrixHeatmap,
+} from '../components/charts';
+import LoadingScreen from '../components/LoadingScreen';
+import DataTable from '../components/tables/DataTable';
+import { StatCard, InsightCard } from '../components/cards';
 
-import { useAppStore, selectSearchQuery, selectRiskFilter } from '../store/appStore';
+import { useAppStore, selectSearchQuery, selectRiskFilter, selectDashboardCurrentPage, selectDashboardExpanded } from '../store/appStore';
 import type { RiskFilter } from '../store/appStore';
 import {
   AlertTriangle,
   Pencil,
   Plus,
   Flame,
+  ArrowLeftRight,
   TrendingUp,
   LineChart,
   Smile,
@@ -18,7 +34,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Presentation,
-  Lightbulb,
   BarChart2,
   PieChart,
   Grid,
@@ -27,36 +42,8 @@ import {
   BookOpen,
   Activity,
   MessageSquare,
-  Users,
-  HelpCircle
+  Users
 } from 'lucide-react';
-
-const getLucideIcon = (name: string) => {
-  switch (name) {
-    case 'ph-chart-bar':
-      return BarChart2;
-    case 'ph-chart-pie-slice':
-      return PieChart;
-    case 'ph-trend-up':
-      return TrendingUp;
-    case 'ph-squares-four':
-      return Grid;
-    case 'ph-moon-stars':
-      return Moon;
-    case 'ph-chart-polar':
-      return BarChart3;
-    case 'ph-book-open-text':
-      return BookOpen;
-    case 'ph-intersect':
-      return Activity;
-    case 'ph-chat-centered-text':
-      return MessageSquare;
-    case 'ph-users-three':
-      return Users;
-    default:
-      return HelpCircle;
-  }
-};
 
 const Dashboard: React.FC = () => {
 
@@ -69,17 +56,54 @@ const {
 const stats = dashboard?.stats;
 const columns = dashboard?.columns ?? [];
 const data = dashboard?.data ?? [];
-const plots = dashboard?.plots;
 
   const search = useAppStore(selectSearchQuery);
   const riskFilter = useAppStore(selectRiskFilter);
   const setSearch = useAppStore((s) => s.setSearchQuery);
   const setRiskFilter = useAppStore((s) => s.setRiskFilter);
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  // Pagination and UI state from appStore
+  const currentPage = useAppStore(selectDashboardCurrentPage);
+  const setCurrentPage = useAppStore((s) => s.setDashboardCurrentPage);
   const recordsPerPage = 10;
-  const [expanded, setExpanded] = useState(false);
+  
+  const expanded = useAppStore(selectDashboardExpanded);
+  const setExpanded = useAppStore((s) => s.setDashboardExpanded);
+
+  const navigate = useNavigate();
+  const selectedStudentRows = useAppStore((s) => s.selectedStudentRows);
+  const toggleStudentRow = useAppStore((s) => s.toggleStudentRow);
+  const clearStudentSelection = useAppStore((s) => s.clearStudentSelection);
+
+  const isRowSelected = (row: any) => {
+    const originalIdx = data.indexOf(row);
+    return selectedStudentRows.includes(originalIdx);
+  };
+
+  const onRowSelectToggle = (row: any) => {
+    const originalIdx = data.indexOf(row);
+    toggleStudentRow(originalIdx);
+  };
+
+  const handleCompareNavigate = () => {
+    if (selectedStudentRows.length < 2 || selectedStudentRows.length > 5) return;
+    const studentIds = selectedStudentRows.map((idx) => `ST-${idx + 1}`).join(',');
+    navigate(`/compare?students=${studentIds}`);
+  };
+
+  const tableColumns = React.useMemo(() => {
+    return columns.map((c) => ({
+      key: c,
+      header: c.replace('_', ' ').toUpperCase(),
+      render: c === 'risk'
+        ? (value: any) => (
+            <span className={`badge badge-${String(value || '').toLowerCase()}`}>
+              {value}
+            </span>
+          )
+        : undefined,
+    }));
+  }, [columns]);
 
 
   if (error)
@@ -89,7 +113,7 @@ const plots = dashboard?.plots;
       {error.message}
     </div>
   );
-  if (loading || !stats || !plots) return <div>Loading...</div>;
+  if (loading || !stats) return <LoadingScreen message="Loading Dashboard..." subtitle="Assembling cohort stats and rendering visual insights." />;
 
   const filteredData = data.filter(row => {
     const riskMatch = riskFilter === 'All' || row['risk'] === riskFilter;
@@ -100,37 +124,6 @@ const plots = dashboard?.plots;
   const totalPages = Math.ceil(filteredData.length / recordsPerPage);
   const start = (currentPage - 1) * recordsPerPage;
   const currentData = filteredData.slice(start, start + recordsPerPage);
-
-  interface ChartCardProps {
-    icon: string;
-    title: string;
-    desc: string;
-    takeaway: string;
-    img_url: string;
-    img_alt: string;
-    reverse?: boolean;
-  }
-
-  const ChartCard = ({ icon, title, desc, takeaway, img_url, img_alt, reverse = false }: ChartCardProps) => {
-    const IconComponent = getLucideIcon(icon);
-    return (
-      <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
-        <div className="insight-text-col">
-          <h3 className="insight-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <IconComponent size={24} style={{ color: 'var(--brand-primary)' }} /> {title}
-          </h3>
-          <p className="insight-desc">{desc}</p>
-          <div className="takeaway-box">
-            <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Lightbulb size={16} /> Key Takeaway</strong>
-            <p style={{ marginTop: '6px' }}>{takeaway}</p>
-          </div>
-        </div>
-        <div className="insight-visual-col">
-          <img src={img_url} alt={img_alt} loading="lazy" />
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -144,38 +137,38 @@ const plots = dashboard?.plots;
       </div>
 
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-        <div className="card stat-card-inner">
-          <Flame size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Flame size={20} style={{ color: 'var(--danger)' }} /> Avg Burnout
-          </div>
-          <div className="stat-val" style={{ color: 'var(--danger)' }}>{stats.avg_burnout}</div>
-          <div className="stat-sub">out of 100</div>
-        </div>
-        <div className="card stat-card-inner">
-          <LineChart size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <TrendingUp size={20} style={{ color: 'var(--info)' }} /> Median / StdDev
-          </div>
-          <div className="stat-val" style={{ color: 'var(--info)' }}>{stats.median_burnout}</div>
-          <div className="stat-sub">±{stats.std_burnout} spread</div>
-        </div>
-        <div className="card stat-card-inner">
-          <AlertTriangle size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <AlertTriangle size={20} style={{ color: 'var(--brand-primary)' }} /> High-Risk Students
-          </div>
-          <div className="stat-val" style={{ color: 'var(--brand-primary)' }}>{stats.high_risk_count}</div>
-          <div className="stat-sub">({stats.pct_high_risk}% of cohort)</div>
-        </div>
-        <div className="card stat-card-inner">
-          <Smile size={112} className="bg-icon" />
-          <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Smile size={20} style={{ color: 'var(--success)' }} /> Avg Sentiment
-          </div>
-          <div className="stat-val" style={{ color: 'var(--success)' }}>{stats.avg_sentiment}</div>
-          <div className="stat-sub">compound score (-1 to +1)</div>
-        </div>
+        <StatCard
+          labelIcon={Flame}
+          bgIcon={Flame}
+          label="Avg Burnout"
+          value={stats.avg_burnout}
+          subtext="out of 100"
+          themeColor="danger"
+        />
+        <StatCard
+          labelIcon={TrendingUp}
+          bgIcon={LineChart}
+          label="Median / StdDev"
+          value={stats.median_burnout}
+          subtext={`±${stats.std_burnout} spread`}
+          themeColor="info"
+        />
+        <StatCard
+          labelIcon={AlertTriangle}
+          bgIcon={AlertTriangle}
+          label="High-Risk Students"
+          value={stats.high_risk_count}
+          subtext={`(${stats.pct_high_risk}% of cohort)`}
+          themeColor="brand-primary"
+        />
+        <StatCard
+          labelIcon={Smile}
+          bgIcon={Smile}
+          label="Avg Sentiment"
+          value={stats.avg_sentiment}
+          subtext="compound score (-1 to +1)"
+          themeColor="success"
+        />
       </div>
 
       <div className="card" style={{ marginBottom: '2.5rem', padding: 0, overflow: 'hidden' }}>
@@ -205,43 +198,26 @@ const plots = dashboard?.plots;
               </select>
             </div>
 
-            <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    {columns.map(c => <th key={c}>{c.replace('_', ' ').toUpperCase()}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentData.map((row, idx) => (
-                    <tr key={idx}>
-                      <td className="row-num" style={{ color: 'var(--text-muted)' }}>{start + idx + 1}</td>
-                      {columns.map(c => (
-                        <td key={c}>
-                          {c === 'risk' ? (
-                            <span className={`badge badge-${String(row[c] || '').toLowerCase()}`}>{row[c]}</span>
-                          ) : (
-                            row[c]
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              columns={tableColumns}
+              data={currentData}
+              showIndex={true}
+              startIndex={start + 1}
+              selectable={true}
+              isRowSelected={isRowSelected}
+              onRowSelectToggle={onRowSelectToggle}
+            />
 
             <div className="pagination-footer" style={{ padding: '1.25rem 1.75rem', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)' }}>
               <div className="pagination-info text-secondary" style={{ fontSize: '0.9rem' }}>
                 Showing {filteredData.length ? start + 1 : 0} – {Math.min(start + recordsPerPage, filteredData.length)} of {filteredData.length} records
               </div>
               <div className="pagination-controls" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="btn btn-outline" style={{ padding: '6px 12px' }}>
+                <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="btn btn-outline" style={{ padding: '6px 12px' }}>
                   <ChevronLeft size={16} /> Previous
                 </button>
                 <span style={{ margin: '0 10px' }}>Page {currentPage} of {totalPages || 1}</span>
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="btn btn-outline" style={{ padding: '6px 12px' }}>
+                <button onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages || totalPages === 0} className="btn btn-outline" style={{ padding: '6px 12px' }}>
                   Next <ChevronRight size={16} />
                 </button>
               </div>
@@ -255,16 +231,60 @@ const plots = dashboard?.plots;
         <span style={{ fontWeight: 400, color: 'var(--text-secondary)', fontSize: '1rem' }}>(Scroll to explore)</span>
       </h2>
 
-      <ChartCard icon="ph-chart-bar" title="Burnout Score Distribution" desc="How burnout scores are spread across the whole student population." takeaway="Peaks clustered above 60 indicate that a significant portion of this cohort is under chronic pressure." img_url={plots.score_hist} img_alt="Burnout Histogram" />
-      <ChartCard icon="ph-chart-pie-slice" title="Burnout Risk Proportions" desc="Categorical slice of the cohort." takeaway="If High-risk exceeds 25%, the cohort needs structural support." img_url={plots.risk_pie} img_alt="Risk Pie" reverse />
-      <ChartCard icon="ph-trend-up" title="Stress Level vs Avg Burnout" desc="Average burnout score at each self-reported stress level." takeaway="The jump from stress level 7 to 8 is typically steeper." img_url={plots.stress_vs_burnout} img_alt="Stress vs Burnout" />
-      <ChartCard icon="ph-squares-four" title="Feature Correlation Heatmap" desc="Strength and direction of linear relationships." takeaway="High positive correlations tell you which levers to pull first." img_url={plots.correlation_heatmap} img_alt="Correlation Heatmap" reverse />
-      <ChartCard icon="ph-moon-stars" title="Sleep Hours vs Burnout Score" desc="Each dot is a student." takeaway="Students sleeping under 5 hours almost universally appear in the red zone." img_url={plots.sleep_vs_burnout} img_alt="Sleep vs Burnout" />
-      <ChartCard icon="ph-chart-polar" title="Burnout Score by Risk Tier" desc="Box-and-whisker plot showing full score spread." takeaway="Whiskers stretching far inside the 'Medium' box mean uncertain cases." img_url={plots.burnout_boxplot} img_alt="Burnout Boxplot" reverse />
-      <ChartCard icon="ph-book-open-text" title="Study Hours vs Burnout Score" desc="Does studying more always mean more burnout?" takeaway="At high study loads burnout is nearly guaranteed unless sleep is preserved." img_url={plots.study_vs_burnout} img_alt="Study vs Burnout" />
-      <ChartCard icon="ph-intersect" title="Stress Level vs Sleep Hours" desc="Pattern between stress and sleep." takeaway="The downward trend confirms the inverse relationship." img_url={plots.stress_vs_sleep} img_alt="Stress vs Sleep" reverse />
-      <ChartCard icon="ph-chat-centered-text" title="Sentiment Score Distribution" desc="VADER compound score from student feedback." takeaway="A distribution skewed negative signals hidden distress." img_url={plots.sentiment_dist} img_alt="Sentiment Distribution" />
-      <ChartCard icon="ph-users-three" title="Sentiment Score vs Burnout Score" desc="Does language match actual burnout?" takeaway="Outliers are potential maskers." img_url={plots.sentiment_vs_burnout} img_alt="Sentiment vs Burnout" reverse />
+      <InsightCard icon={BarChart2} title="Burnout Score Distribution" desc="How burnout scores are spread across the whole student population." takeaway="Peaks clustered above 60 indicate that a significant portion of this cohort is under chronic pressure.">
+        <BurnoutAreaChart data={data} />
+      </InsightCard>
+      <InsightCard icon={PieChart} title="Burnout Risk Proportions" desc="Categorical slice of the cohort." takeaway="If High-risk exceeds 25%, the cohort needs structural support." reverse>
+        <RiskPieChart data={data} />
+      </InsightCard>
+      <InsightCard icon={TrendingUp} title="Stress Level vs Avg Burnout" desc="Average burnout score at each self-reported stress level." takeaway="The jump from stress level 7 to 8 is typically steeper.">
+        <StressBarChart data={data} />
+      </InsightCard>
+      <InsightCard icon={Grid} title="Feature Correlation Heatmap" desc="Strength and direction of linear relationships." takeaway="High positive correlations tell you which levers to pull first." reverse>
+        {dashboard?.corr_matrix && (
+          <ConfusionMatrixHeatmap 
+            matrix={dashboard.corr_matrix.data} 
+            labels={dashboard.corr_matrix.columns.map((c: string) => c.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()))} 
+            title="" 
+          />
+        )}
+      </InsightCard>
+      <InsightCard icon={Moon} title="Sleep Hours vs Burnout Score" desc="Each dot is a student." takeaway="Students sleeping under 5 hours almost universally appear in the red zone.">
+        <SleepScatterChart data={data} />
+      </InsightCard>
+      <InsightCard icon={BarChart3} title="Burnout Score by Risk Tier" desc="Mean ± std dev spread across the three risk cohorts." takeaway="A wide error bar in the Medium tier indicates uncertain classification cases." reverse>
+        <BurnoutBoxChart data={data} />
+      </InsightCard>
+      <InsightCard icon={BookOpen} title="Study Hours vs Burnout Score" desc="Average burnout at each study-hour bracket." takeaway="At high study loads burnout is nearly guaranteed unless sleep is preserved.">
+        <StudyBurnoutChart data={data} />
+      </InsightCard>
+      <InsightCard icon={Activity} title="Stress Level vs Sleep Hours" desc="Inverse pattern between stress and sleep with regression trendline." takeaway="The downward trend confirms the inverse relationship." reverse>
+        <StressSleepChart data={data} />
+      </InsightCard>
+      <InsightCard icon={MessageSquare} title="Sentiment Score Distribution" desc="VADER compound score from student feedback." takeaway="A distribution skewed negative signals hidden distress.">
+        <SentimentDistChart data={data} />
+      </InsightCard>
+      <InsightCard icon={Users} title="Sentiment Score vs Burnout Score" desc="Does language match actual burnout?" takeaway="Outliers are potential maskers — look for high burnout paired with positive sentiment." reverse>
+        <SentimentBurnoutChart data={data} />
+      </InsightCard>
+
+      {selectedStudentRows.length >= 2 && selectedStudentRows.length <= 5 && (
+        <div className="floating-action-panel">
+          <div className="panel-content">
+            <span className="panel-text">
+              <strong>{selectedStudentRows.length}</strong> students selected for comparison
+            </span>
+            <div className="panel-actions">
+              <button onClick={clearStudentSelection} className="btn btn-outline" style={{ padding: '6px 14px', fontSize: '0.85rem', borderRadius: '30px' }}>
+                Clear
+              </button>
+              <button onClick={handleCompareNavigate} className="btn btn-primary" style={{ padding: '6px 18px', fontSize: '0.85rem', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                Compare Selected <ArrowLeftRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

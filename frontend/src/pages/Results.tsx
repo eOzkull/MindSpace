@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useResults } from '../hooks/usePrediction';
+import LoadingScreen from '../components/LoadingScreen';
+import DataTable from '../components/tables/DataTable';
+import { StatCard } from '../components/cards';
 import type { ResultsResponse } from '../types/prediction';
 import {
   AlertTriangle,
@@ -26,7 +29,7 @@ const Results: React.FC = () => {
     : (response?.error ?? '');
   const data: ResultsResponse | null = response?.error ? null : (response ?? null);
 
-  if (loading || !data) return <div>Loading...</div>;
+  if (loading || !data) return <LoadingScreen message="Summarizing Cohort Results..." subtitle="Reviewing clinical patterns and synthesizing recommendations." />;
   if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
 
   return (
@@ -47,38 +50,30 @@ const Results: React.FC = () => {
         </p>
 
         <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-card-inner">
-              <Flame size={112} className="bg-icon" />
-              <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Flame size={20} style={{ color: 'var(--warning)' }} /> Avg Burnout
-              </div>
-              <div className="stat-val">{data.avg_burnout ?? 'N/A'}</div>
-              <div className="stat-sub">Out of 100</div>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-card-inner">
-              <AlertTriangle size={112} className="bg-icon" />
-              <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <AlertTriangle size={20} style={{ color: 'var(--danger)' }} /> High Risk
-              </div>
-              <div className="stat-val">{data.high_risk_pct ?? 'N/A'}%</div>
-              <div className="stat-sub">Of student population</div>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-card-inner">
-              <MessageSquare size={112} className="bg-icon" />
-              <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <MessageSquare size={20} style={{ color: 'var(--info)' }} /> Avg Sentiment
-              </div>
-              <div className="stat-val">{data.avg_sentiment ?? 'N/A'}</div>
-              <div className="stat-sub">VADER Compound Score</div>
-            </div>
-          </div>
+          <StatCard
+            labelIcon={Flame}
+            bgIcon={Flame}
+            label="Avg Burnout"
+            value={data.avg_burnout ?? 'N/A'}
+            subtext="Out of 100"
+            themeColor="warning"
+          />
+          <StatCard
+            labelIcon={AlertTriangle}
+            bgIcon={AlertTriangle}
+            label="High Risk"
+            value={data.high_risk_pct !== undefined && data.high_risk_pct !== null ? `${data.high_risk_pct}%` : 'N/A'}
+            subtext="Of student population"
+            themeColor="danger"
+          />
+          <StatCard
+            labelIcon={MessageSquare}
+            bgIcon={MessageSquare}
+            label="Avg Sentiment"
+            value={data.avg_sentiment ?? 'N/A'}
+            subtext="VADER Compound Score"
+            themeColor="info"
+          />
         </div>
       </div>
 
@@ -147,46 +142,40 @@ const Results: React.FC = () => {
       </h3>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem' }}>
-        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: '15%', whiteSpace: 'nowrap' }}>Risk Tier</th>
-                <th style={{ width: '14%', whiteSpace: 'nowrap' }}>Avg. Sleep</th>
-                <th style={{ width: '14%', whiteSpace: 'nowrap' }}>Avg. Study</th>
-                <th style={{ width: '14%', whiteSpace: 'nowrap' }}>Avg. Stress</th>
-                <th style={{ width: '18%', whiteSpace: 'nowrap' }}>Avg. Sentiment</th>
-                <th style={{ width: '25%' }}>Target Action</th>
-              </tr>
-            </thead>
-            <tbody id="cohort-body">
-              <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
-                <td><span className="badge badge-low">Low Risk</span></td>
-                <td>7.8 hrs</td>
-                <td>4.2 hrs</td>
-                <td>2.1/10</td>
-                <td style={{ color: 'var(--success)' }}>Positive (+0.42)</td>
-                <td>Maintenance / Peer Mentorship</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
-                <td><span className="badge badge-medium">Medium Risk</span></td>
-                <td>6.1 hrs</td>
-                <td>6.5 hrs</td>
-                <td>5.4/10</td>
-                <td style={{ color: 'var(--info)' }}>Neutral (+0.12)</td>
-                <td>Early Monitoring / Workshop</td>
-              </tr>
-              <tr>
-                <td><span className="badge badge-high">High Risk</span></td>
-                <td>4.2 hrs</td>
-                <td>9.8 hrs</td>
-                <td>8.7/10</td>
-                <td style={{ color: 'var(--danger)' }}>Critical (-0.24)</td>
-                <td>Immediate Counselor Outreach</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={[
+            {
+              key: 'risk',
+              header: 'Risk Tier',
+              width: '15%',
+              render: (v) => (
+                <span className={`badge badge-${v.replace(' Risk', '').toLowerCase()}`}>
+                  {v}
+                </span>
+              )
+            },
+            { key: 'sleep', header: 'Avg. Sleep', width: '14%' },
+            { key: 'study', header: 'Avg. Study', width: '14%' },
+            { key: 'stress', header: 'Avg. Stress', width: '14%' },
+            {
+              key: 'sentiment',
+              header: 'Avg. Sentiment',
+              width: '18%',
+              render: (v, r) => (
+                <span style={{ color: `var(--${r.sentimentColor})` }}>
+                  {v}
+                </span>
+              )
+            },
+            { key: 'action', header: 'Target Action', width: '25%' }
+          ]}
+          data={[
+            { risk: 'Low Risk', sleep: '7.8 hrs', study: '4.2 hrs', stress: '2.1/10', sentiment: 'Positive (+0.42)', sentimentColor: 'success', action: 'Maintenance / Peer Mentorship' },
+            { risk: 'Medium Risk', sleep: '6.1 hrs', study: '6.5 hrs', stress: '5.4/10', sentiment: 'Neutral (+0.12)', sentimentColor: 'info', action: 'Early Monitoring / Workshop' },
+            { risk: 'High Risk', sleep: '4.2 hrs', study: '9.8 hrs', stress: '8.7/10', sentiment: 'Critical (-0.24)', sentimentColor: 'danger', action: 'Immediate Counselor Outreach' }
+          ]}
+          rowStyle={(_, index) => index < 2 ? { borderBottom: '1px solid var(--card-border)' } : {}}
+        />
         <div className="takeaway-box" style={{ margin: '1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)' }}>
           <Info size={16} style={{ color: 'var(--brand-primary)', marginRight: '6px', verticalAlign: 'middle', display: 'inline-block' }} />
           <strong>Synthesized Conclusion:</strong> The "High" risk group exhibits a dangerous "Workplace Substitution" pattern—trading physiological recovery (sleep) for academic effort (study). This trade-off leads to exponential stress growth, making immediate counseling the only viable pathway to prevent systemic burnout.

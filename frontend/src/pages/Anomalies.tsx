@@ -2,7 +2,8 @@ import React from 'react';
 import { useAnomalies } from '../hooks/useAnomalies';
 import { ShieldAlert, RefreshCw, Info, AlertOctagon } from 'lucide-react';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
+import LoadingScreen from '../components/LoadingScreen';
+import DataTable from '../components/tables/DataTable';
 
 interface AnomalyItem {
   id: string;
@@ -61,6 +62,53 @@ const Anomalies: React.FC = () => {
     ? MOCK_ANOMALIES
     : ((fetchedAnomalies as AnomalyItem[] | undefined) ?? []);
 
+  const tableColumns = React.useMemo(() => [
+    {
+      key: 'id',
+      header: 'Student ID',
+      width: '12%',
+      style: { fontWeight: 600 }
+    },
+    {
+      key: 'type',
+      header: 'Anomaly Type',
+      width: '18%',
+      render: (value: any, item: AnomalyItem) => (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ShieldAlert size={16} style={{ color: item.severity === 'High' ? 'var(--danger)' : 'var(--warning)' }} />
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'metric',
+      header: 'Telemetry Matrix',
+      width: '20%',
+      style: { fontFamily: 'monospace', fontSize: '0.85rem' }
+    },
+    {
+      key: 'confidence',
+      header: 'Confidence',
+      width: '10%'
+    },
+    {
+      key: 'severity',
+      header: 'Severity',
+      width: '10%',
+      render: (value: any) => (
+        <span className={`badge badge-${String(value || '').toLowerCase()}`}>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'description',
+      header: 'Description / Insights',
+      width: '30%',
+      style: { fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }
+    }
+  ], []);
+
   return (
     <div className="anomalies-container">
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
@@ -69,7 +117,7 @@ const Anomalies: React.FC = () => {
         </button>
       </div>
 
-      <div className="card Executive-verdict" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(24, 24, 27, 0) 100%)', border: '1px solid var(--card-border)', marginBottom: '2.5rem' }}>
+      <div className="card Executive-verdict" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%)', border: '1px solid var(--card-border)', marginBottom: '2.5rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
           <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', color: 'var(--danger)' }}>
             <AlertOctagon size={32} />
@@ -92,48 +140,14 @@ const Anomalies: React.FC = () => {
       )}
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
-          <Spinner size={48} label="Loading anomalies..." />
-        </div>
+        <LoadingScreen message="Scanning Anomalies..." subtitle="Looking for telemetry mismatch and masking patterns in cohort." />
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: '12%' }}>Student ID</th>
-                  <th style={{ width: '18%' }}>Anomaly Type</th>
-                  <th style={{ width: '20%' }}>Telemetry Matrix</th>
-                  <th style={{ width: '10%' }}>Confidence</th>
-                  <th style={{ width: '10%' }}>Severity</th>
-                  <th style={{ width: '30%' }}>Description / Insights</th>
-                </tr>
-              </thead>
-              <tbody>
-                {anomalies.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid var(--card-border)' }}>
-                    <td style={{ fontWeight: 600 }}>{item.id}</td>
-                    <td>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <ShieldAlert size={16} style={{ color: item.severity === 'High' ? 'var(--danger)' : 'var(--warning)' }} />
-                        {item.type}
-                      </span>
-                    </td>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{item.metric}</td>
-                    <td>{item.confidence}</td>
-                    <td>
-                      <span className={`badge badge-${item.severity.toLowerCase()}`}>
-                        {item.severity}
-                      </span>
-                    </td>
-                    <td style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                      {item.description}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={tableColumns}
+            data={anomalies}
+            rowStyle={() => ({ borderBottom: '1px solid var(--card-border)' })}
+          />
           <div className="takeaway-box" style={{ margin: '1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)' }}>
             <Info size={16} style={{ color: 'var(--brand-primary)', marginRight: '6px', verticalAlign: 'middle', display: 'inline-block' }} />
             <strong>Advisory Note:</strong> Masking anomalies are highly critical. Students showing masking behaviors should be engaged with indirect wellness surveys rather than direct confrontation about academic performance.

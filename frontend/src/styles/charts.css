@@ -1,0 +1,233 @@
+/* Custom styling overrides and utility classes for Recharts SVG components */
+
+/* Recharts container wrappers */
+.chart-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Custom Tooltip styling matching theme cards */
+.custom-chart-tooltip {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  font-family: inherit;
+}
+
+[data-theme="light"] .custom-chart-tooltip {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.custom-chart-tooltip-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.custom-chart-tooltip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-chart-tooltip-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.custom-chart-tooltip-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.custom-chart-tooltip-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Recharts grid overrides */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--card-border);
+  stroke-dasharray: 4 4;
+}
+
+/* Recharts Axis ticks styling */
+.recharts-cartesian-axis-tick-value {
+  fill: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Recharts legend styling */
+.custom-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+}
+
+.custom-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.custom-chart-legend-item:hover {
+  color: var(--text-primary);
+}
+
+.custom-chart-legend-marker {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* Confusion Matrix Heatmap */
+.confusion-matrix-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 16px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.confusion-matrix-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.confusion-matrix-layout {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.confusion-matrix-y-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+
+.confusion-matrix-core {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.confusion-matrix-header {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.confusion-matrix-corner {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.confusion-matrix-col-label {
+  flex: 1;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+.confusion-matrix-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.confusion-matrix-row {
+  display: flex;
+  gap: 4px;
+}
+
+.confusion-matrix-row-label {
+  width: 100px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.confusion-matrix-cell {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.confusion-matrix-cell:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.confusion-matrix-val {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.confusion-matrix-x-label {
+  text-align: center;
+  margin-top: 16px;
+  margin-left: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+
