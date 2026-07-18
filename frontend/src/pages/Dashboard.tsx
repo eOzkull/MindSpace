@@ -6,6 +6,11 @@ import {
   StressBarChart,
   RiskPieChart,
   SleepScatterChart,
+  StudyBurnoutChart,
+  StressSleepChart,
+  SentimentDistChart,
+  SentimentBurnoutChart,
+  BurnoutBoxChart,
 } from '../components/charts';
 import LoadingScreen from '../components/LoadingScreen';
 
@@ -276,11 +281,21 @@ const plots = dashboard?.plots;
       <ChartCard icon="ph-moon-stars" title="Sleep Hours vs Burnout Score" desc="Each dot is a student." takeaway="Students sleeping under 5 hours almost universally appear in the red zone.">
         <SleepScatterChart data={data} />
       </ChartCard>
-      <ChartCard icon="ph-chart-polar" title="Burnout Score by Risk Tier" desc="Box-and-whisker plot showing full score spread." takeaway="Whiskers stretching far inside the 'Medium' box mean uncertain cases." img_url={plots.burnout_boxplot} img_alt="Burnout Boxplot" reverse />
-      <ChartCard icon="ph-book-open-text" title="Study Hours vs Burnout Score" desc="Does studying more always mean more burnout?" takeaway="At high study loads burnout is nearly guaranteed unless sleep is preserved." img_url={plots.study_vs_burnout} img_alt="Study vs Burnout" />
-      <ChartCard icon="ph-intersect" title="Stress Level vs Sleep Hours" desc="Pattern between stress and sleep." takeaway="The downward trend confirms the inverse relationship." img_url={plots.stress_vs_sleep} img_alt="Stress vs Sleep" reverse />
-      <ChartCard icon="ph-chat-centered-text" title="Sentiment Score Distribution" desc="VADER compound score from student feedback." takeaway="A distribution skewed negative signals hidden distress." img_url={plots.sentiment_dist} img_alt="Sentiment Distribution" />
-      <ChartCard icon="ph-users-three" title="Sentiment Score vs Burnout Score" desc="Does language match actual burnout?" takeaway="Outliers are potential maskers." img_url={plots.sentiment_vs_burnout} img_alt="Sentiment vs Burnout" reverse />
+      <ChartCard icon="ph-chart-polar" title="Burnout Score by Risk Tier" desc="Mean ± std dev spread across the three risk cohorts." takeaway="A wide error bar in the Medium tier indicates uncertain classification cases." reverse>
+        <BurnoutBoxChart data={data} />
+      </ChartCard>
+      <ChartCard icon="ph-book-open-text" title="Study Hours vs Burnout Score" desc="Average burnout at each study-hour bracket." takeaway="At high study loads burnout is nearly guaranteed unless sleep is preserved.">
+        <StudyBurnoutChart data={data} />
+      </ChartCard>
+      <ChartCard icon="ph-intersect" title="Stress Level vs Sleep Hours" desc="Inverse pattern between stress and sleep with regression trendline." takeaway="The downward trend confirms the inverse relationship." reverse>
+        <StressSleepChart data={data} />
+      </ChartCard>
+      <ChartCard icon="ph-chat-centered-text" title="Sentiment Score Distribution" desc="VADER compound score from student feedback." takeaway="A distribution skewed negative signals hidden distress.">
+        <SentimentDistChart data={data} />
+      </ChartCard>
+      <ChartCard icon="ph-users-three" title="Sentiment Score vs Burnout Score" desc="Does language match actual burnout?" takeaway="Outliers are potential maskers — look for high burnout paired with positive sentiment." reverse>
+        <SentimentBurnoutChart data={data} />
+      </ChartCard>
     </>
   );
 };

@@ -6,3 +6,8 @@ export * from './SleepScatterChart';
 export * from './FeatureImportanceChart';
 export * from './ClusterChart';
 export * from './ConfusionMatrixHeatmap';
+export * from './StudyBurnoutChart';
+export * from './StressSleepChart';
+export * from './SentimentDistChart';
+export * from './SentimentBurnoutChart';
+export * from './BurnoutBoxChart';

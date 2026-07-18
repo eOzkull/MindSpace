@@ -1,14 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { useAppStore, selectSelectedPredictionDataset } from '../store/appStore';
 import { useEvaluate } from '../hooks/usePrediction';
+import { useDebounce } from '../hooks/useDebounce';
 import { Sparkles, Brain, AlertTriangle, Moon, BookOpen, AlertCircle } from 'lucide-react';
 
 const Predict: React.FC = () => {
   const selectedDataset = useAppStore(selectSelectedPredictionDataset);
   const setSelectedDataset = useAppStore((s) => s.setSelectedPredictionDataset);
 
+  // Debounce remote prediction requests by 300ms via reusable hook
+  const debouncedDataset = useDebounce(selectedDataset, 300);
+
   // Reuse existing prediction hook to keep backend model metadata support intact
-  const { data: evaluateData } = useEvaluate(selectedDataset);
+  const { data: evaluateData } = useEvaluate(debouncedDataset);
   const metrics = evaluateData?.metrics;
 
   // Controlled form inputs
