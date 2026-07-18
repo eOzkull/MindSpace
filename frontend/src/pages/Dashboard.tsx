@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDashboard } from '../hooks/useDashboard';
+import {
+  BurnoutAreaChart,
+  StressBarChart,
+  RiskPieChart,
+  SleepScatterChart,
+} from '../components/charts';
 
 import { useAppStore, selectSearchQuery, selectRiskFilter } from '../store/appStore';
 import type { RiskFilter } from '../store/appStore';
@@ -106,12 +112,13 @@ const plots = dashboard?.plots;
     title: string;
     desc: string;
     takeaway: string;
-    img_url: string;
-    img_alt: string;
+    img_url?: string;
+    img_alt?: string;
     reverse?: boolean;
+    children?: React.ReactNode;
   }
 
-  const ChartCard = ({ icon, title, desc, takeaway, img_url, img_alt, reverse = false }: ChartCardProps) => {
+  const ChartCard = ({ icon, title, desc, takeaway, img_url, img_alt, reverse = false, children }: ChartCardProps) => {
     const IconComponent = getLucideIcon(icon);
     return (
       <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
@@ -125,8 +132,8 @@ const plots = dashboard?.plots;
             <p style={{ marginTop: '6px' }}>{takeaway}</p>
           </div>
         </div>
-        <div className="insight-visual-col">
-          <img src={img_url} alt={img_alt} loading="lazy" />
+        <div className="insight-visual-col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {children ? children : img_url ? <img src={img_url} alt={img_alt} loading="lazy" /> : null}
         </div>
       </div>
     );
@@ -255,11 +262,19 @@ const plots = dashboard?.plots;
         <span style={{ fontWeight: 400, color: 'var(--text-secondary)', fontSize: '1rem' }}>(Scroll to explore)</span>
       </h2>
 
-      <ChartCard icon="ph-chart-bar" title="Burnout Score Distribution" desc="How burnout scores are spread across the whole student population." takeaway="Peaks clustered above 60 indicate that a significant portion of this cohort is under chronic pressure." img_url={plots.score_hist} img_alt="Burnout Histogram" />
-      <ChartCard icon="ph-chart-pie-slice" title="Burnout Risk Proportions" desc="Categorical slice of the cohort." takeaway="If High-risk exceeds 25%, the cohort needs structural support." img_url={plots.risk_pie} img_alt="Risk Pie" reverse />
-      <ChartCard icon="ph-trend-up" title="Stress Level vs Avg Burnout" desc="Average burnout score at each self-reported stress level." takeaway="The jump from stress level 7 to 8 is typically steeper." img_url={plots.stress_vs_burnout} img_alt="Stress vs Burnout" />
+      <ChartCard icon="ph-chart-bar" title="Burnout Score Distribution" desc="How burnout scores are spread across the whole student population." takeaway="Peaks clustered above 60 indicate that a significant portion of this cohort is under chronic pressure.">
+        <BurnoutAreaChart data={data} />
+      </ChartCard>
+      <ChartCard icon="ph-chart-pie-slice" title="Burnout Risk Proportions" desc="Categorical slice of the cohort." takeaway="If High-risk exceeds 25%, the cohort needs structural support." reverse>
+        <RiskPieChart data={data} />
+      </ChartCard>
+      <ChartCard icon="ph-trend-up" title="Stress Level vs Avg Burnout" desc="Average burnout score at each self-reported stress level." takeaway="The jump from stress level 7 to 8 is typically steeper.">
+        <StressBarChart data={data} />
+      </ChartCard>
       <ChartCard icon="ph-squares-four" title="Feature Correlation Heatmap" desc="Strength and direction of linear relationships." takeaway="High positive correlations tell you which levers to pull first." img_url={plots.correlation_heatmap} img_alt="Correlation Heatmap" reverse />
-      <ChartCard icon="ph-moon-stars" title="Sleep Hours vs Burnout Score" desc="Each dot is a student." takeaway="Students sleeping under 5 hours almost universally appear in the red zone." img_url={plots.sleep_vs_burnout} img_alt="Sleep vs Burnout" />
+      <ChartCard icon="ph-moon-stars" title="Sleep Hours vs Burnout Score" desc="Each dot is a student." takeaway="Students sleeping under 5 hours almost universally appear in the red zone.">
+        <SleepScatterChart data={data} />
+      </ChartCard>
       <ChartCard icon="ph-chart-polar" title="Burnout Score by Risk Tier" desc="Box-and-whisker plot showing full score spread." takeaway="Whiskers stretching far inside the 'Medium' box mean uncertain cases." img_url={plots.burnout_boxplot} img_alt="Burnout Boxplot" reverse />
       <ChartCard icon="ph-book-open-text" title="Study Hours vs Burnout Score" desc="Does studying more always mean more burnout?" takeaway="At high study loads burnout is nearly guaranteed unless sleep is preserved." img_url={plots.study_vs_burnout} img_alt="Study vs Burnout" />
       <ChartCard icon="ph-intersect" title="Stress Level vs Sleep Hours" desc="Pattern between stress and sleep." takeaway="The downward trend confirms the inverse relationship." img_url={plots.stress_vs_sleep} img_alt="Stress vs Sleep" reverse />
