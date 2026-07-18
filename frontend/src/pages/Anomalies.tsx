@@ -1,6 +1,8 @@
 import React from 'react';
 import { useAnomalies } from '../hooks/useAnomalies';
-import { ShieldAlert, RefreshCw, Info, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Info, AlertOctagon } from 'lucide-react';
+import { ErrorBanner } from '../components/Banner/ErrorBanner';
+import { Spinner } from '../components/Spinner/Spinner';
 
 interface AnomalyItem {
   id: string;
@@ -52,8 +54,8 @@ const MOCK_ANOMALIES: AnomalyItem[] = [
 ];
 
 const Anomalies: React.FC = () => {
-  const { data: fetchedAnomalies, isLoading: loading, isError, refetch } = useAnomalies();
-
+  const { data: fetchedAnomalies, isLoading, isError, refetch, isFetching } = useAnomalies();
+  const loading = isLoading || isFetching;
   const error = isError ? 'Backend API scanning not available. Using offline cache data.' : '';
   const anomalies: AnomalyItem[] = isError
     ? MOCK_ANOMALIES
@@ -82,14 +84,17 @@ const Anomalies: React.FC = () => {
       </div>
 
       {error && (
-        <div className="card flash-alert flash-warning" style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <AlertTriangle size={20} style={{ color: 'var(--warning)' }} />
-          <span>{error}</span>
-        </div>
+        <ErrorBanner
+          title="Scan Notice"
+          message={error}
+          variant="warning"
+        />
       )}
 
       {loading ? (
-        <div>Loading anomalies...</div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+          <Spinner size={48} label="Loading anomalies..." />
+        </div>
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
