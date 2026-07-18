@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { fetchAnomalies } from '../api/anomalies';
-import { ShieldAlert, RefreshCw, Info, AlertTriangle, AlertOctagon } from 'lucide-react';
+import React from 'react';
+import { useAnomalies } from '../hooks/useAnomalies';
+import { ShieldAlert, RefreshCw, Info, AlertOctagon } from 'lucide-react';
+import { ErrorBanner } from '../components/Banner/ErrorBanner';
+import { Spinner } from '../components/Spinner/Spinner';
 
 interface AnomalyItem {
   id: string;
@@ -12,72 +14,57 @@ interface AnomalyItem {
   severity: 'High' | 'Medium' | 'Low';
 }
 
+const MOCK_ANOMALIES: AnomalyItem[] = [
+  {
+    id: "ST-0812",
+    type: "Masking Pattern",
+    metric: "Stress (8/10) vs Sentiment (+0.65)",
+    value: "Dissonant Feedback",
+    confidence: "94%",
+    description: "Student reports extreme subjective stress but feedback text compound sentiment is highly positive. Suggests defensive mask and potential burnout concealment.",
+    severity: "High"
+  },
+  {
+    id: "ST-0931",
+    type: "Sleep Deprivation Extreme",
+    metric: "Sleep Hours (3.5h / night)",
+    value: "Outlier Sleep Duration",
+    confidence: "88%",
+    description: "Sleep duration is below 3 standard deviations from cohort mean. Study hours remain high (9.5h), indicating high critical exhaustion risk.",
+    severity: "High"
+  },
+  {
+    id: "ST-0245",
+    type: "Telemetry Dissonance",
+    metric: "Stress (2/10) vs Burnout Score (74/100)",
+    value: "Inconsistent Telemetry",
+    confidence: "75%",
+    description: "Low subjective stress reported but calculated ML burnout score is extremely elevated. Subject may be in cognitive denial or misinterpreting the survey parameters.",
+    severity: "Medium"
+  },
+  {
+    id: "ST-0477",
+    type: "Chronic Study Load",
+    metric: "Study Hours (13.5h / day)",
+    value: "Workload Outlier",
+    confidence: "91%",
+    description: "Workload exceeds study recommendations by 2.2x. Burnout scores are rising steadily over the last three weekly logs.",
+    severity: "Medium"
+  }
+];
+
 const Anomalies: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [anomalies, setAnomalies] = useState<AnomalyItem[]>([]);
-
-  const loadData = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      // Call the typed API
-      const realData = await fetchAnomalies();
-      setAnomalies(realData as AnomalyItem[]);
-    } catch (err: any) {
-      setError('Backend API scanning not available. Using offline cache data.');
-      console.log('Using mockup anomalies fallback due to backend endpoint availability:', err);
-      setAnomalies([
-        {
-          id: "ST-0812",
-          type: "Masking Pattern",
-          metric: "Stress (8/10) vs Sentiment (+0.65)",
-          value: "Dissonant Feedback",
-          confidence: "94%",
-          description: "Student reports extreme subjective stress but feedback text compound sentiment is highly positive. Suggests defensive mask and potential burnout concealment.",
-          severity: "High",
-        },
-        {
-          id: "ST-0931",
-          type: "Sleep Deprivation Extreme",
-          metric: "Sleep Hours (3.5h / night)",
-          value: "Outlier Sleep Duration",
-          confidence: "88%",
-          description: "Sleep duration is below 3 standard deviations from cohort mean. Study hours remain high (9.5h), indicating high critical exhaustion risk.",
-          severity: "High",
-        },
-        {
-          id: "ST-0245",
-          type: "Telemetry Dissonance",
-          metric: "Stress (2/10) vs Burnout Score (74/100)",
-          value: "Inconsistent Telemetry",
-          confidence: "75%",
-          description: "Low subjective stress reported but calculated ML burnout score is extremely elevated. Subject may be in cognitive denial or misinterpreting the survey parameters.",
-          severity: "Medium",
-        },
-        {
-          id: "ST-0477",
-          type: "Chronic Study Load",
-          metric: "Study Hours (13.5h / day)",
-          value: "Workload Outlier",
-          confidence: "91%",
-          description: "Workload exceeds study recommendations by 2.2x. Burnout scores are rising steadily over the last three weekly logs.",
-          severity: "Medium",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  const { data: fetchedAnomalies, isLoading, isError, refetch, isFetching } = useAnomalies();
+  const loading = isLoading || isFetching;
+  const error = isError ? 'Backend API scanning not available. Using offline cache data.' : '';
+  const anomalies: AnomalyItem[] = isError
+    ? MOCK_ANOMALIES
+    : ((fetchedAnomalies as AnomalyItem[] | undefined) ?? []);
 
   return (
     <div className="anomalies-container">
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={loadData} className="btn btn-outline" disabled={loading}>
+        <button onClick={() => refetch()} className="btn btn-outline" disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : ""} size={16} /> Re-scan Database
         </button>
       </div>
@@ -97,14 +84,17 @@ const Anomalies: React.FC = () => {
       </div>
 
       {error && (
-        <div className="card flash-alert flash-warning" style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <AlertTriangle size={20} style={{ color: 'var(--warning)' }} />
-          <span>{error}</span>
-        </div>
+        <ErrorBanner
+          title="Scan Notice"
+          message={error}
+          variant="warning"
+        />
       )}
 
       {loading ? (
-        <div>Loading anomalies...</div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+          <Spinner size={48} label="Loading anomalies..." />
+        </div>
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>

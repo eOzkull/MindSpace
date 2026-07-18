@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { fetchRecommendations } from '../api/recommendations';
+import React, { useState, useEffect } from 'react';
+import { useInsights } from '../hooks/useInsights';
+import { ErrorBanner } from '../components/Banner/ErrorBanner';
+import { Spinner } from '../components/Spinner/Spinner';
 import { ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
 
 type RecommendationItem = {
@@ -55,32 +57,63 @@ const OFFLINE_FALLBACK: RecommendationItem[] = [
   },
 ];
 
+const MOCK_RECOMMENDATIONS: RecommendationItem[] = [
+  {
+    id: "REC-01",
+    title: "Workplace Substitution Restructuring",
+    category: "Policy / Scheduling",
+    impact: "High",
+    cohort: "High Risk Students (Sleep < 5h, Study > 9h)",
+    actionablePlan: "Establish a late-night assignment submission lock-out (e.g. no submissions accepted between 12:00 AM and 6:00 AM) to force physiological recovery and sleep.",
+    status: "Pending"
+  },
+  {
+    id: "REC-02",
+    title: "Mandatory Wellness Check-ins",
+    category: "Counseling Outreach",
+    impact: "High",
+    cohort: "Students self-reporting stress level 7 or higher",
+    actionablePlan: "Automatically schedule a 15-minute informal check-in with a peer mentor or mental health staff advisor within 48 hours of logging stress levels >= 7.",
+    status: "Active"
+  },
+  {
+    id: "REC-03",
+    title: "Dissonance & Masking Outreach Protocol",
+    category: "Alternative Assessment",
+    impact: "Medium",
+    cohort: "Students flagged with telemetry/sentiment anomalies",
+    actionablePlan: "Engage students using indirect wellness metrics. Do not confront with analytical risk indicators. Offer non-academic counseling workshops.",
+    status: "Pending"
+  },
+  {
+    id: "REC-04",
+    title: "Workload Adjustments and Extensions",
+    category: "Academic Support",
+    impact: "Medium",
+    cohort: "Medium Risk students showing increasing burnout index",
+    actionablePlan: "Recommend course load adjustments or automatic 2-day submission extensions on major assignments to provide brief intervals of relief.",
+    status: "Resolved"
+  }
+];
+
 const Recommendations: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+  const { data: insightsData, isLoading, isError, refetch, isFetching } = useInsights();
+  const loading = isLoading || isFetching;
+  const error = isError ? 'Could not connect to live recommendations API. Running in offline evaluation mode.' : '';
 
-  const loadData = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      await fetchRecommendations();
-      // NOTE: this page currently does not populate recommendations from the API response,
-      // but it should NOT overwrite successful backend state with mock data.
-      // If API starts returning data later, replace the fallback logic accordingly.
-    } catch (err: any) {
-      setError('Could not connect to live recommendations API. Running in offline evaluation mode.');
-      console.log('Using mockup recommendations fallback due to backend availability:', err);
-      setRecommendations(OFFLINE_FALLBACK);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>(MOCK_RECOMMENDATIONS);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (insightsData && Array.isArray(insightsData)) {
+      setRecommendations(insightsData as RecommendationItem[]);
+    }
+  }, [insightsData]);
+
+  useEffect(() => {
+    if (isError) {
+      setRecommendations(OFFLINE_FALLBACK);
+    }
+  }, [isError]);
 
   const handleToggleStatus = (id: string) => {
     setRecommendations((prev) =>
@@ -99,23 +132,23 @@ const Recommendations: React.FC = () => {
   return (
     <div className="recommendations-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
       <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={loadData} className="btn btn-outline" disabled={loading}>
-          <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Re-evaluate Recommendations
+        <button onClick={() => refetch()} className="btn btn-outline" disabled={loading}>
+          <RefreshCw className={loading ? "animate-spin" : ""} size={16} /> Re-evaluate Recommendations
         </button>
       </div>
 
       {error && (
-        <div
-          className="card flash-alert flash-warning"
-          style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <AlertCircle size={20} style={{ color: 'var(--warning)' }} />
-          <span>{error}</span>
-        </div>
+        <ErrorBanner
+          title="Connection Notice"
+          message={error}
+          variant="warning"
+        />
       )}
 
       {loading ? (
-        <div>Loading recommendations...</div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+          <Spinner size={48} label="Loading recommendations..." />
+        </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem' }}>
           {recommendations.map((item) => (

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchResults } from '../api/prediction';
+import { useResults } from '../hooks/usePrediction';
 import type { ResultsResponse } from '../types/prediction';
 import {
   AlertTriangle,
@@ -18,27 +18,13 @@ import {
 } from 'lucide-react';
 
 const Results: React.FC = () => {
-  const [data, setData] = useState<ResultsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data: response, isLoading: loading, isError } = useResults();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetchResults();
-        if (res.error) {
-          setError(res.error);
-        } else {
-          setData(res);
-        }
-      } catch (err) {
-        setError('Failed to load results.');
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const error = isError
+    ? 'Failed to load results.'
+    : (response?.error ?? '');
+  const data: ResultsResponse | null = response?.error ? null : (response ?? null);
 
   if (loading || !data) return <div>Loading...</div>;
   if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;

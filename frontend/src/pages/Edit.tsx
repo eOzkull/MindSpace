@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDashboard, updateData } from '../api/dashboard';
+import { useDashboard, useUpdateDashboard } from '../hooks/useDashboard';
 import type { DataRow } from '../types/dashboard';
 import type { UpdatePayload } from '../types/common';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
@@ -13,79 +13,58 @@ import {
 } from 'lucide-react';
 
 const Edit: React.FC = () => {
-  const [data, setData] = useState<DataRow[]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const { data: dashboard, isLoading: loading, error: queryError } = useDashboard();
+  const columns: string[] = dashboard?.columns ?? [];
+  const error = queryError ? (queryError as Error).message || 'Failed to load dataset.' : '';
+
+  const [editRows, setEditRows] = useState<DataRow[]>([]);
+  const [saveError, setSaveError] = useState('');
+  const updateMutation = useUpdateDashboard();
+  const saving = updateMutation.isPending;
   const navigate = useNavigate();
 
   useEffect(() => {
-  const load = async () => {
-    try {
-      const res = await fetchDashboard();
-
-      if (res.error) {
-        setError(res.error);
-      } else {
-        if (res.data) setData(res.data);
-        if (res.columns) setColumns(res.columns);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Failed to load dataset.');
-    } finally {
-      setLoading(false);
+    if (dashboard?.data) {
+      setEditRows(dashboard.data);
     }
-  };
-
-  load();
-}, []);
+  }, [dashboard?.data]);
 
   const handleAddRow = () => {
     const newRow = columns.reduce<DataRow>((acc, col) => ({ ...acc, [col]: '' }), {});
-    setData([...data, newRow]);
+    setEditRows([...editRows, newRow]);
   };
 
   const handleChange = (rowIndex: number, col: string, value: string) => {
-    const newData = [...data];
+    const newData = [...editRows];
     newData[rowIndex][col] = value;
-    setData(newData);
+    setEditRows(newData);
   };
 
   const handleSave = async () => {
-  setSaving(true);
-  setError('');
-
-  try {
+    setSaveError('');
     const updates: UpdatePayload[] = [];
-
-    data.forEach((row, rIdx) => {
-      columns.forEach((col) => {
+    editRows.forEach((row, rIdx) => {
+      columns.forEach(col => {
         if (row[col] !== undefined) {
-          updates.push({
-            row: rIdx,
-            col,
-            value: row[col],
-          });
+          updates.push({ row: rIdx, col, value: row[col] });
         }
       });
     });
-
-    const res = await updateData(updates);
-
-    if (res.success) {
-      navigate('/dashboard');
-    } else {
-      setError(res.error || 'Failed to save.');
-    }
-  } catch (err) {
-    console.error(err);
-    setError('Error saving data.');
-  } finally {
-    setSaving(false);
-  }
-};
+    
+    updateMutation.mutate(updates, {
+      onSuccess: (res) => {
+        if (res.success) {
+          navigate('/dashboard');
+        } else {
+          setSaveError(res.error || 'Failed to save.');
+        }
+      },
+      onError: (err) => {
+        console.error(err);
+        setSaveError('Error saving data.');
+      }
+    });
+  };
 
   if (loading || saving) {
     return (
@@ -100,17 +79,24 @@ const Edit: React.FC = () => {
   }
 
   if (error) {
-  return (
-    <ErrorBanner
-      title="Save Failed"
-      message={error}
-      variant="danger"
-    />
-  );
-}
+    return (
+      <ErrorBanner
+        title="Load Failed"
+        message={error}
+        variant="danger"
+      />
+    );
+  }
 
   return (
     <>
+      {saveError && (
+        <ErrorBanner
+          title="Save Failed"
+          message={saveError}
+          variant="danger"
+        />
+      )}
       <div className="top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '1.5rem' }}>
         <button onClick={handleSave} className="btn btn-primary">
           <Save size={16} /> Save & Analyze
@@ -139,7 +125,7 @@ const Edit: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((row, i) => (
+              {editRows.map((row, i) => (
                 <tr key={i}>
                   <td className="row-num" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{i + 1}</td>
                   {columns.map(col => (
