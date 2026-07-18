@@ -14,6 +14,8 @@ export interface UIState {
   isSidebarOpen: boolean;
   isGlobalLoading: boolean;
   loadingMessage: string;
+  dashboardCurrentPage: number;
+  dashboardExpanded: boolean;
 }
 
 export interface UIActions {
@@ -26,6 +28,8 @@ export interface UIActions {
   toggleSidebar: () => void;
   setGlobalLoading: (loading: boolean, message?: string) => void;
   resetUIFilters: () => void;
+  setDashboardCurrentPage: (page: number) => void;
+  setDashboardExpanded: (expanded: boolean) => void;
 }
 
 
@@ -62,6 +66,8 @@ const DEFAULT_UI: UIState = {
   isSidebarOpen: false,
   isGlobalLoading: false,
   loadingMessage: '',
+  dashboardCurrentPage: 1,
+  dashboardExpanded: false,
 };
 
 const DEFAULT_SELECTION: SelectionState = {
@@ -129,6 +135,12 @@ export const useAppStore = create<AppStore>()(
           false,
           'ui/resetUIFilters',
         ),
+
+      setDashboardCurrentPage: (page) =>
+        set({ dashboardCurrentPage: page }, false, 'ui/setDashboardCurrentPage'),
+
+      setDashboardExpanded: (expanded) =>
+        set({ dashboardExpanded: expanded }, false, 'ui/setDashboardExpanded'),
 
       ...DEFAULT_SELECTION,
 
@@ -222,6 +234,8 @@ export const selectIsSidebarOpen = (s: AppStore): boolean => s.isSidebarOpen;
 export const selectIsGlobalLoading = (s: AppStore): boolean =>
   s.isGlobalLoading;
 export const selectLoadingMessage = (s: AppStore): string => s.loadingMessage;
+export const selectDashboardCurrentPage = (s: AppStore): number => s.dashboardCurrentPage;
+export const selectDashboardExpanded = (s: AppStore): boolean => s.dashboardExpanded;
 
 // Selection selectors
 export const selectSelectedDataset = (s: AppStore): DatasetTarget =>
@@ -257,6 +271,10 @@ export const appActions = {
   setGlobalLoading: (loading: boolean, message?: string) =>
     useAppStore.getState().setGlobalLoading(loading, message),
   resetUIFilters: () => useAppStore.getState().resetUIFilters(),
+  setDashboardCurrentPage: (page: number) =>
+    useAppStore.getState().setDashboardCurrentPage(page),
+  setDashboardExpanded: (expanded: boolean) =>
+    useAppStore.getState().setDashboardExpanded(expanded),
 
   // Selection
   setSelectedDataset: (dataset: DatasetTarget) =>

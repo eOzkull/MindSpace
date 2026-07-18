@@ -1,5 +1,4 @@
-import os
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 import pandas as pd
 import state
 from services.data_processing_service import process_data
@@ -50,13 +49,12 @@ def edit():
         except Exception as e:
             logger.error(f"Error updating row {row} col {col}: {e}")
 
-    plot_dir = os.path.join(current_app.static_folder, 'plots')
-    df, corr_matrix = process_data(df, plot_dir, state.get_sia())
+    df, corr_matrix = process_data(df, state.get_sia())
     
     state.data_df = df
     state.corr_matrix = corr_matrix
 
-    metrics = _auto_train(state.data_df, plot_dir, 'primary')
+    metrics = _auto_train(state.data_df, 'primary')
     if metrics:
         em = state.eval_metrics
         em['primary'] = metrics

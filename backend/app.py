@@ -1,10 +1,5 @@
 import os
 import sys
-import shutil
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-plt.style.use('ggplot')
 
 # Fix module resolution (sys.path) so local imports work in Vercel Serverless environment
 backend_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +13,7 @@ local_nltk_path = os.path.join(root_dir, 'nltk_data')
 if local_nltk_path not in nltk.data.path:
     nltk.data.path.append(local_nltk_path)
 
-from flask import Flask, send_from_directory
+from flask import Flask
 from flask_cors import CORS
 
 from config import Config
@@ -53,25 +48,6 @@ def create_app(config_class=Config):
 
     # Register exception and error handling middleware
     register_error_handlers(app)
-
-    # Handle temporary plot directory (production uses /tmp due to serverless read-only disk)
-    is_prod = config_class.FLASK_ENV == 'production'
-    if is_prod:
-        plot_dir = '/tmp/plots'
-        # Serve plots from /tmp in production environment
-        @app.route('/static/plots/<path:filename>')
-        def serve_plots(filename):
-            return send_from_directory('/tmp/plots', filename)
-    else:
-        plot_dir = os.path.join(app.static_folder, 'plots')
-
-    # Recreate plots directory safely on startup
-    if os.path.exists(plot_dir):
-        try:
-            shutil.rmtree(plot_dir)
-        except Exception as e:
-            logger.warning(f"Could not clear plot directory: {e}")
-    os.makedirs(plot_dir, exist_ok=True)
 
     # Register route blueprints
     app.register_blueprint(history_bp)

@@ -1,18 +1,14 @@
-import os
-from flask import Blueprint, request, jsonify, session, current_app
-from werkzeug.utils import secure_filename
+import numpy as np
+from flask import Blueprint, request, jsonify, session
 import pandas as pd
 import state
 from services.ml_service import _auto_train
 from services.analytics_service import _build_stats
-from services.visualisation_service import _generate_compare_plots
 from services.burnout_service import calculate_burnout, assign_risk, calculate_sentiment
-from services.file_service import get_static_url
 from utils.validators import validate_csv
 from utils.csv_normalize import normalize_dataframe
 
 compare_bp = Blueprint('compare', __name__)
-
 
 @compare_bp.route('/api/compare', methods=['GET'])
 def compare_status():
@@ -21,7 +17,6 @@ def compare_status():
         'compare_loaded': state.compare_df is not None,
         'compare_meta':   state.compare_meta,
     })
-
 
 @compare_bp.route('/api/compare/upload', methods=['POST'])
 def compare_upload():
@@ -35,7 +30,7 @@ def compare_upload():
         return jsonify({'error': 'Invalid file format. Only .csv files are supported.'}), 400
 
     try:
-        safe_filename = secure_filename(file.filename) or 'compare.csv'
+        safe_filename = secure_filename_filename(file.filename)
         cdf = pd.read_csv(file)
 
         is_valid, error_msg = validate_csv(cdf)
@@ -51,8 +46,7 @@ def compare_upload():
         state.compare_df = cdf
         state.compare_meta = {'filename': safe_filename, 'records': len(cdf)}
 
-        plot_dir = os.path.join(current_app.static_folder, 'plots')
-        metrics = _auto_train(cdf, plot_dir, 'compare')
+        metrics = _auto_train(cdf, 'compare')
         if metrics:
             em = state.eval_metrics
             em['compare'] = metrics
@@ -66,6 +60,9 @@ def compare_upload():
     except Exception as e:
         return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
 
+def secure_filename_filename(filename):
+    from werkzeug.utils import secure_filename
+    return secure_filename(filename) or 'compare.csv'
 
 @compare_bp.route('/api/compare/results', methods=['GET'])
 def compare_results():
@@ -86,9 +83,6 @@ def compare_results():
     stats_a = _build_stats(data_df.copy(), sia)
     stats_b = _build_stats(compare_df.copy(), sia)
 
-    plot_dir = os.path.join(current_app.static_folder, 'plots')
-    _generate_compare_plots(stats_a, stats_b, label_a, label_b, plot_dir)
-
     def _strip(s):
         return {k: v for k, v in s.items() if k != '_df'}
 
@@ -106,21 +100,25 @@ def compare_results():
         'avg_sentiment': _delta(stats_a['avg_sentiment'], stats_b['avg_sentiment']),
     }
 
+    cols_to_send = ['burnout_score', 'sentiment_score', 'risk', 'sleep_hours', 'study_hours', 'stress_level']
+    available_a = [c for c in cols_to_send if c in data_df.columns]
+    available_b = [c for c in cols_to_send if c in compare_df.columns]
+
+    safe_a = data_df[available_a].replace({np.nan: None})
+    safe_b = compare_df[available_b].replace({np.nan: None})
+
+    data_a = safe_a.to_dict('records')
+    data_b = safe_b.to_dict('records')
+
     return jsonify({
         'label_a': label_a,
         'label_b': label_b,
         'stats_a': _strip(stats_a),
         'stats_b': _strip(stats_b),
         'deltas':  deltas,
-        'plots': {
-            'cmp_burnout_hist': get_static_url('cmp_burnout_hist.png'),
-            'cmp_risk_bar':     get_static_url('cmp_risk_bar.png'),
-            'cmp_features':     get_static_url('cmp_features.png'),
-            'cmp_boxplot':      get_static_url('cmp_boxplot.png'),
-            'cmp_sentiment':    get_static_url('cmp_sentiment.png'),
-        }
+        'data_a':  data_a,
+        'data_b':  data_b
     })
-
 
 @compare_bp.route('/api/compare/clear', methods=['POST'])
 def compare_clear():
@@ -130,4 +128,3 @@ def compare_clear():
     em['compare'] = None
     state.eval_metrics = em
     return jsonify({'success': True})
-

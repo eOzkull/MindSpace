@@ -1,5 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useDashboard } from '../hooks/useDashboard';
+import DataTable from '../components/tables/DataTable';
+import LoadingScreen from '../components/LoadingScreen';
+import { InsightCard } from '../components/cards';
+import {
+  CompareBurnoutHistChart,
+  CompareRiskBarChart,
+  CompareFeaturesChart,
+  CompareBoxChart,
+  CompareSentimentHistChart,
+} from '../components/charts';
 import {
   useCompareStatus,
   useCompareResults,
@@ -12,7 +23,6 @@ import {
   Upload,
   CheckCircle2,
   Files,
-  Lightbulb,
   RotateCw,
   Circle,
   ArrowLeftRight,
@@ -27,25 +37,20 @@ import {
   BarChart3,
   SlidersHorizontal,
   MessageSquare,
-  HelpCircle,
 } from 'lucide-react';
 
-const getLucideIcon = (name: string) => {
-  switch (name) {
-    case 'ph-waves':
-      return Waves;
-    case 'ph-chart-polar':
-      return BarChart3;
-    case 'ph-sliders-horizontal':
-      return SlidersHorizontal;
-    case 'ph-chat-teardrop-text':
-      return MessageSquare;
-    default:
-      return HelpCircle;
-  }
-};
+
 
 const Compare = () => {
+  const [searchParams] = useSearchParams();
+  const studentsParam = searchParams.get('students');
+
+  // React Query hooks called unconditionally at the top level
+  const {
+    data: dashboard,
+    isLoading: loadingDashboard,
+  } = useDashboard();
+
   const {
     data: status,
     isLoading: loadingStatus,
@@ -65,6 +70,40 @@ const Compare = () => {
       refetchResults();
     }
   }, [status?.compare_loaded, refetchResults]);
+
+  // Parse student identifiers (e.g. ST-1,ST-3) to original row indices (0-based)
+  const selectedIndices = React.useMemo(() => {
+    if (!studentsParam) return [];
+    return studentsParam.split(',')
+      .map(id => {
+        const match = id.match(/ST-(\d+)/i);
+        return match ? parseInt(match[1]) - 1 : -1;
+      })
+      .filter(idx => idx >= 0);
+  }, [studentsParam]);
+
+  const selectedStudents = React.useMemo(() => {
+    if (!dashboard?.data || selectedIndices.length === 0) return [];
+    return selectedIndices
+      .map(idx => dashboard.data![idx])
+      .filter(Boolean);
+  }, [dashboard?.data, selectedIndices]);
+
+  const isStudentCompareMode = selectedIndices.length >= 2;
+
+  const renderDeltaBadge = (value: number, baselineValue: number, isLowerBetter: boolean, unit: string = '') => {
+    const delta = value - baselineValue;
+    if (delta === 0) return null;
+    const isGood = isLowerBetter ? delta < 0 : delta > 0;
+    const sign = delta > 0 ? '+' : '';
+    const badgeClass = isGood ? 'badge-low' : 'badge-high';
+    return (
+      <span className={`badge ${badgeClass}`} style={{ marginLeft: '8px', fontSize: '0.75rem', padding: '2px 6px', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+        {sign}{delta.toFixed(1)}{unit}
+        {delta > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+      </span>
+    );
+  };
 
   const uploadMutation = useUploadCompareFile();
   const clearMutation = useClearCompare();
@@ -158,44 +197,220 @@ const Compare = () => {
 
   if (!results) return <div className="card" style={{ maxWidth: 680, margin: '0 auto', padding: '2rem', textAlign: 'center' }}>Loading results...</div>;
 
-  const { label_a, label_b, stats_a, stats_b, deltas, plots } = results;
+  const { label_a, label_b, stats_a, stats_b, deltas, data_a, data_b } = results;
 
-  interface CmpChartProps {
-    icon: string;
-    title: string;
-    desc: string;
-    insight: string;
-    img_url: string;
-    reverse?: boolean;
-  }
 
-  const CmpChart = ({ icon, title, desc, insight, img_url, reverse = false }: CmpChartProps) => {
-    const IconComponent = getLucideIcon(icon);
-    return (
-      <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
-        <div className="insight-text-col">
-          <h3 className="insight-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <IconComponent size={24} style={{ color: 'var(--brand-primary)' }} /> {title}
-          </h3>
-          <p className="insight-desc">{desc}</p>
-          <div className="takeaway-box">
-            <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Lightbulb size={16} /> What to look for
-            </strong>
-            <p style={{ marginTop: '6px' }}>{insight}</p>
-          </div>
+
+  if (isStudentCompareMode) {
+    if (loadingDashboard || !dashboard) {
+      return <LoadingScreen message="Loading Student Records..." subtitle="Retrieving student parameters and assembling side-by-side metrics." />;
+    }
+
+    if (selectedStudents.length === 0) {
+      return (
+        <div className="card" style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center', padding: '2.5rem' }}>
+          <h3 style={{ marginBottom: '0.75rem', color: 'var(--danger)' }}>No students found</h3>
+          <p className="insight-desc" style={{ marginBottom: '1.5rem' }}>
+            The selected student identifiers are invalid or could not be found in the current dataset.
+          </p>
+          <Link to="/dashboard" className="btn btn-primary">
+            Back to Dashboard
+          </Link>
         </div>
-        <div className="insight-visual-col">
-          <img
-            src={img_url}
-            alt={title}
-            loading="lazy"
-            style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', background: 'var(--input-bg)' }}
+      );
+    }
+
+    return (
+      <div className="compare-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-start' }}>
+          <Link to="/dashboard" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            &larr; Back to Dashboard
+          </Link>
+        </div>
+
+        <div className="card" style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.5rem', fontWeight: 700 }}>
+            <Scale size={24} style={{ color: 'var(--brand-primary)' }} /> Student Comparison
+          </h2>
+          <p className="insight-desc" style={{ margin: 0 }}>
+            Side-by-side clinical breakdown of {selectedStudents.length} selected students. All metrics on subsequent cards are compared to the first selected student (<strong>ST-{selectedIndices[0] + 1}</strong>) as a baseline.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(280px, 1fr))`, gap: '1.5rem', marginBottom: '2.5rem' }}>
+          {selectedStudents.map((student, idx) => {
+            const studentId = `ST-${selectedIndices[idx] + 1}`;
+            const isBaseline = idx === 0;
+            const baseline = selectedStudents[0];
+            
+            const sleep = Number(student.sleep_hours) || 0;
+            const study = Number(student.study_hours) || 0;
+            const stress = Number(student.stress_level) || 0;
+            const burnout = Number(student.burnout_score) || 0;
+            const sentiment = Number(student.sentiment_score) || 0;
+            const risk = String(student.risk || 'Low');
+
+            const baseSleep = Number(baseline.sleep_hours) || 0;
+            const baseStudy = Number(baseline.study_hours) || 0;
+            const baseStress = Number(baseline.stress_level) || 0;
+            const baseBurnout = Number(baseline.burnout_score) || 0;
+            const baseSentiment = Number(baseline.sentiment_score) || 0;
+
+            return (
+              <div key={studentId} className="card" style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                border: `2px solid var(--${risk.toLowerCase()})`,
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem' }}>
+                      {studentId} {isBaseline && <span className="badge badge-low" style={{ fontSize: '0.7rem', padding: '2px 8px', background: 'rgba(40, 199, 111, 0.1)', color: 'var(--success)' }}>Baseline</span>}
+                    </h3>
+                    <span className={`badge badge-${risk.toLowerCase()}`}>
+                      {risk} Risk
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Burnout Index</span>
+                      <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center' }}>
+                        {burnout.toFixed(0)}/100
+                        {!isBaseline && renderDeltaBadge(burnout, baseBurnout, true)}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Sleep Hours</span>
+                      <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                        {sleep.toFixed(1)} hrs
+                        {!isBaseline && renderDeltaBadge(sleep, baseSleep, false, 'h')}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Study Hours</span>
+                      <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                        {study.toFixed(1)} hrs
+                        {!isBaseline && renderDeltaBadge(study, baseStudy, true, 'h')}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Stress Level</span>
+                      <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                        {stress}/10
+                        {!isBaseline && renderDeltaBadge(stress, baseStress, true)}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Sentiment Score</span>
+                      <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                        {sentiment.toFixed(3)}
+                        {!isBaseline && renderDeltaBadge(sentiment, baseSentiment, false)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {student.feedback && (
+                    <div className="takeaway-box" style={{ background: 'var(--input-bg)', borderLeftColor: `var(--${risk.toLowerCase()})`, margin: '1rem 0 0 0' }}>
+                      <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                        <MessageSquare size={14} /> Qualitative Comment
+                      </strong>
+                      <p style={{ marginTop: '4px', fontSize: '0.85rem', fontStyle: 'italic', lineHeight: 1.4, margin: '4px 0 0 0' }}>
+                        "{student.feedback}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="card" style={{ marginBottom: '2.5rem', padding: 0, overflow: 'hidden' }}>
+          <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+            <ListOrdered size={20} /> Metric Comparison Grid
+          </h3>
+          <DataTable
+            columns={[
+              { key: 'metric', header: 'Metric', width: '25%', style: { fontWeight: 600 } },
+              ...selectedStudents.map((_, i) => ({
+                key: `student_${i}`,
+                header: `ST-${selectedIndices[i] + 1}`,
+                width: `${75 / selectedStudents.length}%`,
+                style: { textAlign: 'center' as const },
+                headerStyle: { textAlign: 'center' as const }
+              }))
+            ]}
+            data={[
+              {
+                metric: 'Burnout Score',
+                ...selectedStudents.reduce((acc, s, i) => {
+                  acc[`student_${i}`] = (
+                    <span>
+                      {Number(s.burnout_score).toFixed(0)}
+                      {i > 0 && renderDeltaBadge(Number(s.burnout_score), Number(selectedStudents[0].burnout_score), true)}
+                    </span>
+                  );
+                  return acc;
+                }, {} as any)
+              },
+              {
+                metric: 'Sleep Hours',
+                ...selectedStudents.reduce((acc, s, i) => {
+                  acc[`student_${i}`] = (
+                    <span>
+                      {Number(s.sleep_hours).toFixed(1)}h
+                      {i > 0 && renderDeltaBadge(Number(s.sleep_hours), Number(selectedStudents[0].sleep_hours), false, 'h')}
+                    </span>
+                  );
+                  return acc;
+                }, {} as any)
+              },
+              {
+                metric: 'Study Hours',
+                ...selectedStudents.reduce((acc, s, i) => {
+                  acc[`student_${i}`] = (
+                    <span>
+                      {Number(s.study_hours).toFixed(1)}h
+                      {i > 0 && renderDeltaBadge(Number(s.study_hours), Number(selectedStudents[0].study_hours), true, 'h')}
+                    </span>
+                  );
+                  return acc;
+                }, {} as any)
+              },
+              {
+                metric: 'Stress Level',
+                ...selectedStudents.reduce((acc, s, i) => {
+                  acc[`student_${i}`] = (
+                    <span>
+                      {s.stress_level}/10
+                      {i > 0 && renderDeltaBadge(Number(s.stress_level), Number(selectedStudents[0].stress_level), true)}
+                    </span>
+                  );
+                  return acc;
+                }, {} as any)
+              },
+              {
+                metric: 'Sentiment Score',
+                ...selectedStudents.reduce((acc, s, i) => {
+                  acc[`student_${i}`] = (
+                    <span>
+                      {Number(s.sentiment_score).toFixed(3)}
+                      {i > 0 && renderDeltaBadge(Number(s.sentiment_score), Number(selectedStudents[0].sentiment_score), false)}
+                    </span>
+                  );
+                  return acc;
+                }, {} as any)
+              }
+            ]}
           />
         </div>
       </div>
     );
-  };
+  }
 
   return (
     <>
@@ -227,95 +442,69 @@ const Compare = () => {
       </div>
 
       <div className="card" style={{ marginBottom: '2rem', padding: 0, overflow: 'hidden' }}>
-        <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
           <ListOrdered size={20} /> Metric-by-Metric Summary
         </h3>
-        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ whiteSpace: 'nowrap', width: '15%' }}>Metric</th>
-                <th
-                  style={{
-                    color: 'var(--info)',
-                    width: '12%',
-                    maxWidth: '150px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                  title={label_a}
-                >
-                  {label_a}
-                </th>
-                <th
-                  style={{
-                    color: 'var(--warning)',
-                    width: '12%',
-                    maxWidth: '150px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                  title={label_b}
-                >
-                  {label_b}
-                </th>
-                <th style={{ width: '18%' }}>Δ Change</th>
-                <th style={{ width: '43%' }}>Interpretation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { label: 'Avg Burnout Score', va: stats_a.avg_burnout, vb: stats_b.avg_burnout, d: deltas.avg_burnout, unit: '/100', lower: true, note: 'Lower is healthier — fewer students are overloaded.' },
-                { label: 'High-Risk %', va: stats_a.pct_high, vb: stats_b.pct_high, d: deltas.pct_high, unit: '%', lower: true, note: 'The proportion requiring urgent support.' },
-                { label: 'Avg Stress Level', va: stats_a.avg_stress, vb: stats_b.avg_stress, d: deltas.avg_stress, unit: '/10', lower: true, note: 'Lower stress means a healthier learning environment.' },
-                { label: 'Avg Study Hours', va: stats_a.avg_study, vb: stats_b.avg_study, d: deltas.avg_study, unit: 'h', lower: true, note: 'More study hours often correlates with higher burnout.' },
-                { label: 'Avg Sleep Hours', va: stats_a.avg_sleep, vb: stats_b.avg_sleep, d: deltas.avg_sleep, unit: 'h', lower: false, note: 'More sleep is protective; below 6h is a risk threshold.' },
-                { label: 'Avg Sentiment', va: stats_a.avg_sentiment, vb: stats_b.avg_sentiment, d: deltas.avg_sentiment, unit: '', lower: false, note: 'Closer to +1 = more positive student feedback tone.' },
-              ].map((row) => {
-                const positive = row.d !== null && row.d > 0;
-                const negative = row.d !== null && row.d < 0;
-                const neutral = row.d === 0;
-                const good = row.lower ? negative : positive;
+        <DataTable
+          columns={[
+            { key: 'label', header: 'Metric', width: '15%', style: { fontWeight: 600 } },
+            {
+              key: 'va',
+              header: label_a,
+              width: '12%',
+              headerStyle: { color: 'var(--info)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+              style: { color: 'var(--info)', fontWeight: 500 },
+              render: (v, r) => `${v}${r.unit}`
+            },
+            {
+              key: 'vb',
+              header: label_b,
+              width: '12%',
+              headerStyle: { color: 'var(--warning)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+              style: { color: 'var(--warning)', fontWeight: 500 },
+              render: (v, r) => `${v}${r.unit}`
+            },
+            {
+              key: 'd',
+              header: 'Δ Change',
+              width: '18%',
+              render: (d, r) => {
+                if (d === null) return <span className="stat-sub">—</span>;
+                if (d === 0) {
+                  return (
+                    <span className="badge" style={{ background: 'var(--input-bg)', color: 'var(--text-secondary)' }}>
+                      = flat
+                    </span>
+                  );
+                }
+                const positive = d > 0;
+                const good = r.lower ? d < 0 : positive;
                 return (
-                  <tr key={row.label}>
-                    <td>
-                      <strong>{row.label}</strong>
-                    </td>
-                    <td style={{ color: 'var(--info)', fontWeight: 500 }}>
-                      {row.va}
-                      {row.unit}
-                    </td>
-                    <td style={{ color: 'var(--warning)', fontWeight: 500 }}>
-                      {row.vb}
-                      {row.unit}
-                    </td>
-                    <td>
-                      {row.d === null ? (
-                        <span className="stat-sub">—</span>
-                      ) : neutral ? (
-                        <span className="badge" style={{ background: 'var(--input-bg)', color: 'var(--text-secondary)' }}>
-                          = flat
-                        </span>
-                      ) : (
-                        <span className={`badge ${good ? 'badge-low' : 'badge-high'}`}>
-                          {positive ? '+' : ''}
-                          {row.d}
-                          {row.unit}{' '}
-                          {positive ? <TrendingUp size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /> : <TrendingDown size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />}
-                        </span>
-                      )}
-                    </td>
-                    <td className="insight-desc" style={{ fontSize: '0.85rem', margin: 0 }}>
-                      {row.note}
-                    </td>
-                  </tr>
+                  <span className={`badge ${good ? 'badge-low' : 'badge-high'}`}>
+                    {positive ? '+' : ''}
+                    {d}
+                    {r.unit}{' '}
+                    {positive ? <TrendingUp size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /> : <TrendingDown size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />}
+                  </span>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              }
+            },
+            {
+              key: 'note',
+              header: 'Interpretation',
+              width: '43%',
+              cellStyle: { fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }
+            }
+          ]}
+          data={[
+            { label: 'Avg Burnout Score', va: stats_a.avg_burnout, vb: stats_b.avg_burnout, d: deltas.avg_burnout, unit: '/100', lower: true, note: 'Lower is healthier — fewer students are overloaded.' },
+            { label: 'High-Risk %', va: stats_a.pct_high, vb: stats_b.pct_high, d: deltas.pct_high, unit: '%', lower: true, note: 'The proportion requiring urgent support.' },
+            { label: 'Avg Stress Level', va: stats_a.avg_stress, vb: stats_b.avg_stress, d: deltas.avg_stress, unit: '/10', lower: true, note: 'Lower stress means a healthier learning environment.' },
+            { label: 'Avg Study Hours', va: stats_a.avg_study, vb: stats_b.avg_study, d: deltas.avg_study, unit: 'h', lower: true, note: 'More study hours often correlates with higher burnout.' },
+            { label: 'Avg Sleep Hours', va: stats_a.avg_sleep, vb: stats_b.avg_sleep, d: deltas.avg_sleep, unit: 'h', lower: false, note: 'More sleep is protective; below 6h is a risk threshold.' },
+            { label: 'Avg Sentiment', va: stats_a.avg_sentiment, vb: stats_b.avg_sentiment, d: deltas.avg_sentiment, unit: '', lower: false, note: 'Closer to +1 = more positive student feedback tone.' },
+          ]}
+        />
       </div>
 
       <div className="card" style={{ marginBottom: '2rem' }}>
@@ -376,11 +565,7 @@ const Compare = () => {
             </div>
           </div>
           <div>
-            <img
-              src={plots.cmp_risk_bar}
-              alt="Risk bar comparison"
-              style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', background: 'var(--input-bg)' }}
-            />
+            <CompareRiskBarChart statsA={stats_a} statsB={stats_b} labelA={label_a} labelB={label_b} />
           </div>
         </div>
       </div>
@@ -389,36 +574,44 @@ const Compare = () => {
         <Presentation size={24} /> Visual Comparisons
       </h2>
 
-      <CmpChart
-        icon="ph-waves"
+      <InsightCard
+        icon={Waves}
         title="Burnout Score Distributions — Overlaid"
         desc={`Both datasets overlaid on the same axis. Blue = ${label_a}, Orange = ${label_b}.`}
-        insight="If the orange waveform is shifted right of blue, Dataset B has structurally higher burnout. Overlap in the middle means similar distributions."
-        img_url={plots.cmp_burnout_hist}
-      />
-      <CmpChart
-        icon="ph-chart-polar"
+        takeawayLabel="What to look for"
+        takeaway="If the orange waveform is shifted right of blue, Dataset B has structurally higher burnout. Overlap in the middle means similar distributions."
+      >
+        <CompareBurnoutHistChart dataA={data_a} dataB={data_b} labelA={label_a} labelB={label_b} />
+      </InsightCard>
+      <InsightCard
+        icon={BarChart3}
         title="Burnout Spread — Box Plot"
         desc="Median, interquartile range, and outliers for each dataset's burnout scores."
-        insight="A higher median line means one cohort is systematically more burned out. Wide boxes mean inconsistent experiences across students — some doing fine, others struggling. Narrow boxes indicate a more uniform experience."
-        img_url={plots.cmp_boxplot}
+        takeawayLabel="What to look for"
+        takeaway="A higher median line means one cohort is systematically more burned out. Wide boxes mean inconsistent experiences across students — some doing fine, others struggling. Narrow boxes indicate a more uniform experience."
         reverse
-      />
-      <CmpChart
-        icon="ph-sliders-horizontal"
+      >
+        <CompareBoxChart dataA={data_a} dataB={data_b} labelA={label_a} labelB={label_b} />
+      </InsightCard>
+      <InsightCard
+        icon={SlidersHorizontal}
         title="Feature Averages — Scaled Side by Side"
         desc="Sleep, Study, Stress, and Burnout averages for each dataset, normalised to a 0–1 scale for fair comparison. Raw values annotated above bars."
-        insight="Look for the dataset that has lower sleep AND higher stress — that combination predicts the worst burnout outcomes. A dataset leading on both is the higher-priority group for intervention."
-        img_url={plots.cmp_features}
-      />
-      <CmpChart
-        icon="ph-chat-teardrop-text"
+        takeawayLabel="What to look for"
+        takeaway="Look for the dataset that has lower sleep AND higher stress — that combination predicts the worst burnout outcomes. A dataset leading on both is the higher-priority group for intervention."
+      >
+        <CompareFeaturesChart statsA={stats_a} statsB={stats_b} labelA={label_a} labelB={label_b} />
+      </InsightCard>
+      <InsightCard
+        icon={MessageSquare}
         title="Sentiment Score Distributions — Overlaid"
         desc="VADER compound scores from student feedback text. Scores run from -1 (very negative) to +1 (very positive)."
-        insight="If the distributions look similar despite very different burnout scores, students may not be reporting distress in their language — watch for silent high-burnout groups. A left-shifted distribution with low burnout might indicate external pressures beyond academic load."
-        img_url={plots.cmp_sentiment}
+        takeawayLabel="What to look for"
+        takeaway="If the distributions look similar despite very different burnout scores, students may not be reporting distress in their language — watch for silent high-burnout groups. A left-shifted distribution with low burnout might indicate external pressures beyond academic load."
         reverse
-      />
+      >
+        <CompareSentimentHistChart dataA={data_a} dataB={data_b} labelA={label_a} labelB={label_b} />
+      </InsightCard>
 
       <div className="card" style={{ marginBottom: '2rem', border: '2px solid var(--brand-primary)', background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, transparent 100%)' }}>
         <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--brand-primary)' }}>

@@ -11,3 +11,9 @@ export * from './StressSleepChart';
 export * from './SentimentDistChart';
 export * from './SentimentBurnoutChart';
 export * from './BurnoutBoxChart';
+export * from './CompareBurnoutHistChart';
+export * from './CompareRiskBarChart';
+export * from './CompareFeaturesChart';
+export * from './CompareBoxChart';
+export * from './CompareSentimentHistChart';
+

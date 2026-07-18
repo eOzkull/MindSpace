@@ -1,6 +1,5 @@
-import os
 from datetime import datetime
-from flask import Blueprint, request, jsonify, session, current_app
+from flask import Blueprint, request, jsonify, session
 from werkzeug.utils import secure_filename
 import pandas as pd
 import state
@@ -38,10 +37,9 @@ def upload():
             session['history'] = history[:10]
             session.modified = True
 
-            plot_dir = os.path.join(current_app.static_folder, 'plots')
-            state.data_df, state.corr_matrix = process_data(state.data_df, plot_dir, state.get_sia())
+            state.data_df, state.corr_matrix = process_data(state.data_df, state.get_sia())
 
-            metrics = _auto_train(state.data_df, plot_dir, 'primary')
+            metrics = _auto_train(state.data_df, 'primary')
             if metrics:
                 em = state.eval_metrics
                 em['primary'] = metrics
