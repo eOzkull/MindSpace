@@ -17,10 +17,6 @@ interface SentimentBurnoutChartProps {
   height?: number;
 }
 
-/**
- * Sentiment Score vs Burnout Score scatter chart (coloured by risk tier).
- * Replaces the backend matplotlib scatter (sentiment_vs_burnout.png).
- */
 export const SentimentBurnoutChart: React.FC<SentimentBurnoutChartProps> = ({ data, height = 320 }) => {
   const chartData = useMemo(() => {
     return data
@@ -64,8 +60,8 @@ export const SentimentBurnoutChart: React.FC<SentimentBurnoutChartProps> = ({ da
                   d.risk === 'High'
                     ? CHART_COLORS.danger
                     : d.risk === 'Medium'
-                    ? CHART_COLORS.info
-                    : CHART_COLORS.success;
+                      ? CHART_COLORS.info
+                      : CHART_COLORS.success;
                 return (
                   <div className="custom-chart-tooltip">
                     <div className="custom-chart-tooltip-title">Student</div>
@@ -113,8 +109,8 @@ export const SentimentBurnoutChart: React.FC<SentimentBurnoutChartProps> = ({ da
                 entry.risk === 'High'
                   ? CHART_COLORS.danger
                   : entry.risk === 'Medium'
-                  ? CHART_COLORS.info
-                  : CHART_COLORS.success;
+                    ? CHART_COLORS.info
+                    : CHART_COLORS.success;
               return <Cell key={`c-${i}`} fill={fill} />;
             })}
           </Scatter>

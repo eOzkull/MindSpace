@@ -22,7 +22,7 @@ export const SleepScatterChart: React.FC<SleepScatterChartProps> = ({ data }) =>
       const sleep = Number(row.sleep_hours);
       const burnout = Number(row.burnout_score);
       const risk = String(row.risk || 'Low');
-      
+
       let color: string = CHART_COLORS.success;
       if (risk === 'Medium') color = CHART_COLORS.info;
       else if (risk === 'High') color = CHART_COLORS.danger;

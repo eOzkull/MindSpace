@@ -11,6 +11,7 @@ import {
   Table,
   PlusCircle
 } from 'lucide-react';
+import DataTable from '../components/tables/DataTable';
 
 const Edit: React.FC = () => {
   const { data: dashboard, isLoading: loading, error: queryError } = useDashboard();
@@ -39,6 +40,23 @@ const Edit: React.FC = () => {
     newData[rowIndex][col] = value;
     setEditRows(newData);
   };
+
+  const tableColumns = React.useMemo(() => {
+    return columns.map((col) => ({
+      key: col,
+      header: col.replace('_', ' ').toUpperCase(),
+      render: (value: any, _row: DataRow, i: number) => (
+        <input 
+          type="text" 
+          value={value ?? ''} 
+          onChange={(e) => handleChange(i, col, e.target.value)} 
+          placeholder="Empty" 
+          style={{ width: '100%', padding: '4px 8px', border: '1px solid var(--card-border)', background: 'transparent', color: 'var(--text-primary)', borderRadius: '4px' }}
+        />
+      ),
+      cellStyle: { padding: '4px' }
+    }));
+  }, [columns]);
 
   const handleSave = async () => {
     setSaveError('');
@@ -116,34 +134,14 @@ const Edit: React.FC = () => {
           </button>
         </div>
 
-        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0, maxHeight: '60vh', overflowY: 'auto' }}>
-          <table id="edit-table">
-            <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
-              <tr>
-                <th style={{ width: '50px' }}>#</th>
-                {columns.map(c => <th key={c}>{c.replace('_', ' ').toUpperCase()}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {editRows.map((row, i) => (
-                <tr key={i}>
-                  <td className="row-num" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{i + 1}</td>
-                  {columns.map(col => (
-                    <td key={col} style={{ padding: '4px' }}>
-                      <input 
-                        type="text" 
-                        value={row[col] ?? ''} 
-                        onChange={(e) => handleChange(i, col, e.target.value)} 
-                        placeholder="Empty" 
-                        style={{ width: '100%', padding: '4px 8px', border: '1px solid var(--card-border)', background: 'transparent', color: 'var(--text-primary)', borderRadius: '4px' }}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          id="edit-table"
+          columns={tableColumns}
+          data={editRows}
+          showIndex={true}
+          wrapperStyle={{ maxHeight: '60vh', overflowY: 'auto' }}
+          theadStyle={{ position: 'sticky', top: 0, zIndex: 10 }}
+        />
 
         <div style={{ padding: '1.5rem', background: 'var(--card-bg)', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', gap: '12px', position: 'sticky', bottom: 0 }}>
           <button onClick={() => navigate('/dashboard')} className="btn btn-outline">Cancel</button>

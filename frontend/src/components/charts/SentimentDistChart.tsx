@@ -17,10 +17,6 @@ interface SentimentDistChartProps {
   bins?: number;
 }
 
-/**
- * Sentiment Score Distribution histogram (binned bar chart).
- * Replaces the backend matplotlib histogram (sentiment_dist.png).
- */
 export const SentimentDistChart: React.FC<SentimentDistChartProps> = ({
   data,
   height = 320,

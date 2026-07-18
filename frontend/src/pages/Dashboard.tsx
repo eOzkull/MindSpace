@@ -13,6 +13,7 @@ import {
   BurnoutBoxChart,
 } from '../components/charts';
 import LoadingScreen from '../components/LoadingScreen';
+import DataTable from '../components/tables/DataTable';
 
 import { useAppStore, selectSearchQuery, selectRiskFilter } from '../store/appStore';
 import type { RiskFilter } from '../store/appStore';
@@ -92,6 +93,20 @@ const plots = dashboard?.plots;
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
   const [expanded, setExpanded] = useState(false);
+
+  const tableColumns = React.useMemo(() => {
+    return columns.map((c) => ({
+      key: c,
+      header: c.replace('_', ' ').toUpperCase(),
+      render: c === 'risk'
+        ? (value: any) => (
+            <span className={`badge badge-${String(value || '').toLowerCase()}`}>
+              {value}
+            </span>
+          )
+        : undefined,
+    }));
+  }, [columns]);
 
 
   if (error)
@@ -218,32 +233,12 @@ const plots = dashboard?.plots;
               </select>
             </div>
 
-            <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    {columns.map(c => <th key={c}>{c.replace('_', ' ').toUpperCase()}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentData.map((row, idx) => (
-                    <tr key={idx}>
-                      <td className="row-num" style={{ color: 'var(--text-muted)' }}>{start + idx + 1}</td>
-                      {columns.map(c => (
-                        <td key={c}>
-                          {c === 'risk' ? (
-                            <span className={`badge badge-${String(row[c] || '').toLowerCase()}`}>{row[c]}</span>
-                          ) : (
-                            row[c]
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              columns={tableColumns}
+              data={currentData}
+              showIndex={true}
+              startIndex={start + 1}
+            />
 
             <div className="pagination-footer" style={{ padding: '1.25rem 1.75rem', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)' }}>
               <div className="pagination-info text-secondary" style={{ fontSize: '0.9rem' }}>

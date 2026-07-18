@@ -17,10 +17,6 @@ interface StressSleepChartProps {
   height?: number;
 }
 
-/**
- * Stress Level vs Sleep Hours scatter chart.
- * Replaces the backend matplotlib regplot (stress_vs_sleep.png).
- */
 export const StressSleepChart: React.FC<StressSleepChartProps> = ({ data, height = 320 }) => {
   const chartData = useMemo(() => {
     return data
@@ -97,8 +93,8 @@ export const StressSleepChart: React.FC<StressSleepChartProps> = ({ data, height
                 entry.risk === 'High'
                   ? CHART_COLORS.danger
                   : entry.risk === 'Medium'
-                  ? CHART_COLORS.info
-                  : CHART_COLORS.success;
+                    ? CHART_COLORS.info
+                    : CHART_COLORS.success;
               return <Cell key={`c-${i}`} fill={fill} />;
             })}
           </Scatter>

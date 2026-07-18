@@ -17,10 +17,6 @@ interface BurnoutBoxChartProps {
   height?: number;
 }
 
-/**
- * Burnout Score by Risk Tier — bar chart with ±std dev error bars.
- * Replaces the backend seaborn boxplot (burnout_boxplot.png).
- */
 export const BurnoutBoxChart: React.FC<BurnoutBoxChartProps> = ({ data, height = 320 }) => {
   const chartData = useMemo(() => {
     const tiers = ['Low', 'Medium', 'High'] as const;
