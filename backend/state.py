@@ -2,38 +2,28 @@
 state.py — Session-isolated application state.
 
 Replaces global in-memory state with a Proxy object that dynamically reads/writes
-to disk per user session.
+to the database per user session.
 """
 
 import sys
-import os
-import json
 import uuid
+import json
 import pandas as pd
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from flask import session, has_app_context, g
-
-SESSION_DIR = os.path.join(os.path.dirname(__file__), 'data', 'sessions')
-os.makedirs(SESSION_DIR, exist_ok=True)
+from extensions import db
+from models import SessionState
 
 def _get_session_id():
     """Ensure a unique session ID exists for the current user."""
-    # We must operate inside a Flask request context.
     if 'uid' not in session:
         session['uid'] = uuid.uuid4().hex
         session.modified = True
     return session['uid']
 
-def _get_user_dir():
-    """Get the absolute path to the user's specific data folder."""
-    sid = _get_session_id()
-    user_dir = os.path.join(SESSION_DIR, sid)
-    os.makedirs(user_dir, exist_ok=True)
-    return user_dir
-
 class StateManager:
-    """Proxy object that acts like the old AppState but persists to disk."""
+    """Proxy object that acts like the old AppState but persists to DB."""
 
     def __init__(self):
         self._sia = None
@@ -48,105 +38,104 @@ class StateManager:
             self._sia = SentimentIntensityAnalyzer()
         return self._sia
 
-    def get_user_dir(self):
-        """Public wrapper for the module-level _get_user_dir helper."""
-        return _get_user_dir()
+    # --- DB IO Helpers ---
+    def _save_state(self, key, value, is_df=False):
+        if not has_app_context():
+            return
+            
+        sid = _get_session_id()
+        
+        # Save to request context cache
+        cache_key = f"_state_{key}"
+        setattr(g, cache_key, value)
+        
+        state_record = SessionState.query.filter_by(session_uid=sid, state_key=key).first()
+        
+        if value is None:
+            if state_record:
+                db.session.delete(state_record)
+                db.session.commit()
+            return
 
-    # --- Disk IO Helpers ---
-    def _save_df(self, name, df):
-        path = os.path.join(_get_user_dir(), f"{name}.pkl")
-        if df is None:
-            if os.path.exists(path):
-                os.remove(path)
-            if has_app_context():
-                g.pop(f"_state_df_{name}", None)
+        serialized = value.to_json(orient='split') if is_df else json.dumps(value)
+        
+        if not state_record:
+            state_record = SessionState(session_uid=sid, state_key=key, state_value=serialized)
+            db.session.add(state_record)
         else:
-            df.to_pickle(path)
-            if has_app_context():
-                setattr(g, f"_state_df_{name}", df)
-
-    def _load_df(self, name):
-        if has_app_context() and hasattr(g, f"_state_df_{name}"):
-            return getattr(g, f"_state_df_{name}")
+            state_record.state_value = serialized
             
-        path = os.path.join(_get_user_dir(), f"{name}.pkl")
-        df = None
-        if os.path.exists(path):
-            df = pd.read_pickle(path)
+        db.session.commit()
+
+    def _load_state(self, key, is_df=False, default=None):
+        if not has_app_context():
+            return default
             
-        if has_app_context():
-            setattr(g, f"_state_df_{name}", df)
-        return df
-
-    def _save_json(self, name, data):
-        path = os.path.join(_get_user_dir(), f"{name}.json")
-        if data is None:
-            if os.path.exists(path):
-                os.remove(path)
-            if has_app_context():
-                g.pop(f"_state_json_{name}", None)
-        else:
-            with open(path, 'w') as f:
-                json.dump(data, f)
-            if has_app_context():
-                setattr(g, f"_state_json_{name}", data)
-
-    def _load_json(self, name, default=None):
-        if has_app_context() and hasattr(g, f"_state_json_{name}"):
-            return getattr(g, f"_state_json_{name}")
+        cache_key = f"_state_{key}"
+        if hasattr(g, cache_key):
+            return getattr(g, cache_key)
             
-        path = os.path.join(_get_user_dir(), f"{name}.json")
-        data = default
-        if os.path.exists(path):
-            with open(path, 'r') as f:
-                data = json.load(f)
-                
-        if has_app_context():
-            setattr(g, f"_state_json_{name}", data)
-        return data
+        sid = _get_session_id()
+        state_record = SessionState.query.filter_by(session_uid=sid, state_key=key).first()
+        
+        if not state_record or not state_record.state_value:
+            setattr(g, cache_key, default)
+            return default
+            
+        try:
+            if is_df:
+                from io import StringIO
+                val = pd.read_json(StringIO(state_record.state_value), orient='split')
+            else:
+                val = json.loads(state_record.state_value)
+        except Exception:
+            val = default
+            
+        setattr(g, cache_key, val)
+        return val
 
-    # --- Properties mapping to disk ---
+    # --- Properties mapping to DB ---
 
     @property
     def data_df(self):
-        return self._load_df('data_df')
+        return self._load_state('data_df', is_df=True)
 
     @data_df.setter
     def data_df(self, df):
-        self._save_df('data_df', df)
+        self._save_state('data_df', df, is_df=True)
 
     @property
     def compare_df(self):
-        return self._load_df('compare_df')
+        return self._load_state('compare_df', is_df=True)
 
     @compare_df.setter
     def compare_df(self, df):
-        self._save_df('compare_df', df)
+        self._save_state('compare_df', df, is_df=True)
 
     @property
     def corr_matrix(self):
-        # Using pickle instead of json for corr_matrix because it's a DataFrame or Series sometimes
-        return self._load_df('corr_matrix')
+        return self._load_state('corr_matrix', is_df=True)
 
     @corr_matrix.setter
     def corr_matrix(self, matrix):
-        self._save_df('corr_matrix', matrix)
+        self._save_state('corr_matrix', matrix, is_df=True)
 
     @property
     def compare_meta(self):
-        return self._load_json('compare_meta')
+        return self._load_state('compare_meta', is_df=False)
 
     @compare_meta.setter
     def compare_meta(self, meta):
-        self._save_json('compare_meta', meta)
+        self._save_state('compare_meta', meta, is_df=False)
 
     @property
     def eval_metrics(self):
-        return self._load_json('eval_metrics', default={'primary': None, 'compare': None})
+        return self._load_state('eval_metrics', is_df=False, default={'primary': None, 'compare': None})
 
     @eval_metrics.setter
     def eval_metrics(self, metrics):
-        self._save_json('eval_metrics', metrics)
+        self._save_state('eval_metrics', metrics, is_df=False)
 
 
 sys.modules[__name__] = StateManager()
+
