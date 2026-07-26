@@ -28,12 +28,14 @@ def assign_risk(df):
 def calculate_sentiment(df, sia):
     """
     Calculates the sentiment score from feedback if the feedback column exists.
+    Preserves existing sentiment_score if already present.
     """
+    if 'sentiment_score' in df.columns:
+        return df
     if 'feedback' in df.columns:
         df['sentiment_score'] = df['feedback'].apply(
             lambda x: sia.polarity_scores(str(x))['compound']
         )
     else:
-        if 'sentiment_score' not in df.columns:
-            df['sentiment_score'] = 0
+        df['sentiment_score'] = 0
     return df

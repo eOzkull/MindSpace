@@ -1,111 +1,111 @@
-sleep_hours,study_hours,stress_level,feedback
-7,5,9,"Too much pressure, can't sleep"
-7,2,5,Could use more sleep
-8,4,7,A bit busy
-8,10,10,"Exhausted, high stress"
-5,7,10,Struggling to keep up
-7,10,10,"Burning out, need help"
-6,2,6,"Managing okay, but tired"
-7,2,4,"Feeling good, balanced"
-4,6,10,"Exhausted, high stress"
-5,10,10,"Too much pressure, can't sleep"
-9,2,4,Managing okay
-8,8,10,"Exhausted, high stress"
-8,9,10,Struggling to keep up
-5,1,5,Trying to stay on track
-7,3,6,I feel overwhelmed with assignments
-9,8,9,"Burning out, need help"
-10,3,2,"Feeling good, balanced"
-10,4,3,Feeling energized
-6,2,6,"Managing okay, but tired"
-6,5,10,Completely overwhelmed
-6,8,10,"Too much pressure, can't sleep"
-8,5,7,Trying to stay on track
-9,1,3,Feeling energized
-10,2,1,Stress-free day
-8,1,3,Productive and calm
-4,2,8,Struggling to keep up
-5,6,10,Completely overwhelmed
-8,8,10,"Burning out, need help"
-5,8,10,"Too much pressure, can't sleep"
-6,7,10,"Too much pressure, can't sleep"
-10,9,8,"Too much pressure, can't sleep"
-7,2,4,Productive and calm
-5,5,9,"Burning out, need help"
-6,2,7,I feel overwhelmed with assignments
-4,6,10,"Exhausted, high stress"
-4,9,10,"Exhausted, high stress"
-10,1,1,Managing okay
-10,1,2,Feeling energized
-7,6,10,"Exhausted, high stress"
-9,6,8,"Too much pressure, can't sleep"
-4,1,6,A bit busy
-5,6,10,Struggling to keep up
-10,4,4,Productive and calm
-7,6,10,"Too much pressure, can't sleep"
-6,10,10,Completely overwhelmed
-9,9,10,Struggling to keep up
-8,5,8,"Too much pressure, can't sleep"
-4,10,10,"Exhausted, high stress"
-8,1,4,Managing okay
-7,5,9,"Too much pressure, can't sleep"
-6,4,9,"Exhausted, high stress"
-4,10,10,"Exhausted, high stress"
-9,1,1,Productive and calm
-9,10,10,"Too much pressure, can't sleep"
-4,9,10,"Too much pressure, can't sleep"
-4,4,10,Completely overwhelmed
-6,5,9,"Burning out, need help"
-9,9,10,Completely overwhelmed
-4,3,10,Completely overwhelmed
-4,5,10,Completely overwhelmed
-8,8,10,Completely overwhelmed
-8,2,5,A bit busy
-6,8,10,"Exhausted, high stress"
-7,4,6,A bit busy
-4,9,10,"Burning out, need help"
-5,4,8,"Too much pressure, can't sleep"
-10,2,1,Stress-free day
-6,4,8,Completely overwhelmed
-10,10,10,"Exhausted, high stress"
-10,3,2,Stress-free day
-10,6,5,Could use more sleep
-8,8,10,Completely overwhelmed
-7,1,5,Could use more sleep
-4,9,10,"Exhausted, high stress"
-9,10,10,"Too much pressure, can't sleep"
-8,6,7,A bit busy
-8,1,4,Productive and calm
-5,6,10,Completely overwhelmed
-5,4,9,"Exhausted, high stress"
-8,4,6,A bit busy
-6,6,9,Struggling to keep up
-8,1,2,Stress-free day
-9,2,3,Managing okay
-10,3,4,Managing okay
-8,6,8,Struggling to keep up
-8,1,3,"Feeling good, balanced"
-6,1,6,A bit busy
-9,3,5,A bit busy
-5,5,10,"Burning out, need help"
-8,10,10,"Burning out, need help"
-10,7,7,"Managing okay, but tired"
-7,7,10,Struggling to keep up
-6,1,6,Trying to stay on track
-5,10,10,Completely overwhelmed
-4,2,9,"Burning out, need help"
-10,5,6,I feel overwhelmed with assignments
-4,10,10,Struggling to keep up
-4,6,10,Completely overwhelmed
-9,10,10,"Too much pressure, can't sleep"
-8,10,10,"Burning out, need help"
-5,4,8,Struggling to keep up
-7,7,9,Completely overwhelmed
-4,5,10,Completely overwhelmed
-10,8,8,"Burning out, need help"
-7,9,10,"Burning out, need help"
-6,3,6,Trying to stay on track
-7,5,8,Completely overwhelmed
-9,8,8,"Burning out, need help"
-7,1,3,Stress-free day
-7,10,10,Completely overwhelmed
+sleep_hours,study_hours,stress_level,feedback,burnout_score,risk,sentiment_score
+7,5,9,"Too much pressure, can't sleep",64.28571428571429,Medium,0.0
+7,2,5,Could use more sleep,14.285714285714285,Low,0.0
+8,4,7,A bit busy,35.0,Medium,0.0
+8,10,10,"Exhausted, high stress",100.0,High,0.0
+5,7,10,Struggling to keep up,100.0,High,0.0
+7,10,10,"Burning out, need help",100.0,High,0.0
+6,2,6,"Managing okay, but tired",20.0,Low,0.0
+7,2,4,"Feeling good, balanced",11.428571428571427,Low,0.0
+4,6,10,"Exhausted, high stress",100.0,High,0.0
+5,10,10,"Too much pressure, can't sleep",100.0,High,0.0
+9,2,4,Managing okay,8.88888888888889,Low,0.0
+8,8,10,"Exhausted, high stress",100.0,High,0.0
+8,9,10,Struggling to keep up,100.0,High,0.0
+5,1,5,Trying to stay on track,10.0,Low,0.0
+7,3,6,I feel overwhelmed with assignments,25.71428571428571,Low,0.0
+9,8,9,"Burning out, need help",80.0,High,0.0
+10,3,2,"Feeling good, balanced",6.0,Low,0.0
+10,4,3,Feeling energized,12.000000000000002,Low,0.0
+6,2,6,"Managing okay, but tired",20.0,Low,0.0
+6,5,10,Completely overwhelmed,83.33333333333334,High,0.0
+6,8,10,"Too much pressure, can't sleep",100.0,High,0.0
+8,5,7,Trying to stay on track,43.75,Medium,0.0
+9,1,3,Feeling energized,3.333333333333333,Low,0.0
+10,2,1,Stress-free day,2.0,Low,0.0
+8,1,3,Productive and calm,3.75,Low,0.0
+4,2,8,Struggling to keep up,40.0,Medium,0.0
+5,6,10,Completely overwhelmed,100.0,High,0.0
+8,8,10,"Burning out, need help",100.0,High,0.0
+5,8,10,"Too much pressure, can't sleep",100.0,High,0.0
+6,7,10,"Too much pressure, can't sleep",100.0,High,0.0
+10,9,8,"Too much pressure, can't sleep",72.0,High,0.0
+7,2,4,Productive and calm,11.428571428571427,Low,0.0
+5,5,9,"Burning out, need help",90.0,High,0.0
+6,2,7,I feel overwhelmed with assignments,23.33333333333333,Low,0.0
+4,6,10,"Exhausted, high stress",100.0,High,0.0
+4,9,10,"Exhausted, high stress",100.0,High,0.0
+10,1,1,Managing okay,1.0,Low,0.0
+10,1,2,Feeling energized,2.0,Low,0.0
+7,6,10,"Exhausted, high stress",85.71428571428571,High,0.0
+9,6,8,"Too much pressure, can't sleep",53.33333333333333,Medium,0.0
+4,1,6,A bit busy,15.0,Low,0.0
+5,6,10,Struggling to keep up,100.0,High,0.0
+10,4,4,Productive and calm,16.0,Low,0.0
+7,6,10,"Too much pressure, can't sleep",85.71428571428571,High,0.0
+6,10,10,Completely overwhelmed,100.0,High,0.0
+9,9,10,Struggling to keep up,100.0,High,0.0
+8,5,8,"Too much pressure, can't sleep",50.0,Medium,0.0
+4,10,10,"Exhausted, high stress",100.0,High,0.0
+8,1,4,Managing okay,5.0,Low,0.0
+7,5,9,"Too much pressure, can't sleep",64.28571428571429,Medium,0.0
+6,4,9,"Exhausted, high stress",60.0,Medium,0.0
+4,10,10,"Exhausted, high stress",100.0,High,0.0
+9,1,1,Productive and calm,1.1111111111111112,Low,0.0
+9,10,10,"Too much pressure, can't sleep",100.0,High,0.0
+4,9,10,"Too much pressure, can't sleep",100.0,High,0.0
+4,4,10,Completely overwhelmed,100.0,High,0.0
+6,5,9,"Burning out, need help",75.0,High,0.0
+9,9,10,Completely overwhelmed,100.0,High,0.0
+4,3,10,Completely overwhelmed,75.0,High,0.0
+4,5,10,Completely overwhelmed,100.0,High,0.0
+8,8,10,Completely overwhelmed,100.0,High,0.0
+8,2,5,A bit busy,12.5,Low,0.0
+6,8,10,"Exhausted, high stress",100.0,High,0.0
+7,4,6,A bit busy,34.285714285714285,Medium,0.0
+4,9,10,"Burning out, need help",100.0,High,0.0
+5,4,8,"Too much pressure, can't sleep",64.0,Medium,0.0
+10,2,1,Stress-free day,2.0,Low,0.0
+6,4,8,Completely overwhelmed,53.33333333333333,Medium,0.0
+10,10,10,"Exhausted, high stress",100.0,High,0.0
+10,3,2,Stress-free day,6.0,Low,0.0
+10,6,5,Could use more sleep,30.0,Low,0.0
+8,8,10,Completely overwhelmed,100.0,High,0.0
+7,1,5,Could use more sleep,7.142857142857142,Low,0.0
+4,9,10,"Exhausted, high stress",100.0,High,0.0
+9,10,10,"Too much pressure, can't sleep",100.0,High,0.0
+8,6,7,A bit busy,52.5,Medium,0.0
+8,1,4,Productive and calm,5.0,Low,0.0
+5,6,10,Completely overwhelmed,100.0,High,0.0
+5,4,9,"Exhausted, high stress",72.0,High,0.0
+8,4,6,A bit busy,30.0,Low,0.0
+6,6,9,Struggling to keep up,90.0,High,0.0
+8,1,2,Stress-free day,2.5,Low,0.0
+9,2,3,Managing okay,6.666666666666666,Low,0.0
+10,3,4,Managing okay,12.0,Low,0.0
+8,6,8,Struggling to keep up,60.0,Medium,0.0
+8,1,3,"Feeling good, balanced",3.75,Low,0.0
+6,1,6,A bit busy,10.0,Low,0.0
+9,3,5,A bit busy,16.666666666666664,Low,0.0
+5,5,10,"Burning out, need help",100.0,High,0.0
+8,10,10,"Burning out, need help",100.0,High,0.0
+10,7,7,"Managing okay, but tired",48.99999999999999,Medium,0.0
+7,7,10,Struggling to keep up,100.0,High,0.0
+6,1,6,Trying to stay on track,10.0,Low,0.0
+5,10,10,Completely overwhelmed,100.0,High,0.0
+4,2,9,"Burning out, need help",45.0,Medium,0.0
+10,5,6,I feel overwhelmed with assignments,30.0,Low,0.0
+4,10,10,Struggling to keep up,100.0,High,0.0
+4,6,10,Completely overwhelmed,100.0,High,0.0
+9,10,10,"Too much pressure, can't sleep",100.0,High,0.0
+8,10,10,"Burning out, need help",100.0,High,0.0
+5,4,8,Struggling to keep up,64.0,Medium,0.0
+7,7,9,Completely overwhelmed,90.0,High,0.0
+4,5,10,Completely overwhelmed,100.0,High,0.0
+10,8,8,"Burning out, need help",64.0,Medium,0.0
+7,9,10,"Burning out, need help",100.0,High,0.0
+6,3,6,Trying to stay on track,30.0,Low,0.0
+7,5,8,Completely overwhelmed,57.142857142857146,Medium,0.0
+9,8,8,"Burning out, need help",71.11111111111111,High,0.0
+7,1,3,Stress-free day,4.285714285714286,Low,0.0
+7,10,10,Completely overwhelmed,100.0,High,0.0

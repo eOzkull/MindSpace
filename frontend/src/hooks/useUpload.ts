@@ -15,6 +15,9 @@ export const useUploadFile = () => {
     mutationFn: uploadFile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['history'] });
+      queryClient.invalidateQueries({ queryKey: ['evaluate'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['results'] });
     },
   });
 };

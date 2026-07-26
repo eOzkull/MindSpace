@@ -98,11 +98,11 @@ def upload():
             db.session.bulk_save_objects(student_records)
             db.session.commit()
 
+            # Always overwrite - even if None - so stale metrics from a previous upload are cleared
             metrics = _auto_train(state.data_df, 'primary')
-            if metrics:
-                em = state.eval_metrics
-                em['primary'] = metrics
-                state.eval_metrics = em
+            em = state.eval_metrics
+            em['primary'] = metrics
+            state.eval_metrics = em
 
             return jsonify({
                 'success': True,
