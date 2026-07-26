@@ -15,8 +15,11 @@ class Config:
     cookie_secure_str = os.environ.get('COOKIE_SECURE', str(is_prod)).lower()
     COOKIE_SECURE = cookie_secure_str in ('true', '1', 'yes')
 
-    # Session cookies parameters
-    SESSION_COOKIE_SAMESITE = 'None' if COOKIE_SECURE else 'Lax'
+    # Session cookie parameters
+    # SameSite=None is only valid over HTTPS (Secure flag required by spec).
+    # Setting it over plain HTTP causes modern browsers to silently reject the
+    # cookie entirely.  Restrict to production + secure context only.
+    SESSION_COOKIE_SAMESITE = 'None' if (COOKIE_SECURE and FLASK_ENV == 'production') else 'Lax'
     SESSION_COOKIE_SECURE = COOKIE_SECURE
 
     # CORS settings (list of origins)
