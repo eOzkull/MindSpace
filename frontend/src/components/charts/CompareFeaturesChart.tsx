@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface CompareFeaturesChartProps {
   statsA: {
@@ -76,11 +76,12 @@ export const CompareFeaturesChart: React.FC<CompareFeaturesChartProps> = ({ stat
   return (
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 15, left: -20, bottom: 5 }}>
+        <BarChart data={data} margin={{ top: 20, right: 15, left: -20, bottom: 4 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
-          <XAxis dataKey="name" stroke="transparent" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} dy={8} />
-          <YAxis domain={[0, 1.2]} stroke="transparent" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} dx={-8} />
+          <XAxis {...DEFAULT_X_AXIS_PROPS} dataKey="name" />
+          <YAxis {...DEFAULT_Y_AXIS_PROPS} domain={[0, 1.2]} />
           <Tooltip
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const rawData = payload[0].payload;
@@ -89,11 +90,11 @@ export const CompareFeaturesChart: React.FC<CompareFeaturesChartProps> = ({ stat
                     <div className="custom-chart-tooltip-title">{rawData.name}</div>
                     <div className="custom-chart-tooltip-list">
                       <div className="custom-chart-tooltip-item">
-                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: '#4facfe' }} />
+                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: CHART_COLORS.info }} />
                         {labelA}: <span className="custom-chart-tooltip-value">{rawData[labelA].toFixed(1)}</span>
                       </div>
                       <div className="custom-chart-tooltip-item">
-                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: '#ff9f43' }} />
+                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: CHART_COLORS.warning }} />
                         {labelB}: <span className="custom-chart-tooltip-value">{rawData[labelB].toFixed(1)}</span>
                       </div>
                     </div>
@@ -109,20 +110,20 @@ export const CompareFeaturesChart: React.FC<CompareFeaturesChartProps> = ({ stat
             content={() => (
               <ul className="custom-chart-legend" style={{ margin: 0, justifyContent: 'center' }}>
                 <li className="custom-chart-legend-item">
-                  <span className="custom-chart-legend-marker" style={{ backgroundColor: '#4facfe' }} />
+                  <span className="custom-chart-legend-marker" style={{ backgroundColor: CHART_COLORS.info }} />
                   {labelA}
                 </li>
                 <li className="custom-chart-legend-item">
-                  <span className="custom-chart-legend-marker" style={{ backgroundColor: '#ff9f43' }} />
+                  <span className="custom-chart-legend-marker" style={{ backgroundColor: CHART_COLORS.warning }} />
                   {labelB}
                 </li>
               </ul>
             )}
           />
-          <Bar dataKey={`${labelA}_norm`} fill="#4facfe" radius={[4, 4, 0, 0]} maxBarSize={45}>
+          <Bar dataKey={`${labelA}_norm`} fill={CHART_COLORS.info} radius={[4, 4, 0, 0]} maxBarSize={45}>
             <LabelList dataKey={labelA} content={renderCustomizedLabel} />
           </Bar>
-          <Bar dataKey={`${labelB}_norm`} fill="#ff9f43" radius={[4, 4, 0, 0]} maxBarSize={45}>
+          <Bar dataKey={`${labelB}_norm`} fill={CHART_COLORS.warning} radius={[4, 4, 0, 0]} maxBarSize={45}>
             <LabelList dataKey={labelB} content={renderCustomizedLabel} />
           </Bar>
         </BarChart>

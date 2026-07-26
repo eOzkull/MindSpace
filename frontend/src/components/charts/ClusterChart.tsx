@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS, formatChartValue } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE, formatChartValue } from './chartUtils';
 
 export interface ClusterPoint {
   x: number;
@@ -31,7 +31,6 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
   xAxisLabel = 'Component 1',
   yAxisLabel = 'Component 2'
 }) => {
-  // Group by cluster for legend and separate scatters
   const clusters = useMemo(() => {
     const grouped = data.reduce((acc, point) => {
       if (!acc[point.cluster]) {
@@ -46,7 +45,6 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
 
   const clusterKeys = Object.keys(clusters);
   
-  // Color palette for clusters
   const palette = [
     CHART_COLORS.primary,
     CHART_COLORS.info,
@@ -60,27 +58,23 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart
-          margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
+          margin={{ top: 16, right: 16, left: -10, bottom: 16 }}
         >
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
           <XAxis 
+            {...DEFAULT_X_AXIS_PROPS}
             type="number" 
             dataKey="x" 
             name={xAxisLabel} 
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dy={8}
           />
           <YAxis 
+            {...DEFAULT_Y_AXIS_PROPS}
             type="number" 
             dataKey="y" 
             name={yAxisLabel} 
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dx={-8}
           />
           <Tooltip
-            cursor={{ strokeDasharray: '3 3' }}
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const pointData = payload[0].payload as ClusterPoint;
@@ -106,8 +100,8 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
                         <span className="badge" style={{ 
                           fontSize: '0.7rem', 
                           padding: '2px 6px',
-                          background: 'var(--bg-main)',
-                          border: '1px solid var(--card-border)',
+                          background: 'var(--input-bg)',
+                          border: '1px solid var(--border-color)',
                           borderRadius: '4px'
                         }}>
                           {pointData.cluster}
@@ -121,7 +115,7 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
             }}
           />
           <Legend 
-            wrapperStyle={{ paddingTop: '20px' }}
+            wrapperStyle={{ paddingTop: '16px' }}
             content={(props) => {
               const { payload } = props;
               return (
@@ -130,7 +124,7 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
                     <li key={`item-${index}`} className="custom-chart-legend-item">
                       <span 
                         className="custom-chart-legend-marker" 
-                        style={{ backgroundColor: entry.color, borderRadius: '50%', width: 10, height: 10 }} 
+                        style={{ backgroundColor: entry.color, borderRadius: '50%', width: 8, height: 8 }} 
                       />
                       {entry.value}
                     </li>
@@ -145,7 +139,7 @@ export const ClusterChart: React.FC<ClusterChartProps> = ({
               name={clusterName}
               data={clusters[clusterName]}
               fill={palette[index % palette.length]}
-              fillOpacity={0.8}
+              fillOpacity={0.85}
             />
           ))}
         </ScatterChart>

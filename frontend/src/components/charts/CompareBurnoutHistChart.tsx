@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface CompareBurnoutHistChartProps {
   dataA: Array<{ burnout_score?: number | string }>;
@@ -48,11 +48,12 @@ export const CompareBurnoutHistChart: React.FC<CompareBurnoutHistChartProps> = (
   return (
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 15, right: 15, left: -20, bottom: 5 }}>
+        <AreaChart data={chartData} margin={{ top: 12, right: 15, left: -20, bottom: 4 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
-          <XAxis dataKey="range" stroke="transparent" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} dy={8} />
-          <YAxis stroke="transparent" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} dx={-8} />
+          <XAxis {...DEFAULT_X_AXIS_PROPS} dataKey="range" />
+          <YAxis {...DEFAULT_Y_AXIS_PROPS} />
           <Tooltip
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0].payload;
@@ -61,11 +62,11 @@ export const CompareBurnoutHistChart: React.FC<CompareBurnoutHistChartProps> = (
                     <div className="custom-chart-tooltip-title">Burnout Range: {item.range}</div>
                     <div className="custom-chart-tooltip-list">
                       <div className="custom-chart-tooltip-item">
-                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: '#4facfe' }} />
+                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: CHART_COLORS.info }} />
                         {labelA}: <span className="custom-chart-tooltip-value">{item[labelA]} students</span>
                       </div>
                       <div className="custom-chart-tooltip-item">
-                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: '#ff9f43' }} />
+                        <span className="custom-chart-tooltip-marker" style={{ backgroundColor: CHART_COLORS.warning }} />
                         {labelB}: <span className="custom-chart-tooltip-value">{item[labelB]} students</span>
                       </div>
                     </div>
@@ -81,18 +82,18 @@ export const CompareBurnoutHistChart: React.FC<CompareBurnoutHistChartProps> = (
             content={() => (
               <ul className="custom-chart-legend" style={{ margin: 0, justifyContent: 'center' }}>
                 <li className="custom-chart-legend-item">
-                  <span className="custom-chart-legend-marker" style={{ backgroundColor: '#4facfe' }} />
+                  <span className="custom-chart-legend-marker" style={{ backgroundColor: CHART_COLORS.info }} />
                   {labelA}
                 </li>
                 <li className="custom-chart-legend-item">
-                  <span className="custom-chart-legend-marker" style={{ backgroundColor: '#ff9f43' }} />
+                  <span className="custom-chart-legend-marker" style={{ backgroundColor: CHART_COLORS.warning }} />
                   {labelB}
                 </li>
               </ul>
             )}
           />
-          <Area type="monotone" dataKey={labelA} stroke="#4facfe" fill="#4facfe" fillOpacity={0.4} strokeWidth={2} />
-          <Area type="monotone" dataKey={labelB} stroke="#ff9f43" fill="#ff9f43" fillOpacity={0.4} strokeWidth={2} />
+          <Area type="monotone" dataKey={labelA} stroke={CHART_COLORS.info} fill={CHART_COLORS.info} fillOpacity={0.35} strokeWidth={2} />
+          <Area type="monotone" dataKey={labelB} stroke={CHART_COLORS.warning} fill={CHART_COLORS.warning} fillOpacity={0.35} strokeWidth={2} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

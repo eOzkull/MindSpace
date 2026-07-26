@@ -4,9 +4,10 @@ import {
   Pie,
   Cell,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface RiskPieChartProps {
   data: Array<Record<string, string | number>>;
@@ -29,14 +30,18 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
     ].filter((item) => item.value > 0);
   }, [data]);
 
+  const total = chartData.reduce((sum, d) => sum + d.value, 0);
+
   return (
     <div className="chart-container" style={{ width: '100%', height: 320 }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Tooltip
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0];
+                const pct = total > 0 ? ((item.value as number) / total * 100).toFixed(1) : '0';
                 return (
                   <div className="custom-chart-tooltip">
                     <div className="custom-chart-tooltip-title">{item.name}</div>
@@ -49,12 +54,30 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
                         Students:
                         <span className="custom-chart-tooltip-value">{item.value}</span>
                       </div>
+                      <div className="custom-chart-tooltip-item">
+                        Share:
+                        <span className="custom-chart-tooltip-value">{pct}%</span>
+                      </div>
                     </div>
                   </div>
                 );
               }
               return null;
             }}
+          />
+          <Legend
+            verticalAlign="bottom"
+            height={36}
+            content={() => (
+              <ul className="custom-chart-legend" style={{ margin: 0, justifyContent: 'center' }}>
+                {chartData.map((entry) => (
+                  <li key={entry.name} className="custom-chart-legend-item">
+                    <span className="custom-chart-legend-marker" style={{ backgroundColor: entry.color }} />
+                    {entry.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           />
           <Pie
             data={chartData}
@@ -65,11 +88,11 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
             outerRadius={100}
             innerRadius={60}
             paddingAngle={4}
-            label={({ name, percent }) => `${name}: ${percent !== undefined ? (percent * 100).toFixed(0) : 0}%`}
+            label={({ percent }) => `${percent !== undefined ? (percent * 100).toFixed(0) : 0}%`}
             labelLine={{ stroke: CHART_COLORS.border, strokeWidth: 1 }}
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
             ))}
           </Pie>
         </PieChart>
