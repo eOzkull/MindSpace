@@ -48,7 +48,7 @@ export function DataTable<T>({
   onRowSelectToggle,
 }: DataTableProps<T>) {
   return (
-    <div className={wrapperClass} style={{ border: 'none', borderRadius: 0, ...wrapperStyle }}>
+    <div className={wrapperClass} style={wrapperStyle}>
       <table id={id} className={tableClass}>
         <thead style={theadStyle}>
           <tr>

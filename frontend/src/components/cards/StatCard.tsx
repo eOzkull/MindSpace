@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export interface StatCardProps {
   labelIcon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
@@ -11,21 +12,38 @@ export interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({
   labelIcon: LabelIcon,
-  bgIcon: BgIcon,
+  bgIcon: _BgIcon,
   label,
   value,
   subtext,
   themeColor,
 }) => {
   return (
-    <div className="card stat-card-inner">
-      <BgIcon size={112} className="bg-icon" />
-      <div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <LabelIcon size={20} style={{ color: `var(--${themeColor})` }} /> {label}
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.15 }}
+      className="card stat-card-inner"
+      style={{
+        '--accent-color': `var(--${themeColor})`,
+      } as React.CSSProperties}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+        <span className="stat-card-badge">
+          <LabelIcon size={18} style={{ color: `var(--${themeColor})` }} />
+        </span>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+          {label}
+        </span>
       </div>
-      <div className="stat-val" style={{ color: `var(--${themeColor})` }}>{value}</div>
-      <div className="stat-sub">{subtext}</div>
-    </div>
+      <div style={{ fontSize: '2rem', fontWeight: 700, color: `var(--${themeColor})`, lineHeight: 1.2 }}>
+        {value}
+      </div>
+      {subtext && (
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          {subtext}
+        </div>
+      )}
+    </motion.div>
   );
 };
 

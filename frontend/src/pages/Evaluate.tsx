@@ -1,9 +1,11 @@
 import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useEvaluate } from '../hooks/usePrediction';
 import { ConfusionMatrixHeatmap } from '../components/charts';
 import LoadingScreen from '../components/LoadingScreen';
 import { StatCard } from '../components/cards';
+import { fadeUp, staggerContainer, staggerItem } from '../lib/motion';
 import type { EvaluateResponse } from '../types/evaluate';
 import {
   AlertTriangle,
@@ -41,18 +43,18 @@ const Evaluate: React.FC = () => {
 
   if (error) {
     return (
-      <div className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center' }}>
-        <AlertCircle size={64} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
-        <h3 style={{ marginBottom: '0.5rem' }}>Model Not Ready</h3>
-        <p className="insight-desc">{error}</p>
+      <motion.div {...fadeUp} className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
+        <AlertCircle size={48} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
+        <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', fontWeight: 600 }}>Model Not Ready</h3>
+        <p className="insight-desc" style={{ color: 'var(--text-secondary)' }}>{error}</p>
         {target === 'compare' && (
-          <p className="insight-desc" style={{ marginTop: '1rem' }}>
-            <Link to="/evaluate?dataset=primary" className="btn btn-outline" style={{ margin: '0 auto' }}>
+          <div style={{ marginTop: '1.5rem' }}>
+            <Link to="/evaluate?dataset=primary" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <ArrowLeft size={16} /> Back to Primary Dataset
             </Link>
-          </p>
+          </div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
@@ -61,38 +63,87 @@ const Evaluate: React.FC = () => {
   const readyStatus = isReady ? 'ready' : 'not-ready';
 
   return (
-    <>
+    <motion.div {...fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* Segmented Control Dataset Selector */}
       {data.compare_exists && (
-        <div className="card" style={{ marginBottom: '2rem', padding: '0.75rem', display: 'flex', justifyContent: 'center', background: 'var(--input-bg)' }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Link to="/evaluate?dataset=primary" className={`btn ${target === 'primary' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem' }}>
-              <Database size={16} /> Primary Dataset
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div style={{
+            display: 'inline-flex',
+            padding: '4px',
+            background: 'var(--input-bg)',
+            borderRadius: '10px',
+            border: '1px solid var(--border-color)',
+            gap: '4px'
+          }}>
+            <Link
+              to="/evaluate?dataset=primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 18px',
+                borderRadius: '7px',
+                background: target === 'primary' ? 'var(--brand-primary)' : 'transparent',
+                color: target === 'primary' ? '#ffffff' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Database size={15} /> Primary Dataset
             </Link>
-            <Link to="/evaluate?dataset=compare" className={`btn ${target === 'compare' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem' }}>
-              <ArrowLeftRight size={16} /> Comparison Dataset
+            <Link
+              to="/evaluate?dataset=compare"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 18px',
+                borderRadius: '7px',
+                background: target === 'compare' ? 'var(--brand-primary)' : 'transparent',
+                color: target === 'compare' ? '#ffffff' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ArrowLeftRight size={15} /> Comparison Dataset
             </Link>
           </div>
         </div>
       )}
 
+      {/* Verdict Card */}
       <div className={`card verdict-card ${readyStatus}`} style={{ 
-        background: 'linear-gradient(135deg, rgba(40, 199, 111, 0.05) 0%, transparent 100%)', 
-        marginBottom: '2.5rem',
-        border: `2px solid var(--${isReady ? 'success' : 'warning'})`
+        padding: '1.75rem',
+        borderRadius: 'var(--radius-lg)',
+        background: isReady ? 'rgba(40, 199, 111, 0.04)' : 'rgba(255, 171, 0, 0.04)',
+        border: `1.5 solid var(--${isReady ? 'success' : 'warning'})`
       }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
-          <div style={{ padding: '1rem', background: 'var(--input-bg)', borderRadius: '50%', border: '1px solid var(--card-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: isReady ? 'rgba(40, 199, 111, 0.12)' : 'rgba(255, 171, 0, 0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
             {isReady ? (
-              <CheckCircle2 size={40} style={{ color: 'var(--success)' }} className={`verdict-icon ${readyStatus}`} />
+              <CheckCircle2 size={24} style={{ color: 'var(--success)' }} />
             ) : (
-              <AlertTriangle size={40} style={{ color: 'var(--warning)' }} className={`verdict-icon ${readyStatus}`} />
+              <AlertTriangle size={24} style={{ color: 'var(--warning)' }} />
             )}
           </div>
           <div>
-            <h3 className={`verdict-title ${readyStatus}`} style={{ marginBottom: '0.5rem', fontSize: '1.4rem', color: `var(--${isReady ? 'success' : 'warning'})` }}>
+            <h3 style={{ marginBottom: '0.4rem', fontSize: '1.1rem', fontWeight: 600, color: isReady ? 'var(--success)' : 'var(--warning)' }}>
               Deployment Readiness: {isReady ? 'Approved for Production' : 'Further Tuning Advised'}
             </h3>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1.05rem', margin: 0 }}>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.925rem', margin: 0 }}>
               {isReady 
                 ? 'The model demonstrates robust predictive capabilities, exceeding the 85% F1-score and 80% Recall thresholds. It is highly reliable at identifying high-risk students without generating excessive false alarms.' 
                 : 'The model shows promise but falls below our strict deployment thresholds (F1 > 85%, Recall > 80%). We recommend collecting more diverse samples or engineering additional features before using this model for automated outreach.'}
@@ -101,60 +152,80 @@ const Evaluate: React.FC = () => {
         </div>
       </div>
 
-      <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-        <StatCard
-          labelIcon={Target}
-          bgIcon={Target}
-          label="Accuracy"
-          value={`${(metrics.accuracy * 100).toFixed(2)}%`}
-          subtext={`${metrics.n_test} test samples`}
-          themeColor="success"
-        />
-        <StatCard
-          labelIcon={Scale}
-          bgIcon={Scale}
-          label="F1 Score (weighted)"
-          value={metrics.f1}
-          subtext="precision × recall balance"
-          themeColor="brand-primary"
-        />
-        <StatCard
-          labelIcon={Crosshair}
-          bgIcon={Crosshair}
-          label="Precision"
-          value={metrics.precision}
-          subtext="weighted average"
-          themeColor="info"
-        />
-        <StatCard
-          labelIcon={ZoomIn}
-          bgIcon={ZoomIn}
-          label="Recall"
-          value={metrics.recall}
-          subtext="weighted average"
-          themeColor="warning"
-        />
-      </div>
+      {/* Staggered Metrics Grid */}
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="stats-grid"
+      >
+        <motion.div variants={staggerItem}>
+          <StatCard
+            labelIcon={Target}
+            bgIcon={Target}
+            label="Accuracy"
+            value={`${(metrics.accuracy * 100).toFixed(2)}%`}
+            subtext={`${metrics.n_test} test samples`}
+            themeColor="success"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <StatCard
+            labelIcon={Scale}
+            bgIcon={Scale}
+            label="F1 Score (weighted)"
+            value={metrics.f1}
+            subtext="precision × recall balance"
+            themeColor="brand-primary"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <StatCard
+            labelIcon={Crosshair}
+            bgIcon={Crosshair}
+            label="Precision"
+            value={metrics.precision}
+            subtext="weighted average"
+            themeColor="info"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <StatCard
+            labelIcon={ZoomIn}
+            bgIcon={ZoomIn}
+            label="Recall"
+            value={metrics.recall}
+            subtext="weighted average"
+            themeColor="warning"
+          />
+        </motion.div>
+      </motion.div>
 
-      <div className="metrics-grid" style={{ marginBottom: '2.5rem', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
-        <div className="card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
-          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Grid size={20} /> Confusion Matrix
+      {/* Metrics Detail Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+        {/* Confusion Matrix Card */}
+        <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+            <Grid size={18} style={{ color: 'var(--brand-primary)' }} /> Confusion Matrix
           </h3>
           {metrics.confusion_matrix && (
             <ConfusionMatrixHeatmap matrix={metrics.confusion_matrix} labels={metrics.class_names} title="" />
           )}
-          <p className="insight-desc" style={{ marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center' }}>
-            <Info size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> Diagonal cells = correct predictions.<br />Off-diagonal = misclassifications.
+          <p style={{ marginTop: 'auto', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
+            <Info size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+            Diagonal cells = correct predictions. Off-diagonal = misclassifications.
           </p>
         </div>
 
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-            <List size={20} /> Per-Class Breakdown
-          </h3>
+        {/* Per-Class Breakdown Table Card */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+              <List size={18} style={{ color: 'var(--brand-primary)' }} /> Per-Class Breakdown
+            </h3>
+          </div>
           <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
-            <table>
+            <table className="data-table">
               <thead>
                 <tr>
                   <th>Class</th>
@@ -181,66 +252,80 @@ const Evaluate: React.FC = () => {
             </table>
           </div>
 
-          <div className="takeaway-box" style={{ margin: '1.5rem', borderRadius: 'var(--radius-sm)', borderLeftColor: 'var(--brand-primary)', background: 'rgba(139, 92, 246, 0.05)' }}>
-            <strong style={{ color: 'var(--text-primary)', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Lightbulb size={16} /> Translating Model Efficacy to Student Welfare
+          <div className="takeaway-box" style={{ margin: '1.25rem 1.5rem', borderRadius: 'var(--radius-sm)', borderLeftColor: 'var(--brand-primary)', background: 'rgba(139, 92, 246, 0.05)', padding: '1rem' }}>
+            <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Lightbulb size={15} style={{ color: 'var(--brand-primary)' }} /> Translating Model Efficacy to Student Welfare
             </strong>
-            <ul style={{ marginTop: '1rem', lineHeight: 1.8, color: 'var(--text-secondary)', fontSize: '0.95rem', paddingLeft: '1.2rem' }}>
-              <li><strong style={{ color: 'var(--info)' }}>Precision:</strong> Of the students proactively flagged, what percentage were truly at risk? Low precision wastes counselling resources on false alarms.</li>
-              <li><strong style={{ color: 'var(--warning)' }}>Recall (Sensitivity):</strong> Did the model successfully capture all students in the high-risk cohort? <em>In welfare applications, high recall is prioritized—missing a crisis is worse than a false positive.</em></li>
-              <li><strong style={{ color: 'var(--brand-primary)' }}>F1-Score:</strong> The harmonic mean balancing Precision and Recall, indicating overall system robustness against imbalanced classes.</li>
+            <ul style={{ marginTop: '0.75rem', lineHeight: 1.6, color: 'var(--text-secondary)', fontSize: '0.85rem', paddingLeft: '1.2rem', margin: '0.75rem 0 0 0' }}>
+              <li><strong style={{ color: 'var(--info)' }}>Precision:</strong> Percentage of flagged students truly at risk. High precision avoids false alarm fatigue.</li>
+              <li><strong style={{ color: 'var(--warning)' }}>Recall:</strong> Percentage of actual high-risk students captured. <em>Missing a student crisis is far worse than a false alarm.</em></li>
+              <li><strong style={{ color: 'var(--brand-primary)' }}>F1-Score:</strong> Harmonic balance of precision and recall.</li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: '2.5rem', background: 'rgba(139, 92, 246, 0.02)' }}>
-        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <GraduationCap size={24} /> Methodology & Theoretical Framework
-        </h3>
-        <div className="insights-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-            <h4 style={{ color: 'var(--brand-primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Network size={20} /> The Algorithm</h4>
-            <p className="insight-desc" style={{ fontSize: '0.95rem' }}>
-              MindSpace utilizes a <strong>Random Forest Classifier</strong>. Unlike simple linear models, Random Forest builds an ensemble of decision trees, each voting on the risk level. This handles the "Non-Linear Spikes" in burnout—where stress levels of 8 or 9 combined with low sleep create a risk level significantly higher than the sum of its parts.
+      {/* Methodology Section */}
+      <div className="card" style={{ background: 'rgba(139, 92, 246, 0.02)' }}>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+            <GraduationCap size={20} style={{ color: 'var(--brand-primary)' }} /> Methodology & Theoretical Framework
+          </h3>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ background: 'var(--card-bg)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <h4 style={{ color: 'var(--brand-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.95rem', fontWeight: 600 }}>
+              <Network size={18} /> The Algorithm
+            </h4>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+              MindSpace utilizes a <strong>Random Forest Classifier</strong> to model complex non-linear burnout spikes from study/sleep interactions.
             </p>
           </div>
-          <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-            <h4 style={{ color: 'var(--info)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Activity size={20} /> Evaluation Mode</h4>
-            <p className="insight-desc" style={{ fontSize: '0.95rem' }}>
-              We employ a <strong>80/20 Supervised Split</strong>. The uploaded dataset is partitioned: 80% is used for training (learning the patterns) and 20% is reserved as a "Blind Test." The metrics shown above reflect how well the model performed on the blind test—data it had never seen before—ensuring a realistic measure of its diagnostic accuracy.
+          <div style={{ background: 'var(--card-bg)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <h4 style={{ color: 'var(--info)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.95rem', fontWeight: 600 }}>
+              <Activity size={18} /> Evaluation Split
+            </h4>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+              An <strong>80/20 train/test split</strong> ensures reported metrics reflect performance on unseen blind test data.
             </p>
           </div>
-          <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-            <h4 style={{ color: 'var(--warning)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Zap size={20} /> Diagnostic Success</h4>
-            <p className="insight-desc" style={{ fontSize: '0.95rem' }}>
-              Our model "spared" through the data by identifying <strong>Multivariate Clusters</strong>. It doesn't just look at high study hours; it analyzes the <em>ratio</em> of effort to recovery. This allows MindSpace to differentiate between "High-Performance Achievers" (high study, high sleep) and "Burnout Candidates" (high study, low sleep).
+          <div style={{ background: 'var(--card-bg)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <h4 style={{ color: 'var(--warning)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.95rem', fontWeight: 600 }}>
+              <Zap size={18} /> Diagnostic Target
+            </h4>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+              Identifies <strong>multivariate clusters</strong> to distinguish high achievers from genuine burnout candidates.
             </p>
           </div>
         </div>
       </div>
 
+      {/* ROC-AUC Banner */}
       {metrics.roc_auc && (
-        <div className="card" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ flexShrink: 0, textAlign: 'center', paddingRight: '1.5rem', borderRight: '1px solid var(--card-border)' }}>
-            <div className="stat-label" style={{ justifyContent: 'center' }}>ROC-AUC (OvR)</div>
-            <div className="stat-val" style={{ color: 'var(--info)', fontSize: '2rem' }}>{metrics.roc_auc}</div>
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem' }}>
+          <div style={{ flexShrink: 0, textAlign: 'center', paddingRight: '1.5rem', borderRight: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>ROC-AUC (OvR)</div>
+            <div style={{ color: 'var(--info)', fontSize: '1.8rem', fontWeight: 700, lineHeight: 1.2, marginTop: '2px' }}>{metrics.roc_auc}</div>
           </div>
-          <p className="insight-desc" style={{ margin: 0 }}>
-            AUC above <strong>0.90</strong> means the model can reliably distinguish between all three risk classes. The closer to 1.0, the less it needs to guess when the decision boundary is tight.
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            AUC above <strong>0.90</strong> indicates exceptional discrimination capacity between Low, Medium, and High risk tiers.
           </p>
         </div>
       )}
 
+      {/* Visual Confusion Matrix Plot */}
       <div className="card">
-        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Image size={20} /> Visual Confusion Matrix
-        </h3>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <img src={data.plot} alt="Confusion Matrix Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', background: 'var(--input-bg)' }} />
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+            <Image size={18} style={{ color: 'var(--brand-primary)' }} /> Visual Confusion Matrix
+          </h3>
+        </div>
+        <div style={{ maxWidth: '540px', margin: '0 auto' }}>
+          <img src={data.plot} alt="Confusion Matrix Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--input-bg)' }} />
         </div>
       </div>
-    </>
+    </motion.div>
   );
 };
 

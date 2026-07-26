@@ -1,5 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
+import { staggerItem } from '../../lib/motion';
 
 export interface InsightCardProps {
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
@@ -25,7 +27,13 @@ export const InsightCard: React.FC<InsightCardProps> = ({
   children,
 }) => {
   return (
-    <div className={`card insight-row ${reverse ? 'reverse' : ''}`} style={{ marginBottom: '2.5rem' }}>
+    <motion.div
+      variants={staggerItem}
+      initial="initial"
+      animate="animate"
+      className={`card insight-row ${reverse ? 'reverse' : ''}`}
+      style={{ marginBottom: '2.5rem', gap: '2rem' }}
+    >
       <div className="insight-text-col">
         <h3 className="insight-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <IconComponent size={24} style={{ color: 'var(--brand-primary)' }} /> {title}
@@ -48,7 +56,7 @@ export const InsightCard: React.FC<InsightCardProps> = ({
           />
         ) : null}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

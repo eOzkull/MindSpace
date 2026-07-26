@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import type { Accept, FileRejection } from 'react-dropzone';
 import { useDropzone } from 'react-dropzone';
+import { motion } from 'framer-motion';
 import {
   CloudUpload,
   Sparkles,
@@ -82,92 +83,99 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
   const IconToRender = IconComponent || CloudUpload;
 
   return (
-    <div
-      {...getRootProps()}
-      className={getContainerClass()}
-      style={{
-        cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      style={{ width: '100%' }}
     >
-      <input {...getInputProps()} id="file-upload" data-testid="dropzone-input" />
-      <div className={compact ? 'upload-zone-content-compact' : 'upload-zone-content'}>
-        {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-            <Loader2
-              size={compact ? 36 : 48}
-              className="animate-spin"
-              style={{ color: 'var(--brand-primary)' }}
-            />
-            <p style={{ color: 'var(--text-secondary)', fontWeight: 500, margin: 0 }}>
-              Processing…
-            </p>
-          </div>
-        ) : isDragReject ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={compact ? 36 : 52} style={{ color: 'var(--danger)', marginBottom: '0.25rem' }} />
-            <h4 style={{ color: 'var(--danger)', margin: 0, fontSize: compact ? '1rem' : '1.15rem' }}>CSV files only</h4>
-            <p className="text-secondary" style={{ fontSize: '0.875rem', margin: 0 }}>
-              Please drop a single valid <strong>.csv</strong> file.
-            </p>
-          </div>
-        ) : isDragActive ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-            <IconToRender size={compact ? 36 : 52} style={{ color: 'var(--brand-primary)', marginBottom: '0.25rem' }} />
-            <h4 style={{ color: 'var(--brand-primary)', margin: 0, fontSize: compact ? '1rem' : '1.15rem' }}>Release to upload</h4>
-            <p className="text-secondary" style={{ fontSize: '0.875rem', margin: 0 }}>
-              Drop your CSV file to begin analysis immediately
-            </p>
-          </div>
-        ) : (
-          <>
-            <IconToRender
-              className="upload-icon"
-              size={compact ? 36 : 52}
-              style={{
-                color: compact ? 'var(--brand-secondary)' : 'var(--brand-primary)',
-              }}
-            />
-            <h3 style={{ marginBottom: '6px', fontSize: compact ? '1.05rem' : '1.25rem', fontWeight: 600 }}>{title}</h3>
-            <p className="text-secondary" style={{ fontSize: compact ? '0.85rem' : '0.925rem', margin: compact ? '0 0 0.75rem 0' : '0 0 1.25rem 0' }}>{subtitle}</p>
-
-            {buttonText && !compact && (
-              <span
-                className="btn btn-primary"
+      <div
+        {...getRootProps()}
+        className={getContainerClass()}
+        style={{
+          cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
+        }}
+      >
+        <input {...getInputProps()} id="file-upload" data-testid="dropzone-input" />
+        <div className={compact ? 'upload-zone-content-compact' : 'upload-zone-content'}>
+          {isLoading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+              <Loader2
+                size={compact ? 36 : 48}
+                className="animate-spin"
+                style={{ color: 'var(--brand-primary)' }}
+              />
+              <p style={{ color: 'var(--text-secondary)', fontWeight: 500, margin: 0 }}>
+                Processing…
+              </p>
+            </div>
+          ) : isDragReject ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertCircle size={compact ? 36 : 52} style={{ color: 'var(--danger)', marginBottom: '0.25rem' }} />
+              <h4 style={{ color: 'var(--danger)', margin: 0, fontSize: compact ? '1rem' : '1.15rem' }}>CSV files only</h4>
+              <p className="text-secondary" style={{ fontSize: '0.875rem', margin: 0 }}>
+                Please drop a single valid <strong>.csv</strong> file.
+              </p>
+            </div>
+          ) : isDragActive ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <IconToRender size={compact ? 36 : 52} style={{ color: 'var(--brand-primary)', marginBottom: '0.25rem' }} />
+              <h4 style={{ color: 'var(--brand-primary)', margin: 0, fontSize: compact ? '1rem' : '1.15rem' }}>Release to upload</h4>
+              <p className="text-secondary" style={{ fontSize: '0.875rem', margin: 0 }}>
+                Drop your CSV file to begin analysis immediately
+              </p>
+            </div>
+          ) : (
+            <>
+              <IconToRender
+                className="upload-icon"
+                size={compact ? 36 : 52}
                 style={{
-                  borderRadius: '9999px',
-                  padding: '10px 24px',
-                  margin: '0 auto',
+                  color: compact ? 'var(--brand-secondary)' : 'var(--brand-primary)',
                 }}
-              >
-                <Sparkles size={16} /> {buttonText}
-              </span>
-            )}
+              />
+              <h3 style={{ marginBottom: '6px', fontSize: compact ? '1.05rem' : '1.25rem', fontWeight: 600 }}>{title}</h3>
+              <p className="text-secondary" style={{ fontSize: compact ? '0.85rem' : '0.925rem', margin: compact ? '0 0 0.75rem 0' : '0 0 1.25rem 0' }}>{subtitle}</p>
 
-            {selectedFile && (
-              <div
-                style={{
-                  marginTop: compact ? '0.75rem' : '1.25rem',
-                  padding: '6px 14px',
-                  borderRadius: '9999px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.25)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: 'var(--success)',
-                  fontWeight: 500,
-                  fontSize: '0.85rem',
-                }}
-              >
-                <FileSpreadsheet size={16} />
-                <CheckCircle2 size={16} />
-                <span>{selectedFile.name}</span>
-              </div>
-            )}
-          </>
-        )}
+              {buttonText && !compact && (
+                <span
+                  className="btn btn-primary"
+                  style={{
+                    borderRadius: '9999px',
+                    padding: '10px 24px',
+                    margin: '0 auto',
+                  }}
+                >
+                  <Sparkles size={16} /> {buttonText}
+                </span>
+              )}
+
+              {selectedFile && (
+                <div
+                  style={{
+                    marginTop: compact ? '0.75rem' : '1.25rem',
+                    padding: '6px 14px',
+                    borderRadius: '9999px',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: 'var(--success)',
+                    fontWeight: 500,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <FileSpreadsheet size={16} />
+                  <CheckCircle2 size={16} />
+                  <span>{selectedFile.name}</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
