@@ -23,12 +23,14 @@ from extensions import db, migrate
 import models
 
 # ── Blueprints ────────────────────────────────────────────────────────────────
-from routes.history_routes    import history_bp
-from routes.upload_routes     import upload_bp
-from routes.dashboard_routes  import dashboard_bp
-from routes.evaluation_routes import evaluation_bp
-from routes.edit_routes       import edit_bp
-from routes.compare_routes    import compare_bp
+from routes.history_routes         import history_bp
+from routes.upload_routes          import upload_bp
+from routes.dashboard_routes       import dashboard_bp
+from routes.evaluation_routes      import evaluation_bp
+from routes.edit_routes            import edit_bp
+from routes.compare_routes         import compare_bp
+from routes.anomalies_routes       import anomalies_bp
+from routes.recommendations_routes import recommendations_bp
 
 def create_app(config_class=Config):
     """Application factory for the MindSpace Flask backend."""
@@ -56,6 +58,8 @@ def create_app(config_class=Config):
     app.register_blueprint(evaluation_bp)
     app.register_blueprint(edit_bp)
     app.register_blueprint(compare_bp)
+    app.register_blueprint(anomalies_bp)
+    app.register_blueprint(recommendations_bp)
 
     logger.info(f"MindSpace application initialized in '{config_class.FLASK_ENV}' mode.")
     return app
