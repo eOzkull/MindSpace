@@ -39,7 +39,8 @@ def create_app(config_class=Config):
 
     # Initialize extensions
     db.init_app(app)
-    migrate.init_app(app, db)
+    if migrate:
+        migrate.init_app(app, db)
 
     # Automatically create database tables if they do not exist
     with app.app_context():

@@ -34,11 +34,15 @@ async function _handle<T>(res: Response): Promise<T> {
 }
 
 // ---------------------------------------------------------------------------
-// Shared fetch defaults — credentials: 'include' ensures Flask session
-// cookies are forwarded on every request (required for session-isolated state)
+// Shared fetch defaults
+// - 'same-origin': safe default for Vercel (frontend + /api/* are same origin)
+// - 'include':     needed locally so Flask session cookies cross the Vite→Flask
+//                  proxy boundary (different ports = cross-origin in dev)
 // ---------------------------------------------------------------------------
+const IS_DEV = import.meta.env.DEV;
+
 const BASE_INIT: RequestInit = {
-  credentials: 'include',
+  credentials: IS_DEV ? 'include' : 'same-origin',
 };
 
 export const apiClient = {

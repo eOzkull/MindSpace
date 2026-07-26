@@ -42,7 +42,9 @@ import {
   BookOpen,
   Activity,
   MessageSquare,
-  Users
+  Users,
+  Upload,
+  CloudUpload
 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
@@ -106,14 +108,30 @@ const data = dashboard?.data ?? [];
   }, [columns]);
 
 
-  if (error)
-  return (
-    <div className="card flash-alert flash-danger">
-      <AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-      {error.message}
-    </div>
-  );
-  if (loading || !stats) return <LoadingScreen message="Loading Dashboard..." subtitle="Assembling cohort stats and rendering visual insights." />;
+  if (error || (!loading && !stats)) {
+    const rawError = (error as any)?.body?.error || error?.message || 'No dataset loaded yet.';
+    const isNoDataset = rawError.includes('No dataset') || rawError.includes('400');
+
+    return (
+      <div className="card" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-primary)', marginBottom: '1.5rem' }}>
+          <CloudUpload size={32} />
+        </div>
+        <h2 style={{ marginBottom: '0.5rem' }}>{isNoDataset ? 'No Active Dataset' : 'Dashboard Unavailable'}</h2>
+        <p className="text-secondary" style={{ marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+          {isNoDataset 
+            ? 'Upload a student cohort CSV dataset from the Home page to unlock interactive visualizations and risk analytics.' 
+            : rawError}
+        </p>
+        <Link to="/" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <Upload size={18} /> Go to Upload Page
+        </Link>
+      </div>
+    );
+  }
+
+  if (loading) return <LoadingScreen message="Loading Dashboard..." subtitle="Assembling cohort stats and rendering visual insights." />;
+  if (!stats) return null;
 
   const filteredData = data.filter(row => {
     const riskMatch = riskFilter === 'All' || row['risk'] === riskFilter;

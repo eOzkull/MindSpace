@@ -1,5 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 
 db = SQLAlchemy()
-migrate = Migrate()
+
+try:
+    from flask_migrate import Migrate
+    migrate = Migrate()
+except ImportError:
+    migrate = None
+

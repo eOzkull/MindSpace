@@ -1,0 +1,12 @@
+.venv
+venv
+ENV
+env
+frontend/node_modules
+frontend/dist
+.git
+.github
+*.pyc
+__pycache__
+documents
+sample_students.csv

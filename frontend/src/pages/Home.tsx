@@ -74,9 +74,11 @@ const Home: React.FC = () => {
           setError(res.error || 'Upload failed');
         }
       },
-      onError: (err) => {
-        console.error(err);
-        setError('Error uploading file');
+      onError: (err: any) => {
+        console.error('Upload error:', err);
+        const bodyError = err?.body?.error || err?.body?.message;
+        const msg = typeof bodyError === 'string' ? bodyError : (err?.message || 'Error uploading file');
+        setError(msg);
       }
     });
   };

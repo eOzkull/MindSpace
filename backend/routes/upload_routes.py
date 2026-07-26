@@ -75,8 +75,12 @@ def upload():
                 if sid_col:
                     known_cols.add(sid_col)
                     
-                demo_data = {k: v for k, v in row.to_dict().items() if k not in known_cols and pd.notnull(v)}
-                demographics_json = json.dumps(demo_data) if demo_data else None
+                demo_data = {}
+                for k, v in row.to_dict().items():
+                    if k not in known_cols and pd.notnull(v):
+                        demo_data[str(k)] = v.item() if hasattr(v, 'item') else str(v)
+
+                demographics_json = json.dumps(demo_data, default=str) if demo_data else None
                 
                 student = Student(
                     student_id=student_id_val,
@@ -87,7 +91,7 @@ def upload():
                     stress_level=float(stress_level) if stress_level is not None and not pd.isna(stress_level) else None,
                     burnout_score=float(burnout_score) if burnout_score is not None and not pd.isna(burnout_score) else None,
                     sentiment_score=float(sentiment_score) if sentiment_score is not None and not pd.isna(sentiment_score) else None,
-                    risk=risk
+                    risk=str(risk) if risk is not None and not pd.isna(risk) else None
                 )
                 student_records.append(student)
                 
