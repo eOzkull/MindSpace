@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { useDropzone, type Accept, type FileRejection } from 'react-dropzone';
+import type { Accept, FileRejection } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import {
   CloudUpload,
   Sparkles,
@@ -85,7 +86,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       {...getRootProps()}
       className={getContainerClass()}
       style={{
-        padding: compact ? '2.5rem 1.5rem' : 0,
         cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
       }}
     >
@@ -98,38 +98,47 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
               className="animate-spin"
               style={{ color: 'var(--brand-primary)' }}
             />
-            <p style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
-              Uploading & Processing Dataset...
+            <p style={{ color: 'var(--text-secondary)', fontWeight: 500, margin: 0 }}>
+              Processing…
             </p>
           </div>
         ) : isDragReject ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={compact ? 36 : 54} style={{ color: 'var(--danger)', marginBottom: '0.5rem' }} />
-            <h4 style={{ color: 'var(--danger)', margin: 0 }}>Invalid File Format</h4>
-            <p className="text-secondary" style={{ fontSize: '0.9rem', margin: 0 }}>
-              Please drop a single <strong>.csv</strong> file.
+            <AlertCircle size={compact ? 36 : 52} style={{ color: 'var(--danger)', marginBottom: '0.25rem' }} />
+            <h4 style={{ color: 'var(--danger)', margin: 0, fontSize: compact ? '1rem' : '1.15rem' }}>CSV files only</h4>
+            <p className="text-secondary" style={{ fontSize: '0.875rem', margin: 0 }}>
+              Please drop a single valid <strong>.csv</strong> file.
             </p>
           </div>
         ) : isDragActive ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-            <IconToRender size={compact ? 36 : 54} style={{ color: 'var(--brand-primary)', marginBottom: '0.5rem' }} />
-            <h4 style={{ color: 'var(--brand-primary)', margin: 0 }}>Drop your CSV file here</h4>
-            <p className="text-secondary" style={{ fontSize: '0.9rem', margin: 0 }}>
-              Release to start processing immediately
+            <IconToRender size={compact ? 36 : 52} style={{ color: 'var(--brand-primary)', marginBottom: '0.25rem' }} />
+            <h4 style={{ color: 'var(--brand-primary)', margin: 0, fontSize: compact ? '1rem' : '1.15rem' }}>Release to upload</h4>
+            <p className="text-secondary" style={{ fontSize: '0.875rem', margin: 0 }}>
+              Drop your CSV file to begin analysis immediately
             </p>
           </div>
         ) : (
           <>
             <IconToRender
               className="upload-icon"
-              size={compact ? 44 : 64}
-              style={{ color: compact ? 'var(--brand-secondary)' : 'var(--brand-primary)', marginBottom: compact ? '0.75rem' : '1.5rem' }}
+              size={compact ? 36 : 52}
+              style={{
+                color: compact ? 'var(--brand-secondary)' : 'var(--brand-primary)',
+              }}
             />
-            <h3 style={{ marginBottom: '8px', fontSize: compact ? '1.15rem' : '1.35rem' }}>{title}</h3>
-            <p className="text-secondary" style={{ marginBottom: compact ? '1rem' : '1.5rem' }}>{subtitle}</p>
+            <h3 style={{ marginBottom: '6px', fontSize: compact ? '1.05rem' : '1.25rem', fontWeight: 600 }}>{title}</h3>
+            <p className="text-secondary" style={{ fontSize: compact ? '0.85rem' : '0.925rem', margin: compact ? '0 0 0.75rem 0' : '0 0 1.25rem 0' }}>{subtitle}</p>
 
             {buttonText && !compact && (
-              <span className="btn btn-primary" style={{ margin: '0 auto' }}>
+              <span
+                className="btn btn-primary"
+                style={{
+                  borderRadius: '9999px',
+                  padding: '10px 24px',
+                  margin: '0 auto',
+                }}
+              >
                 <Sparkles size={16} /> {buttonText}
               </span>
             )}
@@ -137,17 +146,17 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
             {selectedFile && (
               <div
                 style={{
-                  marginTop: '1.25rem',
-                  padding: '8px 16px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--input-bg)',
-                  border: '1px solid var(--card-border)',
+                  marginTop: compact ? '0.75rem' : '1.25rem',
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
                   color: 'var(--success)',
                   fontWeight: 500,
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                 }}
               >
                 <FileSpreadsheet size={16} />
@@ -163,3 +172,4 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
 };
 
 export default FileDropzone;
+

@@ -162,31 +162,29 @@ const Compare = () => {
 
   if (!status?.compare_loaded) {
     return (
-      <div className="card" style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center' }}>
-        <h3
-          style={{
-            marginBottom: '0.5rem',
-            color: 'var(--success)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-          }}
-        >
-          <CheckCircle2 size={20} style={{ color: 'var(--success)' }} /> Primary dataset loaded
-        </h3>
-        <p className="insight-desc" style={{ marginBottom: '2rem' }}>
-          Your primary dataset is in memory. Upload a second CSV below to run the comparison.
-        </p>
-        <FileDropzone
-          onFileDrop={(file) => uploadMutation.mutate(file)}
-          isLoading={uploadMutation.isPending}
-          disabled={uploadMutation.isPending}
-          title="Select Dataset B"
-          subtitle="Drag and drop a CSV file here, or click to browse"
-          icon={Files}
-          compact
-        />
+      <div className="card" style={{ maxWidth: '860px', margin: '0 auto', padding: '2.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', alignItems: 'center' }}>
+          <div style={{ paddingRight: '1rem', borderRight: '1px solid var(--card-border)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '9999px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', fontSize: '0.8rem', fontWeight: 600, marginBottom: '1rem' }}>
+              <CheckCircle2 size={14} /> Dataset A Ready
+            </div>
+            <h3 style={{ marginBottom: '0.5rem', fontSize: '1.35rem', fontWeight: 700 }}>Primary Dataset Loaded</h3>
+            <p className="insight-desc" style={{ fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+              Your primary dataset is currently active in memory. Upload a secondary CSV file (Dataset B) to perform comparative cohort analysis.
+            </p>
+          </div>
+          <div>
+            <FileDropzone
+              onFileDrop={(file) => uploadMutation.mutate(file)}
+              isLoading={uploadMutation.isPending}
+              disabled={uploadMutation.isPending}
+              title="Upload Dataset B"
+              subtitle="Drag & drop CSV or click to browse"
+              icon={Files}
+              compact
+            />
+          </div>
+        </div>
       </div>
     );
   }
@@ -238,7 +236,7 @@ const Compare = () => {
             const studentId = `ST-${selectedIndices[idx] + 1}`;
             const isBaseline = idx === 0;
             const baseline = selectedStudents[0];
-            
+
             const sleep = Number(student.sleep_hours) || 0;
             const study = Number(student.study_hours) || 0;
             const stress = Number(student.stress_level) || 0;

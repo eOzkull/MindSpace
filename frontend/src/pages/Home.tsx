@@ -4,17 +4,17 @@ import { useHistory, useUploadFile, useResetSession } from '../hooks/useUpload';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
 import { Spinner } from '../components/Spinner/Spinner';
 import FileDropzone from '../components/Dropzone/FileDropzone';
-import {  
-  Upload, 
-  History, 
-  Trash2, 
-  FileSpreadsheet, 
-  LayoutDashboard, 
-  CheckSquare, 
-  Moon, 
-  BookOpen, 
-  AlertTriangle, 
-  MessageSquare 
+import {
+  Upload,
+  History,
+  Trash2,
+  FileSpreadsheet,
+  LayoutDashboard,
+  CheckSquare,
+  Moon,
+  BookOpen,
+  AlertTriangle,
+  MessageSquare
 } from 'lucide-react';
 
 const Home: React.FC = () => {
@@ -55,41 +55,57 @@ const Home: React.FC = () => {
     <>
       {loading && (
         <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Spinner size={64} label="Analyzing Your Data..."/>
+          <Spinner size={64} label="Analyzing Your Data..." />
           <p style={{ color: 'var(--text-secondary)' }}>Recalculating burnout metrics and training ML models. Please wait.</p>
         </div>
       )}
 
       {error && (
-  <ErrorBanner
-    title="Upload Failed"
-    message={error}
-    variant="danger"
-  />
-)}
+        <ErrorBanner
+          title="Upload Failed"
+          message={error}
+          variant="danger"
+        />
+      )}
 
       <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-        <div className="card" style={{ gridColumn: 'span 2', padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '1.75rem 1.75rem 0.5rem 1.75rem' }}>
-            <h2 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Upload size={24} style={{ color: 'var(--brand-primary)' }} /> New Session
+        <div className="card" style={{ gridColumn: 'span 2', padding: '2rem' }}>
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h2 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.4rem' }}>
+              <Upload size={22} style={{ color: 'var(--brand-primary)' }} /> New Analysis Session
             </h2>
-            <p className="text-secondary">Upload a student dataset in CSV format to begin analysis.</p>
+            <p className="text-secondary" style={{ fontSize: '0.95rem', margin: 0 }}>
+              Upload a student dataset in CSV format to begin machine learning burnout analysis.
+            </p>
           </div>
 
-          <div style={{ padding: '1.75rem' }}>
-            <FileDropzone
-              onFileDrop={(file) => {
-                setSelectedFile(file);
-                handleUpload(file);
-              }}
-              selectedFile={selectedFile}
-              isLoading={loading}
-              disabled={loading}
-              title="Drag and drop your CSV"
-              subtitle="or click to browse from your computer"
-              buttonText="Analyze Data"
-            />
+          <FileDropzone
+            onFileDrop={(file) => {
+              setSelectedFile(file);
+              handleUpload(file);
+            }}
+            selectedFile={selectedFile}
+            isLoading={loading}
+            disabled={loading}
+            title="Drag and drop your CSV dataset"
+            subtitle="or click to browse files from your computer"
+            buttonText="Analyze Data"
+          />
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1.5rem',
+            marginTop: '1.25rem',
+            fontSize: '0.825rem',
+            color: 'var(--text-muted)'
+          }}>
+            <span>Accepted format: <strong>.csv</strong></span>
+            <span>•</span>
+            <span>Max file size: <strong>50 MB</strong></span>
+            <span>•</span>
+            <span>Secure local ML processing</span>
           </div>
         </div>
 
