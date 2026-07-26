@@ -4,6 +4,7 @@ import { useDashboard } from '../hooks/useDashboard';
 import DataTable from '../components/tables/DataTable';
 import LoadingScreen from '../components/LoadingScreen';
 import { InsightCard } from '../components/cards';
+import FileDropzone from '../components/Dropzone/FileDropzone';
 import {
   CompareBurnoutHistChart,
   CompareRiskBarChart,
@@ -108,14 +109,6 @@ const Compare = () => {
   const uploadMutation = useUploadCompareFile();
   const clearMutation = useClearCompare();
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    uploadMutation.mutate(file);
-    // reset input to allow re-uploading the same file
-    e.target.value = '';
-  };
-
   const handleClear = () => {
     clearMutation.mutate();
   };
@@ -185,12 +178,15 @@ const Compare = () => {
         <p className="insight-desc" style={{ marginBottom: '2rem' }}>
           Your primary dataset is in memory. Upload a second CSV below to run the comparison.
         </p>
-        <label className="upload-zone" style={{ padding: '3rem 1.5rem', cursor: 'pointer', display: 'block' }}>
-          <Files size={48} style={{ color: 'var(--brand-secondary)', marginBottom: '1rem', display: 'inline-block' }} />
-          <h4 style={{ marginBottom: '0.5rem' }}>Select Dataset B</h4>
-          <p className="insight-desc" style={{ marginBottom: '1.5rem' }}>Click to browse your files</p>
-          <input type="file" accept=".csv" onChange={handleUpload} style={{ display: 'none' }} />
-        </label>
+        <FileDropzone
+          onFileDrop={(file) => uploadMutation.mutate(file)}
+          isLoading={uploadMutation.isPending}
+          disabled={uploadMutation.isPending}
+          title="Select Dataset B"
+          subtitle="Drag and drop a CSV file here, or click to browse"
+          icon={Files}
+          compact
+        />
       </div>
     );
   }

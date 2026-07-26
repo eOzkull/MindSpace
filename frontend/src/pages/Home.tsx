@@ -1,13 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHistory, useUploadFile, useResetSession } from '../hooks/useUpload';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
 import { Spinner } from '../components/Spinner/Spinner';
+import FileDropzone from '../components/Dropzone/FileDropzone';
 import {  
   Upload, 
-  CloudUpload, 
-  Sparkles, 
-  CheckCircle2, 
   History, 
   Trash2, 
   FileSpreadsheet, 
@@ -27,41 +25,11 @@ const Home: React.FC = () => {
 
   const loading = uploadMutation.isPending;
   const [error, setError] = useState('');
-  const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleClear = async () => {
     resetMutation.mutate();
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const onDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  const onDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      setSelectedFile(file);
-      await handleUpload(file);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      await handleUpload(file);
-    }
   };
 
   const handleUpload = async (file: File) => {
@@ -110,37 +78,18 @@ const Home: React.FC = () => {
           </div>
 
           <div style={{ padding: '1.75rem' }}>
-            <label
-              className={`upload-zone ${dragOver ? 'dragover' : ''}`}
-              id="drop-zone"
-              htmlFor="file-upload"
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-            >
-              <div className="upload-zone-content">
-                <CloudUpload className="upload-icon" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
-                <h3 style={{ marginBottom: '8px' }}>Drag and drop your CSV</h3>
-                <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>or click to browse from your computer</p>
-
-                <input
-                  type="file"
-                  id="file-upload"
-                  accept=".csv"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
-                <span className="btn btn-primary" style={{ margin: '0 auto' }}>
-                  <Sparkles size={16} /> Analyze Data
-                </span>
-                {selectedFile && (
-                  <p style={{ marginTop: '1.5rem', color: 'var(--success)', fontWeight: 500 }}>
-                    <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> {selectedFile.name}
-                  </p>
-                )}
-              </div>
-            </label>
+            <FileDropzone
+              onFileDrop={(file) => {
+                setSelectedFile(file);
+                handleUpload(file);
+              }}
+              selectedFile={selectedFile}
+              isLoading={loading}
+              disabled={loading}
+              title="Drag and drop your CSV"
+              subtitle="or click to browse from your computer"
+              buttonText="Analyze Data"
+            />
           </div>
         </div>
 

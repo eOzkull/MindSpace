@@ -249,10 +249,36 @@ body {
     align-items: center;
 }
 
-.upload-zone:hover, .upload-zone.dragover {
+.upload-zone-content-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.upload-zone:hover, .upload-zone.dragover, .upload-zone.drag-active {
     border-color: var(--brand-primary);
-    background: rgba(139, 92, 246, 0.06);
+    background: rgba(139, 92, 246, 0.08);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
     transform: scale(1.005);
+}
+
+.upload-zone.drag-reject {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.08);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+    transform: scale(1.005);
+}
+
+.upload-zone.is-loading {
+    border-color: var(--brand-secondary);
+    background: rgba(59, 130, 246, 0.06);
+    cursor: wait;
+}
+
+.upload-zone.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .upload-icon { 
