@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 type ErrorBannerProps = {
@@ -25,46 +26,53 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
   variant = 'danger',
 }) => {
   const [open, setOpen] = React.useState(true);
-  if (!open) return null;
 
   const style = variantToStyle(variant);
 
   return (
-    <div
-      className="card"
-      style={{
-        marginBottom: '1.5rem',
-        border: '1px solid var(--card-border)',
-        borderLeft: `4px solid ${style.borderColor}`,
-        background: style.background,
-        color: style.color,
-        padding: '0.9rem 1rem',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        gap: '1rem',
-      }}
-      role="alert"
-    >
-      <div>
-        <div style={{ fontWeight: 700, marginBottom: 4 }}>{title}</div>
-        <div style={{ color: 'var(--text-primary)' }}>{message}</div>
-      </div>
-      <button
-        type="button"
-        onClick={() => setOpen(false)}
-        aria-label="Dismiss"
-        style={{
-          border: 'none',
-          background: 'transparent',
-          color: style.color,
-          cursor: 'pointer',
-          padding: 4,
-        }}
-      >
-        <X size={18} />
-      </button>
-    </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          className="card"
+          style={{
+            marginBottom: '1.5rem',
+            border: '1px solid var(--card-border)',
+            borderLeft: `4px solid ${style.borderColor}`,
+            background: style.background,
+            color: style.color,
+            padding: '0.9rem 1rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: '1rem',
+          }}
+          role="alert"
+        >
+          <div>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>{title}</div>
+            <div style={{ color: 'var(--text-primary)' }}>{message}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Dismiss"
+            style={{
+              border: 'none',
+              background: 'transparent',
+              color: style.color,
+              cursor: 'pointer',
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

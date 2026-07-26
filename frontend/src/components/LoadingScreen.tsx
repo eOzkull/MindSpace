@@ -1,5 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { fadeIn } from '../lib/motion';
 
 interface LoadingScreenProps {
   message?: string;
@@ -11,26 +13,37 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   subtitle = 'Please wait while we prepare your data.'
 }) => {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '5rem 2rem',
-      minHeight: '400px',
-      width: '100%',
-      background: 'var(--card-bg)',
-      border: '1px solid var(--card-border)',
-      borderRadius: 'var(--radius-lg)',
-      backdropFilter: 'var(--glass-blur)',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-      marginTop: '1rem',
-    }}>
-      <Loader2 
-        className="animate-spin" 
-        size={44} 
-        style={{ color: 'var(--brand-primary)', marginBottom: '1.25rem' }} 
-      />
+    <motion.div
+      {...fadeIn}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '5rem 2rem',
+        minHeight: '400px',
+        width: '100%',
+        background: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        borderRadius: 'var(--radius-lg)',
+        backdropFilter: 'var(--glass-blur)',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        marginTop: '1rem',
+      }}
+    >
+      <motion.div
+        animate={{ rotate: 360, opacity: [0.6, 1, 0.6] }}
+        transition={{
+          rotate: { repeat: Infinity, duration: 1, ease: 'linear' },
+          opacity: { repeat: Infinity, duration: 1.8, ease: 'easeInOut' },
+        }}
+        style={{ display: 'inline-flex', marginBottom: '1.25rem' }}
+      >
+        <Loader2 
+          size={44} 
+          style={{ color: 'var(--brand-primary)' }} 
+        />
+      </motion.div>
       <h3 style={{ 
         marginBottom: '0.5rem', 
         fontWeight: 600, 
@@ -50,7 +63,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       }}>
         {subtitle}
       </p>
-    </div>
+    </motion.div>
   );
 };
 
