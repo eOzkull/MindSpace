@@ -23,11 +23,11 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,
-      gcTime: 300_000,
-      refetchOnMount: 'always',
-      refetchOnWindowFocus: false,
-      retry: 1,
+      staleTime: 0,                // data is marked stale immediately so navigation always fetches fresh state
+      gcTime: 300_000,            // keep unused cache in memory for 5 minutes
+      refetchOnMount: 'always',    // always refetch fresh backend data when navigating to any page
+      refetchOnWindowFocus: false, // prevent background refetches on tab switch
+      retry: 1,                   // retry once on failure
     },
   },
 });

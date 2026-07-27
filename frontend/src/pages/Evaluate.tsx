@@ -47,7 +47,7 @@ const Evaluate: React.FC = () => {
       <motion.div {...fadeUp} className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
         <AlertCircle size={48} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
         <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', fontWeight: 600 }}>Model Not Ready</h3>
-        <p className="insight-desc" style={{ color: 'var(--text-secondary)' }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
         {target === 'compare' && (
           <div style={{ marginTop: '1.5rem' }}>
             <button onClick={() => navigate('/evaluate?dataset=primary')} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
