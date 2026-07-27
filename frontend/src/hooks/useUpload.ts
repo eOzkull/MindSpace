@@ -22,8 +22,11 @@ export const useUploadFile = () => {
 =======
       // Invalidate and reset ALL queries across the app on dataset upload so all pages fetch fresh dataset results
       queryClient.invalidateQueries();
+<<<<<<< HEAD
       queryClient.resetQueries();
 >>>>>>> 675db75 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
+=======
+>>>>>>> e2ce248 (Ml accuracy improvements (#62))
     },
   });
 };
