@@ -15,7 +15,8 @@ export const useUpdateDashboard = () => {
   return useMutation<SuccessResponse, Error, UpdatePayload[]>({
     mutationFn: updateData,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Invalidate all queries so metrics, evaluate, results, recommendations update after row edits
+      queryClient.invalidateQueries();
     },
   });
 };

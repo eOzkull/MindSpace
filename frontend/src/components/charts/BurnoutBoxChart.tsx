@@ -10,7 +10,7 @@ import {
   ErrorBar,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface BurnoutBoxChartProps {
   data: Array<Record<string, string | number>>;
@@ -50,22 +50,18 @@ export const BurnoutBoxChart: React.FC<BurnoutBoxChartProps> = ({ data, height =
   return (
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 10, right: 15, left: -20, bottom: 5 }}>
+        <BarChart data={chartData} margin={{ top: 12, right: 15, left: -20, bottom: 4 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
           <XAxis
+            {...DEFAULT_X_AXIS_PROPS}
             dataKey="tier"
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 12 }}
-            dy={8}
           />
           <YAxis
+            {...DEFAULT_Y_AXIS_PROPS}
             domain={[0, 100]}
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dx={-8}
           />
           <Tooltip
-            cursor={{ fill: 'var(--card-border)', opacity: 0.4 }}
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const d = payload[0].payload;

@@ -13,7 +13,6 @@ export const ConfusionMatrixHeatmap: React.FC<ConfusionMatrixProps> = ({
   title = 'Confusion Matrix',
   height = '100%'
 }) => {
-  // Find max value for color scale interpolation
   const maxValue = useMemo(() => {
     let max = 0;
     matrix.forEach(row => {
@@ -21,7 +20,13 @@ export const ConfusionMatrixHeatmap: React.FC<ConfusionMatrixProps> = ({
         if (val > max) max = val;
       });
     });
-    return max || 1; // avoid division by zero
+    return max || 1;
+  }, [matrix]);
+
+  const totalPredictions = useMemo(() => {
+    let total = 0;
+    matrix.forEach(row => row.forEach(val => { total += val; }));
+    return total || 1;
   }, [matrix]);
 
   return (
@@ -52,17 +57,26 @@ export const ConfusionMatrixHeatmap: React.FC<ConfusionMatrixProps> = ({
                 <div className="confusion-matrix-row-label">{labels[i]}</div>
                 {row.map((val, j) => {
                   const intensity = val / maxValue;
+                  const isDiagonal = i === j;
+                  const pct = Math.round((val / totalPredictions) * 100);
                   return (
                     <div 
                       key={`cell-${i}-${j}`} 
-                      className="confusion-matrix-cell"
+                      className={`confusion-matrix-cell${isDiagonal ? ' confusion-matrix-cell--diagonal' : ''}`}
                       style={{ 
-                        backgroundColor: `color-mix(in srgb, var(--brand-primary, #3b82f6) ${Math.max(5, intensity * 100)}%, transparent)`,
-                        color: intensity > 0.5 ? '#ffffff' : 'var(--text-primary)'
+                        backgroundColor: isDiagonal
+                          ? `color-mix(in srgb, var(--brand-primary, #6c63ff) ${Math.max(10, intensity * 90)}%, transparent)`
+                          : intensity > 0.05
+                            ? `color-mix(in srgb, var(--danger, #ef4444) ${Math.max(5, intensity * 70)}%, transparent)`
+                            : 'transparent',
+                        color: intensity > 0.5 ? '#ffffff' : 'var(--text-primary)',
                       }}
-                      title={`Actual: ${labels[i]}\nPredicted: ${labels[j]}\nValue: ${val}`}
+                      title={`Actual: ${labels[i]}\nPredicted: ${labels[j]}\nCount: ${val} (${pct}%)`}
                     >
                       <span className="confusion-matrix-val">{val}</span>
+                      {val > 0 && (
+                        <span className="confusion-matrix-pct">{pct}%</span>
+                      )}
                     </div>
                   );
                 })}

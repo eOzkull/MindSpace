@@ -10,7 +10,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface StressSleepChartProps {
   data: Array<Record<string, string | number>>;
@@ -28,7 +28,6 @@ export const StressSleepChart: React.FC<StressSleepChartProps> = ({ data, height
       .filter((d) => !isNaN(d.stress) && !isNaN(d.sleep));
   }, [data]);
 
-  // Compute simple linear regression for trendline
   const trendPoints = useMemo(() => {
     if (chartData.length < 2) return [];
     const n = chartData.length;
@@ -44,35 +43,32 @@ export const StressSleepChart: React.FC<StressSleepChartProps> = ({ data, height
   return (
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <ScatterChart margin={{ top: 10, right: 15, left: -20, bottom: 5 }}>
+        <ScatterChart margin={{ top: 12, right: 15, left: -20, bottom: 4 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
           <XAxis
+            {...DEFAULT_X_AXIS_PROPS}
             type="number"
             dataKey="stress"
             name="Stress"
             domain={[1, 10]}
             tickCount={10}
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dy={8}
           />
           <YAxis
+            {...DEFAULT_Y_AXIS_PROPS}
             type="number"
             dataKey="sleep"
             name="Sleep"
             domain={[3, 12]}
             unit="h"
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dx={-8}
           />
           <Tooltip
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const d = payload[0].payload;
                 return (
                   <div className="custom-chart-tooltip">
-                    <div className="custom-chart-tooltip-title">Student</div>
+                    <div className="custom-chart-tooltip-title">Student Profile</div>
                     <div className="custom-chart-tooltip-list">
                       <div className="custom-chart-tooltip-item">
                         Stress Level:<span className="custom-chart-tooltip-value">{d.stress}/10</span>
@@ -87,7 +83,7 @@ export const StressSleepChart: React.FC<StressSleepChartProps> = ({ data, height
               return null;
             }}
           />
-          <Scatter name="Students" data={chartData} fillOpacity={0.7}>
+          <Scatter name="Students" data={chartData} fillOpacity={0.75}>
             {chartData.map((entry, i) => {
               const fill =
                 entry.risk === 'High'
@@ -98,7 +94,6 @@ export const StressSleepChart: React.FC<StressSleepChartProps> = ({ data, height
               return <Cell key={`c-${i}`} fill={fill} />;
             })}
           </Scatter>
-          {/* Trend line approximated via reference segment */}
           {trendPoints.length === 2 && (
             <ReferenceLine
               segment={[
