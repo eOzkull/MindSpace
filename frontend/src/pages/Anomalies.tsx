@@ -15,13 +15,6 @@ interface AnomalyResponse {
   columns_scanned: string[];
 }
 
-interface AnomalyResponse {
-  anomalies: AnomalyItem[];
-  total_scanned: number;
-  total_flagged: number;
-  columns_scanned: string[];
-}
-
 interface AnomalyItem {
   id: string;
   type: string;
