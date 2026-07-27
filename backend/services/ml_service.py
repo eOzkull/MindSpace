@@ -118,7 +118,7 @@ def _auto_train(df, target='primary'):
         return None
 
     try:
-        feature_cols = [c for c in ['sleep_hours', 'study_hours', 'stress_level'] if c in df.columns]
+        feature_cols = [c for c in ['sleep_hours', 'study_hours', 'stress_level', 'burnout_score', 'sentiment_score'] if c in df.columns]
         if 'risk' not in df.columns or len(feature_cols) < 2:
             return None
 
@@ -142,7 +142,7 @@ def _auto_train(df, target='primary'):
 
         # Train/test split index
         n_samples = len(y)
-        n_test = max(2, min(int(n_samples * 0.25), 20))
+        n_test = max(2, int(n_samples * 0.25))
         indices = np.arange(n_samples)
         np.random.seed(42)
         np.random.shuffle(indices)
@@ -160,7 +160,7 @@ def _auto_train(df, target='primary'):
                 accuracy_score, precision_score, recall_score,
                 f1_score, roc_auc_score, confusion_matrix, classification_report
             )
-            model = RandomForestClassifier(n_estimators=100, random_state=42)
+            model = RandomForestClassifier(n_estimators=200, max_depth=8, max_features='sqrt', class_weight='balanced', random_state=100)
             model.fit(X_train, y_train)
 
             y_pred = model.predict(X_test)

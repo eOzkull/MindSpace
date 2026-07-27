@@ -42,10 +42,16 @@ def edit():
 
         try:
             if col in df.columns:
-                df.at[row, col] = (
+                new_val = (
                     pd.to_numeric(value, errors='coerce')
                     if pd.api.types.is_numeric_dtype(df[col]) else value
                 )
+                
+                # Prevent pandas dtype incompatibility warning/error
+                if pd.api.types.is_integer_dtype(df[col]) and isinstance(new_val, float):
+                    df[col] = df[col].astype(float)
+                    
+                df.at[row, col] = new_val
         except Exception as e:
             logger.error(f"Error updating row {row} col {col}: {e}")
 

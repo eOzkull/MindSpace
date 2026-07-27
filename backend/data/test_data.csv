@@ -1,7 +1,61 @@
-sleep_hours,study_hours,stress_level,feedback
-7,5,8,"Feeling overwhelmed with assignments"
-9,2,3,"Managing stress well"
-6,8,9,"High pressure, need support"
-8,4,6,"Balanced but tired"
-5,6,7,"Struggling with workload"
-10,1,2,"Low stress, good sleep"
+sleep_hours,study_hours,stress_level,feedback,burnout_score,risk,sentiment_score
+5.0,2.0,7.0,Could use more sleep,28.000000000000004,Low,0.629
+7.0,10.0,2.0,A bit busy,28.571428571428573,Low,0.5698
+5.0,2.0,5.0,"Feeling good, balanced",20.0,Low,-0.5079
+4.0,4.0,3.0,Struggling to keep up,30.0,Low,0.1995
+5.0,9.0,7.0,Managing okay,100.0,High,0.065
+4.0,9.0,9.0,"Exhausted, high stress",100.0,High,0.1913
+6.0,10.0,3.0,Feeling energized,50.0,Medium,-0.1653
+8.0,3.0,3.0,Completely overwhelmed,11.25,Low,-0.243
+9.0,10.0,8.0,Stress-free day,88.88888888888889,High,0.3034
+8.0,9.0,3.0,"Burning out, need help",33.75,Medium,0.13
+5.0,1.0,4.0,Could use more sleep,8.0,Low,-0.629
+10.0,8.0,3.0,A bit busy,24.000000000000004,Low,-0.5367
+7.0,4.0,7.0,"Feeling good, balanced",40.0,Medium,0.2622
+5.0,3.0,2.0,Struggling to keep up,12.0,Low,0.6482
+5.0,1.0,7.0,Managing okay,14.000000000000002,Low,-0.1442
+4.0,7.0,4.0,"Exhausted, high stress",70.0,High,0.3863
+9.0,1.0,7.0,Feeling energized,7.777777777777777,Low,-0.2688
+7.0,3.0,8.0,Completely overwhelmed,34.285714285714285,Medium,-0.0454
+10.0,4.0,5.0,Stress-free day,20.0,Low,-0.0503
+7.0,3.0,5.0,"Burning out, need help",21.428571428571427,Low,0.3633
+8.0,9.0,10.0,Could use more sleep,100.0,High,0.6488
+6.0,4.0,10.0,A bit busy,66.66666666666666,High,0.6059
+4.0,6.0,3.0,"Feeling good, balanced",45.0,Medium,0.1322
+8.0,6.0,8.0,Struggling to keep up,60.0,Medium,0.3488
+4.0,10.0,10.0,Managing okay,100.0,High,-0.3812
+4.0,5.0,6.0,"Exhausted, high stress",75.0,High,0.5021
+8.0,2.0,6.0,Feeling energized,15.0,Low,-0.1
+5.0,5.0,2.0,Completely overwhelmed,20.0,Low,-0.3682
+7.0,10.0,6.0,Stress-free day,85.71428571428571,High,0.4818
+6.0,8.0,1.0,"Burning out, need help",13.333333333333332,Medium,-0.495
+7.0,7.0,3.0,Could use more sleep,30.0,Low,0.4132
+10.0,6.0,8.0,A bit busy,48.0,Medium,-0.4883
+9.0,8.0,1.0,"Feeling good, balanced",8.88888888888889,Low,-0.534
+10.0,6.0,7.0,Struggling to keep up,42.0,Medium,-0.0696
+8.0,1.0,8.0,Managing okay,10.0,Low,-0.134
+8.0,4.0,3.0,"Exhausted, high stress",15.0,Low,-0.0912
+5.0,8.0,9.0,Feeling energized,100.0,High,-0.3007
+10.0,10.0,7.0,Completely overwhelmed,70.0,High,-0.2702
+5.0,6.0,5.0,Stress-free day,60.0,Medium,-0.5091
+5.0,8.0,3.0,"Burning out, need help",48.00000000000001,Medium,-0.638
+4.0,8.0,6.0,Could use more sleep,100.0,High,0.2516
+9.0,9.0,1.0,A bit busy,10.0,Low,0.0132
+5.0,9.0,2.0,"Feeling good, balanced",36.0,Medium,0.5962
+7.0,1.0,8.0,Struggling to keep up,11.428571428571427,Low,0.4432
+7.0,3.0,1.0,Managing okay,4.285714285714286,Low,-0.3788
+10.0,4.0,6.0,"Exhausted, high stress",24.000000000000004,Low,0.4884
+6.0,5.0,4.0,Feeling energized,33.333333333333336,Medium,-0.012
+6.0,1.0,6.0,Completely overwhelmed,10.0,Low,-0.6393
+7.0,9.0,10.0,Stress-free day,100.0,High,-0.471
+9.0,1.0,9.0,"Burning out, need help",10.0,Low,0.2018
+8.0,10.0,4.0,Could use more sleep,50.0,Medium,-0.4475
+4.0,1.0,2.0,A bit busy,5.0,Low,-0.0092
+8.0,9.0,6.0,"Feeling good, balanced",67.5,High,0.0586
+9.0,5.0,1.0,Struggling to keep up,5.555555555555555,Low,0.5203
+7.0,2.0,1.0,Managing okay,2.8571428571428568,Low,0.1002
+5.0,1.0,8.0,"Exhausted, high stress",16.0,Low,0.2397
+8.0,8.0,8.0,Feeling energized,80.0,High,-0.4463
+7.0,10.0,1.0,Completely overwhelmed,14.285714285714286,Low,-0.6398
+6.0,3.0,8.0,Stress-free day,40.0,Medium,-0.5886
+7.0,8.0,8.0,"Burning out, need help",91.42857142857142,High,0.2962
