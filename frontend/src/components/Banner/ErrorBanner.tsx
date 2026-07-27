@@ -1,21 +1,34 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle, Info } from 'lucide-react';
+import { X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 
 type ErrorBannerProps = {
   title?: string;
   message: string;
-  variant?: 'danger' | 'warning' | 'info';
+  variant?: 'danger' | 'warning' | 'info' | 'success';
 };
 
 export const ErrorBanner: React.FC<ErrorBannerProps> = ({
-  title = 'Error',
+  title = 'Notification',
   message,
   variant = 'danger',
 }) => {
   const [open, setOpen] = React.useState(true);
 
-  const IconComponent = variant === 'info' ? Info : AlertTriangle;
+  const getIcon = () => {
+    switch (variant) {
+      case 'info':
+        return Info;
+      case 'success':
+        return CheckCircle2;
+      case 'warning':
+      case 'danger':
+      default:
+        return AlertTriangle;
+    }
+  };
+
+  const IconComponent = getIcon();
 
   return (
     <AnimatePresence>
@@ -38,7 +51,7 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="Dismiss"
+            aria-label="Dismiss banner"
             style={{
               border: 'none',
               background: 'transparent',
@@ -55,4 +68,5 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
     </AnimatePresence>
   );
 };
+
 

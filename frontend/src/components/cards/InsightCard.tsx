@@ -12,6 +12,7 @@ export interface InsightCardProps {
   imgUrl?: string;
   imgAlt?: string;
   reverse?: boolean;
+  layout?: 'stacked' | 'split';
   children?: React.ReactNode;
 }
 
@@ -24,8 +25,46 @@ export const InsightCard: React.FC<InsightCardProps> = ({
   imgUrl,
   imgAlt,
   reverse = false,
+  layout,
   children,
 }) => {
+  const isSplit = layout ? layout === 'split' : (reverse || imgUrl !== undefined);
+
+  if (!isSplit) {
+    return (
+      <motion.div
+        variants={staggerItem}
+        initial="initial"
+        animate="animate"
+        className="card"
+        style={{ marginBottom: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1.75rem' }}
+      >
+        <div>
+          <h3 className="insight-title" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 0.5rem 0', fontSize: '1.15rem', fontWeight: 600 }}>
+            <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.12)', display: 'inline-flex' }}>
+              <IconComponent size={20} style={{ color: 'var(--brand-primary)' }} />
+            </div>
+            <span>{title}</span>
+          </h3>
+          <p className="insight-desc" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+            {desc}
+          </p>
+        </div>
+
+        {children && <div style={{ width: '100%' }}>{children}</div>}
+
+        <div className="takeaway-box" style={{ marginTop: '0.5rem' }}>
+          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-primary)', fontSize: '0.85rem' }}>
+            <Lightbulb size={16} /> {takeawayLabel}
+          </strong>
+          <p style={{ marginTop: '6px', margin: '6px 0 0 0', fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+            {takeaway}
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       variants={staggerItem}
@@ -39,11 +78,11 @@ export const InsightCard: React.FC<InsightCardProps> = ({
           <IconComponent size={24} style={{ color: 'var(--brand-primary)' }} /> {title}
         </h3>
         <p className="insight-desc">{desc}</p>
-        <div className="takeaway-box">
-          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="takeaway-box" style={{ marginTop: '1rem' }}>
+          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-primary)', fontSize: '0.85rem' }}>
             <Lightbulb size={16} /> {takeawayLabel}
           </strong>
-          <p style={{ marginTop: '6px' }}>{takeaway}</p>
+          <p style={{ marginTop: '6px', margin: '6px 0 0 0', fontSize: '0.875rem', color: 'var(--text-primary)' }}>{takeaway}</p>
         </div>
       </div>
       <div className="insight-visual-col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -61,3 +100,4 @@ export const InsightCard: React.FC<InsightCardProps> = ({
 };
 
 export default InsightCard;
+

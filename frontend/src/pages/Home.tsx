@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useHistory, useUploadFile, useResetSession } from '../hooks/useUpload';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
+import LoadingScreen from '../components/LoadingScreen';
 import FileDropzone from '../components/Dropzone/FileDropzone';
 import { fadeUp, staggerContainer, staggerItem } from '../lib/motion';
 import {
@@ -56,26 +56,26 @@ const Home: React.FC = () => {
   const featureItems = [
     {
       icon: Moon,
-      title: 'Sleep',
-      description: 'Average nightly sleep duration (hours).',
+      title: 'Sleep Hours',
+      description: 'Average nightly sleep duration (hours vector).',
       color: 'var(--info)'
     },
     {
       icon: BookOpen,
-      title: 'Study',
-      description: 'Daily focused learning hours.',
+      title: 'Study Hours',
+      description: 'Daily focused learning & study duration.',
       color: 'var(--brand-primary)'
     },
     {
       icon: AlertTriangle,
-      title: 'Stress',
-      description: 'Self-reported level (scale 1–10).',
+      title: 'Stress Level',
+      description: 'Self-reported stress rating (scale 1–10).',
       color: 'var(--danger)'
     },
     {
       icon: MessageSquare,
-      title: 'Feedback',
-      description: 'Natural language student comments.',
+      title: 'Student Feedback',
+      description: 'Qualitative comments for VADER sentiment analysis.',
       color: 'var(--success)'
     }
   ];
@@ -83,10 +83,11 @@ const Home: React.FC = () => {
   return (
     <motion.div {...fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {loading && (
-        <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Spinner size={64} label="Analyzing Your Data..." />
-          <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>Recalculating burnout metrics and training ML models. Please wait.</p>
-        </div>
+        <LoadingScreen
+          variant="overlay"
+          message="Analyzing Your Data..."
+          subtitle="Recalculating burnout metrics and training ML models. Please wait."
+        />
       )}
 
       {error && (
@@ -97,16 +98,18 @@ const Home: React.FC = () => {
         />
       )}
 
-      {/* Centered Upload Section */}
-      <div style={{ maxWidth: '700px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <div className="card" style={{ padding: '2rem' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em' }}>
-              <Upload size={20} style={{ color: 'var(--brand-primary)' }} />
+      {/* Centered Upload Hero Section */}
+      <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="card" style={{ padding: '2.5rem', background: 'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 70%), var(--card-bg)' }}>
+          <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-primary)', marginBottom: '1rem' }}>
+              <Upload size={24} />
+            </div>
+            <h2 style={{ marginBottom: '0.5rem', fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
               New Analysis Session
             </h2>
-            <p className="text-secondary" style={{ fontSize: '0.9rem', margin: 0, color: 'var(--text-secondary)' }}>
-              Upload a student dataset in CSV format to begin machine learning burnout analysis.
+            <p className="text-secondary" style={{ fontSize: '0.925rem', margin: '0 auto', maxWidth: '480px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              Upload a student cohort CSV dataset to run automated ML evaluations, risk predictions, and intervention guidelines.
             </p>
           </div>
 
@@ -120,7 +123,7 @@ const Home: React.FC = () => {
             disabled={loading}
             title="Drag and drop your CSV dataset"
             subtitle="or click to browse files from your computer"
-            buttonText="Analyze Data"
+            buttonText="Analyze Dataset"
           />
 
           <div style={{
@@ -128,36 +131,37 @@ const Home: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '1.25rem',
-            marginTop: '1.25rem',
+            marginTop: '1.5rem',
             fontSize: '0.8rem',
             color: 'var(--text-muted)',
             flexWrap: 'wrap'
           }}>
             <span>Accepted format: <strong>.csv</strong></span>
             <span>•</span>
-            <span>Max file size: <strong>50 MB</strong></span>
+            <span>Max size: <strong>50 MB</strong></span>
             <span>•</span>
-            <span>Secure local ML processing</span>
+            <span>Secure local processing</span>
           </div>
         </div>
 
+        {/* History Section */}
         {history.length > 0 && (
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
                 <History size={18} style={{ color: 'var(--brand-primary)' }} />
-                Recent Logs
+                Recent Dataset Logs
               </h3>
-              <button onClick={handleClear} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                <Trash2 size={15} /> Clear All
+              <button onClick={handleClear} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Trash2 size={14} /> Clear Logs
               </button>
             </div>
             <div className="table-wrapper">
-              <table className="data-table">
+              <table style={{ tableLayout: 'auto' }}>
                 <thead>
                   <tr>
-                    <th>Dataset Name</th>
-                    <th>Records Analyzed</th>
+                    <th style={{ textAlign: 'left' }}>Dataset Name</th>
+                    <th style={{ textAlign: 'left' }}>Records Analyzed</th>
                     <th style={{ textAlign: 'right' }}>Action</th>
                   </tr>
                 </thead>
@@ -165,19 +169,19 @@ const Home: React.FC = () => {
                   {history.map((entry, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 500 }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                          <FileSpreadsheet size={16} style={{ color: 'var(--brand-secondary)' }} />
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                          <FileSpreadsheet size={16} style={{ color: 'var(--brand-primary)' }} />
                           <span>{entry.filename}</span>
                         </div>
                       </td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{entry.records} rows</td>
+                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{entry.records} rows</td>
                       <td style={{ textAlign: 'right' }}>
                         {idx === 0 ? (
-                          <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>
-                            <LayoutDashboard size={15} /> View Dashboard
+                          <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <LayoutDashboard size={14} /> View Dashboard
                           </button>
                         ) : (
-                          <span className="badge badge-medium">Archived</span>
+                          <span className="badge badge-resolved">Archived</span>
                         )}
                       </td>
                     </tr>
@@ -192,12 +196,12 @@ const Home: React.FC = () => {
       {/* System Requirements Grid */}
       <div className="card">
         <div style={{ marginBottom: '1.25rem' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
             <CheckSquare size={18} style={{ color: 'var(--brand-primary)' }} />
-            System Requirements
+            CSV Feature Requirements
           </h3>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-            Expected features in the uploaded CSV file for accurate ML evaluation.
+            Telemetry columns recognized by the machine learning pipeline for accurate feature extraction.
           </p>
         </div>
 
@@ -217,20 +221,20 @@ const Home: React.FC = () => {
               <motion.div
                 key={idx}
                 variants={staggerItem}
-                className="card feature-pill"
+                className="card"
                 style={{
                   padding: '1.25rem',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '0.5rem',
-                  border: '1px solid var(--border-color)',
-                  transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease'
+                  borderLeft: `3px solid ${item.color}`,
+                  background: 'var(--card-bg)'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{
-                    width: '36px',
-                    height: '36px',
+                    width: '34px',
+                    height: '34px',
                     borderRadius: '8px',
                     backgroundColor: `color-mix(in srgb, ${item.color} 12%, transparent)`,
                     display: 'flex',
@@ -257,3 +261,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+

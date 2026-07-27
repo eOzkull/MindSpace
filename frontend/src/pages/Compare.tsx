@@ -21,7 +21,6 @@ import {
   useClearCompare,
 } from '../hooks/useCompare';
 import {
-  Loader2,
   FolderMinus,
   Upload,
   CheckCircle2,
@@ -40,6 +39,7 @@ import {
   SlidersHorizontal,
   MessageSquare,
 } from 'lucide-react';
+
 
 const Compare = () => {
   const [searchParams] = useSearchParams();
@@ -116,17 +116,11 @@ const Compare = () => {
 
   if (isBusy) {
     return (
-      <div id="loading-overlay" className="loading-overlay">
-        <Loader2
-          className="animate-spin"
-          size={54}
-          style={{ color: 'var(--brand-secondary)', marginBottom: '1.25rem' }}
-        />
-        <h2 style={{ marginBottom: '0.5rem' }}>Comparing Datasets...</h2>
-        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '0 1rem' }}>
-          Generating comparison metrics and plotting delta charts. Please wait.
-        </p>
-      </div>
+      <LoadingScreen
+        variant="overlay"
+        message="Comparing Datasets..."
+        subtitle="Generating comparison metrics and plotting delta charts. Please wait."
+      />
     );
   }
 

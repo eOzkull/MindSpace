@@ -5,7 +5,7 @@ import { useDashboard, useUpdateDashboard } from '../hooks/useDashboard';
 import type { DataRow } from '../types/dashboard';
 import type { UpdatePayload } from '../types/common';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
+import LoadingScreen from '../components/LoadingScreen';
 import DataTable from '../components/tables/DataTable';
 import { fadeUp } from '../lib/motion';
 import {
@@ -89,13 +89,11 @@ const Edit: React.FC = () => {
 
   if (loading || saving) {
     return (
-      <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <Spinner
-          size={64}
-          label={saving ? 'Recalculating Analysis...' : 'Loading Data...'}
-        />
-        <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>{saving ? 'Updating records and retraining the model. Please wait.' : 'Please wait.'}</p>
-      </div>
+      <LoadingScreen
+        variant="overlay"
+        message={saving ? 'Recalculating Analysis...' : 'Loading Data...'}
+        subtitle={saving ? 'Updating records and retraining the model. Please wait.' : 'Loading dataset grid for interactive editing.'}
+      />
     );
   }
 

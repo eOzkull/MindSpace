@@ -6,15 +6,57 @@ import { fadeIn } from '../lib/motion';
 interface LoadingScreenProps {
   message?: string;
   subtitle?: string;
+  variant?: 'inline' | 'overlay';
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
   message = 'Loading dashboard analytics...', 
-  subtitle = 'Please wait while we prepare your data.'
+  subtitle = 'Please wait while we prepare your data.',
+  variant = 'inline'
 }) => {
+  if (variant === 'overlay') {
+    return (
+      <motion.div
+        {...fadeIn}
+        className="loading-overlay"
+        role="status"
+        aria-live="polite"
+      >
+        <motion.div
+          animate={{ rotate: 360, opacity: [0.7, 1, 0.7] }}
+          transition={{
+            rotate: { repeat: Infinity, duration: 1, ease: 'linear' },
+            opacity: { repeat: Infinity, duration: 1.8, ease: 'easeInOut' },
+          }}
+          style={{
+            display: 'inline-flex',
+            marginBottom: '1.5rem',
+            padding: '16px',
+            borderRadius: '9999px',
+            background: 'rgba(139, 92, 246, 0.08)',
+            border: '1px solid rgba(139, 92, 246, 0.2)',
+            boxShadow: '0 0 24px rgba(139, 92, 246, 0.2)',
+          }}
+        >
+          <Loader2 size={42} style={{ color: 'var(--brand-primary)' }} />
+        </motion.div>
+        <h3 style={{ marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-primary)', fontSize: '1.25rem', textAlign: 'center' }}>
+          {message}
+        </h3>
+        {subtitle && (
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.925rem', textAlign: 'center', margin: 0, maxWidth: '450px' }}>
+            {subtitle}
+          </p>
+        )}
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       {...fadeIn}
+      role="status"
+      aria-live="polite"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -92,3 +134,4 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 };
 
 export default LoadingScreen;
+

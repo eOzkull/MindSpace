@@ -12,7 +12,14 @@ export const CHART_COLORS = {
   cardBg: 'var(--card-bg)',
 } as const;
 
-export const CHART_ANIMATION_DURATION = 300;
+export const CHART_ANIMATION_DURATION = 800;
+export const CHART_HEIGHT_DEFAULT = 320;
+
+export const CHART_ANIMATION_PROPS = {
+  isAnimationActive: true,
+  animationDuration: 800,
+  animationEasing: 'ease-out' as const,
+};
 
 export const DEFAULT_CHART_MARGIN = {
   top: 12,
@@ -22,7 +29,7 @@ export const DEFAULT_CHART_MARGIN = {
 } as const;
 
 export const DEFAULT_GRID_PROPS = {
-  stroke: 'var(--border-color)',
+  stroke: 'var(--card-border)',
   strokeDasharray: '4 4',
   vertical: false,
 } as const;

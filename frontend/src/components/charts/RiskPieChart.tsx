@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import {
   PieChart,
   Pie,
@@ -7,7 +8,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
+import { CHART_COLORS, DEFAULT_TOOLTIP_STYLE, CHART_ANIMATION_PROPS } from './chartUtils';
+import { chartEntrance } from '../../lib/motion';
 
 interface RiskPieChartProps {
   data: Array<Record<string, string | number>>;
@@ -32,8 +34,16 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
 
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+        No cohort risk data available
+      </div>
+    );
+  }
+
   return (
-    <div className="chart-container" style={{ width: '100%', height: 320 }}>
+    <motion.div {...chartEntrance} className="chart-container" style={{ width: '100%', height: 320 }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Tooltip
@@ -84,12 +94,13 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
             dataKey="value"
             nameKey="name"
             cx="50%"
-            cy="50%"
-            outerRadius={100}
-            innerRadius={60}
+            cy="45%"
+            outerRadius={95}
+            innerRadius={58}
             paddingAngle={4}
-            label={({ percent }) => `${percent !== undefined ? (percent * 100).toFixed(0) : 0}%`}
-            labelLine={{ stroke: CHART_COLORS.border, strokeWidth: 1 }}
+            {...CHART_ANIMATION_PROPS}
+            label={({ percent }) => (percent && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : '')}
+            labelLine={false}
           >
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
@@ -97,7 +108,7 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
           </Pie>
         </PieChart>
       </ResponsiveContainer>
-    </div>
+    </motion.div>
   );
 };
 

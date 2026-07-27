@@ -5,7 +5,8 @@ import { ShieldAlert, RefreshCw, Info, AlertOctagon, ScanLine } from 'lucide-rea
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
 import LoadingScreen from '../components/LoadingScreen';
 import DataTable from '../components/tables/DataTable';
-import { fadeUp } from '../lib/motion';
+import { StatCard } from '../components/cards';
+import { fadeUp, staggerContainer, staggerItem } from '../lib/motion';
 
 interface AnomalyResponse {
   anomalies: AnomalyItem[];
@@ -141,21 +142,35 @@ const Anomalies: React.FC = () => {
       </div>
 
       {!isError && !loading && totalScanned !== null && (
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {[
-            { label: 'Records Scanned', value: totalScanned.toLocaleString(), icon: <ScanLine size={16} /> },
-            { label: 'Anomalies Flagged', value: totalFlagged, icon: <AlertOctagon size={16} /> },
-            { label: 'Columns Monitored', value: columnsScanned.length, icon: <ShieldAlert size={16} /> },
-          ].map(({ label, value, icon }) => (
-            <div key={label} className="card" style={{ flex: '1 1 140px', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ color: 'var(--brand-primary)', opacity: 0.8 }}>{icon}</span>
-              <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, lineHeight: 1, color: 'var(--text-primary)' }}>{value}</div>
-                <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginTop: '2px' }}>{label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <motion.div variants={staggerContainer} initial="initial" animate="animate" className="stats-grid">
+          <motion.div variants={staggerItem}>
+            <StatCard
+              labelIcon={ScanLine}
+              label="Records Scanned"
+              value={totalScanned}
+              subtext="Active database entries"
+              themeColor="brand-primary"
+            />
+          </motion.div>
+          <motion.div variants={staggerItem}>
+            <StatCard
+              labelIcon={AlertOctagon}
+              label="Anomalies Flagged"
+              value={totalFlagged}
+              subtext="Outliers requiring review"
+              themeColor="danger"
+            />
+          </motion.div>
+          <motion.div variants={staggerItem}>
+            <StatCard
+              labelIcon={ShieldAlert}
+              label="Columns Monitored"
+              value={columnsScanned.length}
+              subtext="Multivariate variables"
+              themeColor="info"
+            />
+          </motion.div>
+        </motion.div>
       )}
 
       <div className="card" style={{
@@ -204,10 +219,12 @@ const Anomalies: React.FC = () => {
             columns={tableColumns}
             data={anomalies}
           />
-          <div className="takeaway-box" style={{ margin: '1.25rem 1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)', padding: '1rem' }}>
-            <Info size={16} style={{ color: 'var(--brand-primary)', marginRight: '6px', verticalAlign: 'middle', display: 'inline-block' }} />
-            <strong style={{ fontSize: '0.875rem' }}>Advisory Note:</strong> Masking anomalies are highly critical. Students showing masking behaviors should be engaged with indirect wellness surveys rather than direct confrontation about academic performance.
-          </div>
+        <div className="takeaway-box" style={{ margin: '0 1.5rem 1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)' }}>
+          <strong style={{ fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Info size={15} style={{ color: 'var(--brand-primary)' }} /> Advisory Note
+          </strong>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>Masking anomalies are highly critical. Students showing masking behaviors should be engaged with indirect wellness surveys rather than direct confrontation about academic performance.</p>
+        </div>
         </div>
       )}
     </motion.div>

@@ -1,10 +1,11 @@
 import React from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEvaluate } from '../hooks/usePrediction';
 import { ConfusionMatrixHeatmap } from '../components/charts';
 import LoadingScreen from '../components/LoadingScreen';
 import { StatCard } from '../components/cards';
+import SegmentedControl from '../components/ui/SegmentedControl';
 import { fadeUp, staggerContainer, staggerItem } from '../lib/motion';
 import type { EvaluateResponse } from '../types/evaluate';
 import {
@@ -30,6 +31,7 @@ import {
 
 const Evaluate: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const target = searchParams.get('dataset') || 'primary';
   const { data: response, isLoading: loading, isError } = useEvaluate(target);
 
@@ -45,12 +47,12 @@ const Evaluate: React.FC = () => {
       <motion.div {...fadeUp} className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
         <AlertCircle size={48} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
         <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', fontWeight: 600 }}>Model Not Ready</h3>
-        <p className="insight-desc" style={{ color: 'var(--text-secondary)' }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
         {target === 'compare' && (
           <div style={{ marginTop: '1.5rem' }}>
-            <Link to="/evaluate?dataset=primary" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <button onClick={() => navigate('/evaluate?dataset=primary')} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
               <ArrowLeft size={16} /> Back to Primary Dataset
-            </Link>
+            </button>
           </div>
         )}
       </motion.div>
@@ -59,93 +61,55 @@ const Evaluate: React.FC = () => {
 
   const metrics = data.metrics;
   const isReady = metrics.f1 >= 0.85 && metrics.recall >= 0.80;
-  const readyStatus = isReady ? 'ready' : 'not-ready';
 
   return (
     <motion.div {...fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {/* Segmented Control Dataset Selector */}
       {data.compare_exists && (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div style={{
-            display: 'inline-flex',
-            padding: '4px',
-            background: 'var(--input-bg)',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            gap: '4px'
-          }}>
-            <Link
-              to="/evaluate?dataset=primary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 18px',
-                borderRadius: '7px',
-                background: target === 'primary' ? 'var(--brand-primary)' : 'transparent',
-                color: target === 'primary' ? '#ffffff' : 'var(--text-secondary)',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                textDecoration: 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Database size={15} /> Primary Dataset
-            </Link>
-            <Link
-              to="/evaluate?dataset=compare"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 18px',
-                borderRadius: '7px',
-                background: target === 'compare' ? 'var(--brand-primary)' : 'transparent',
-                color: target === 'compare' ? '#ffffff' : 'var(--text-secondary)',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                textDecoration: 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <ArrowLeftRight size={15} /> Comparison Dataset
-            </Link>
-          </div>
+          <SegmentedControl
+            options={[
+              { value: 'primary', label: 'Primary Dataset', icon: Database },
+              { value: 'compare', label: 'Comparison Dataset', icon: ArrowLeftRight },
+            ]}
+            value={target}
+            onChange={(val) => navigate(`/evaluate?dataset=${val}`)}
+          />
         </div>
       )}
 
       {/* Verdict Card */}
-      <div className={`card verdict-card ${readyStatus}`} style={{
+      <div className="card" style={{
         padding: '1.75rem',
-        borderRadius: 'var(--radius-lg)',
-        background: isReady ? 'rgba(40, 199, 111, 0.04)' : 'rgba(255, 171, 0, 0.04)',
-        border: `1.5 solid var(--${isReady ? 'success' : 'warning'})`
+        borderLeft: `4px solid var(--${isReady ? 'success' : 'warning'})`,
+        background: isReady ? 'rgba(40, 199, 111, 0.03)' : 'rgba(255, 171, 0, 0.03)',
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem' }}>
           <div style={{
-            width: '48px',
-            height: '48px',
+            width: '46px',
+            height: '46px',
             borderRadius: '12px',
             background: isReady ? 'rgba(40, 199, 111, 0.12)' : 'rgba(255, 171, 0, 0.12)',
+            border: `1px solid ${isReady ? 'rgba(40,199,111,0.25)' : 'rgba(255,171,0,0.25)'}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0
           }}>
             {isReady ? (
-              <CheckCircle2 size={24} style={{ color: 'var(--success)' }} />
+              <CheckCircle2 size={22} style={{ color: 'var(--success)' }} />
             ) : (
-              <AlertTriangle size={24} style={{ color: 'var(--warning)' }} />
+              <AlertTriangle size={22} style={{ color: 'var(--warning)' }} />
             )}
           </div>
           <div>
-            <h3 style={{ marginBottom: '0.4rem', fontSize: '1.1rem', fontWeight: 600, color: isReady ? 'var(--success)' : 'var(--warning)' }}>
-              Deployment Readiness: {isReady ? 'Approved for Production' : 'Further Tuning Advised'}
+            <h3 style={{ marginBottom: '0.4rem', fontSize: '1.05rem', fontWeight: 600, color: isReady ? 'var(--success)' : 'var(--warning)' }}>
+              {isReady ? '✓ Approved for Production Deployment' : '⚠ Further Tuning Advised'}
             </h3>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.925rem', margin: 0 }}>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem', margin: 0 }}>
               {isReady
-                ? 'The model demonstrates robust predictive capabilities, exceeding the 85% F1-score and 80% Recall thresholds. It is highly reliable at identifying high-risk students without generating excessive false alarms.'
-                : 'The model shows promise but falls below our strict deployment thresholds (F1 > 85%, Recall > 80%). We recommend collecting more diverse samples or engineering additional features before using this model for automated outreach.'}
+                ? 'The model exceeds the 85% F1-score and 80% Recall thresholds — reliably identifying high-risk students without excessive false alarms.'
+                : 'Falls below deployment thresholds (F1 > 85%, Recall > 80%). Recommend collecting more diverse samples or engineering additional features before automated outreach.'}
             </p>
           </div>
         </div>
@@ -161,7 +125,6 @@ const Evaluate: React.FC = () => {
         <motion.div variants={staggerItem}>
           <StatCard
             labelIcon={Target}
-            bgIcon={Target}
             label="Accuracy"
             value={`${(metrics.accuracy * 100).toFixed(2)}%`}
             subtext={`${metrics.n_test} test samples`}
@@ -171,7 +134,6 @@ const Evaluate: React.FC = () => {
         <motion.div variants={staggerItem}>
           <StatCard
             labelIcon={Scale}
-            bgIcon={Scale}
             label="F1 Score (weighted)"
             value={metrics.f1}
             subtext="precision × recall balance"
@@ -181,7 +143,6 @@ const Evaluate: React.FC = () => {
         <motion.div variants={staggerItem}>
           <StatCard
             labelIcon={Crosshair}
-            bgIcon={Crosshair}
             label="Precision"
             value={metrics.precision}
             subtext="weighted average"
@@ -191,7 +152,6 @@ const Evaluate: React.FC = () => {
         <motion.div variants={staggerItem}>
           <StatCard
             labelIcon={ZoomIn}
-            bgIcon={ZoomIn}
             label="Recall"
             value={metrics.recall}
             subtext="weighted average"

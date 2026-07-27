@@ -8,26 +8,25 @@ import ErrorBoundary from './pages/ErrorBoundary';
 import './index.css';
 import './styles/charts.css';
 
-// Lazy-load every page — each gets its own chunk, parsed only when visited
-const Home            = lazy(() => import('./pages/Home'));
-const Dashboard       = lazy(() => import('./pages/Dashboard'));
-const Results         = lazy(() => import('./pages/Results'));
-const Evaluate        = lazy(() => import('./pages/Evaluate'));
-const Compare         = lazy(() => import('./pages/Compare'));
-const Edit            = lazy(() => import('./pages/Edit'));
-const Predict         = lazy(() => import('./pages/Predict'));
-const Anomalies       = lazy(() => import('./pages/Anomalies'));
+// Lazy-load every page
+const Home = lazy(() => import('./pages/Home'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Results = lazy(() => import('./pages/Results'));
+const Evaluate = lazy(() => import('./pages/Evaluate'));
+const Compare = lazy(() => import('./pages/Compare'));
+const Edit = lazy(() => import('./pages/Edit'));
+const Predict = lazy(() => import('./pages/Predict'));
+const Anomalies = lazy(() => import('./pages/Anomalies'));
 const Recommendations = lazy(() => import('./pages/Recommendations'));
-const NotFound        = lazy(() => import('./pages/NotFound'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,                // data is marked stale immediately so navigation always fetches fresh state
-      gcTime: 300_000,            // keep unused cache in memory for 5 minutes
-      refetchOnMount: 'always',    // always refetch fresh backend data when navigating to any page
-      refetchOnWindowFocus: false, // prevent background refetches on tab switch
-      retry: 1,                   // retry once on failure
+      staleTime: 60_000,
+      gcTime: 300_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
@@ -41,15 +40,15 @@ function App() {
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
-                <Route path="dashboard"       element={<Dashboard />} />
-                <Route path="results"         element={<Results />} />
-                <Route path="evaluate"        element={<Evaluate />} />
-                <Route path="compare"         element={<Compare />} />
-                <Route path="edit"            element={<Edit />} />
-                <Route path="predict"         element={<Predict />} />
-                <Route path="anomalies"       element={<Anomalies />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="results" element={<Results />} />
+                <Route path="evaluate" element={<Evaluate />} />
+                <Route path="compare" element={<Compare />} />
+                <Route path="edit" element={<Edit />} />
+                <Route path="predict" element={<Predict />} />
+                <Route path="anomalies" element={<Anomalies />} />
                 <Route path="recommendations" element={<Recommendations />} />
-                <Route path="*"              element={<NotFound />} />
+                <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
           </Suspense>

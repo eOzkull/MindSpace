@@ -25,24 +25,31 @@ const NotFound: React.FC = () => {
           padding: '3.5rem 2.5rem',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          background: 'radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 70%), var(--card-bg)',
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        {/* Large Muted 404 */}
-        <div
+        {/* Animated Gradient 404 */}
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           style={{
-            fontSize: '6rem',
-            fontWeight: 800,
+            fontSize: '6.5rem',
+            fontWeight: 900,
             lineHeight: 1,
-            letterSpacing: '-0.05em',
-            color: 'var(--text-muted)',
-            opacity: 0.3,
+            letterSpacing: '-0.06em',
+            background: 'var(--brand-gradient)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
             userSelect: 'none',
-            marginBottom: '0.5rem'
+            marginBottom: '0.75rem',
+            filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.2))'
           }}
         >
           404
-        </div>
+        </motion.div>
 
         <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
           Page Not Found
@@ -59,9 +66,9 @@ const NotFound: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '10px 22px',
+            padding: '10px 24px',
             fontSize: '0.9rem',
-            borderRadius: '8px'
+            borderRadius: '9999px'
           }}
         >
           <ArrowLeft size={16} /> Back to Home

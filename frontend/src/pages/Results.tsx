@@ -51,14 +51,17 @@ const Results: React.FC = () => {
       </div>
 
       {/* Executive Summary Card */}
-      <div className="card executive-summary" style={{ padding: '2rem' }}>
+      <div className="card card-accent-left" style={{
+        padding: '2rem',
+        background: 'radial-gradient(circle at 0% 50%, rgba(139, 92, 246, 0.07) 0%, transparent 60%), var(--card-bg)'
+      }}>
         <div style={{ marginBottom: '1.25rem' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>
             <Building2 size={20} style={{ color: 'var(--brand-primary)' }} />
             Executive Summary
           </h2>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.95rem', margin: '0.5rem 0 0 0' }}>
-            Based on the comprehensive analysis of your dataset, we have identified several critical patterns concerning student workload, stress levels, and resulting burnout. The findings below highlight the most urgent areas requiring intervention.
+          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem', margin: '0.5rem 0 0 0' }}>
+            Comprehensive analysis of your cohort dataset reveals critical patterns in student workload, stress, and burnout. The findings below highlight the most urgent areas requiring institutional intervention.
           </p>
         </div>
 
@@ -72,7 +75,6 @@ const Results: React.FC = () => {
           <motion.div variants={staggerItem}>
             <StatCard
               labelIcon={Flame}
-              bgIcon={Flame}
               label="Avg Burnout"
               value={data.avg_burnout ?? 'N/A'}
               subtext="Out of 100"
@@ -82,7 +84,6 @@ const Results: React.FC = () => {
           <motion.div variants={staggerItem}>
             <StatCard
               labelIcon={AlertTriangle}
-              bgIcon={AlertTriangle}
               label="High Risk"
               value={data.high_risk_pct !== undefined && data.high_risk_pct !== null ? `${data.high_risk_pct}%` : 'N/A'}
               subtext="Of student population"
@@ -92,7 +93,6 @@ const Results: React.FC = () => {
           <motion.div variants={staggerItem}>
             <StatCard
               labelIcon={MessageSquare}
-              bgIcon={MessageSquare}
               label="Avg Sentiment"
               value={data.avg_sentiment ?? 'N/A'}
               subtext="VADER Compound Score"
@@ -142,7 +142,7 @@ const Results: React.FC = () => {
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.9rem', margin: 0 }}>
               The data conclusively shows that sleep deprivation is the strongest linear predictor of high burnout. Students sacrificing sleep to increase study hours paradoxically experience higher stress and reduced academic efficiency.
             </p>
-            <div className="takeaway-box" style={{ marginTop: 'auto', background: 'rgba(40, 199, 111, 0.05)', borderLeftColor: 'var(--success)', padding: '0.75rem 1rem' }}>
+            <div className="takeaway-box" style={{ marginTop: 'auto', background: 'rgba(40, 199, 111, 0.06)', borderLeftColor: 'var(--success)' }}>
               <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Recommendation:</strong> Institutional policies must prioritize adequate rest, potentially enforcing hard cut-offs for assignment submissions.
             </div>
           </motion.div>
@@ -170,7 +170,7 @@ const Results: React.FC = () => {
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.9rem', margin: 0 }}>
               There is a clear "tipping point" observed around self-reported stress levels of 7 and 8. Beyond this threshold, burnout scores escalate exponentially rather than linearly, indicating systemic exhaustion.
             </p>
-            <div className="takeaway-box" style={{ marginTop: 'auto', background: 'rgba(255, 75, 92, 0.05)', borderLeftColor: 'var(--danger)', padding: '0.75rem 1rem' }}>
+            <div className="takeaway-box" style={{ marginTop: 'auto', background: 'rgba(255, 75, 92, 0.06)', borderLeftColor: 'var(--danger)' }}>
               <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Recommendation:</strong> Implement early warning systems and mandatory check-ins for students self-reporting stress levels of 7 or higher.
             </div>
           </motion.div>
@@ -198,7 +198,7 @@ const Results: React.FC = () => {
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.9rem', margin: 0 }}>
               In several sub-groups, explicitly reported burnout numbers remain 'Medium', yet verbatim sentiment analysis reveals deeply negative language constructs. This discrepancy suggests students may be underreporting their actual distress due to academic pressures.
             </p>
-            <div className="takeaway-box" style={{ marginTop: 'auto', background: 'rgba(79, 172, 254, 0.05)', borderLeftColor: 'var(--info)', padding: '0.75rem 1rem' }}>
+            <div className="takeaway-box" style={{ marginTop: 'auto', background: 'rgba(79, 172, 254, 0.06)', borderLeftColor: 'var(--info)' }}>
               <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Recommendation:</strong> Do not rely solely on numeric surveys; qualitative, anonymous feedback loops are necessary.
             </div>
           </motion.div>
@@ -247,17 +247,20 @@ const Results: React.FC = () => {
           ]}
         />
 
-        <div className="takeaway-box" style={{ margin: '1.25rem 1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)', padding: '1rem' }}>
-          <Info size={16} style={{ color: 'var(--brand-primary)', marginRight: '6px', verticalAlign: 'middle', display: 'inline-block' }} />
-          <strong style={{ fontSize: '0.875rem' }}>Synthesized Conclusion:</strong> The "High" risk group exhibits a dangerous "Workplace Substitution" pattern—trading physiological recovery (sleep) for academic effort (study). This trade-off leads to exponential stress growth, making immediate counseling the only viable pathway to prevent systemic burnout.
+        <div className="takeaway-box" style={{ margin: '0 1.5rem 1.5rem', background: 'rgba(139, 92, 246, 0.05)', borderLeftColor: 'var(--brand-primary)' }}>
+          <strong style={{ fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Info size={15} style={{ color: 'var(--brand-primary)' }} /> Synthesized Conclusion
+          </strong>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>The "High" risk group exhibits a dangerous "Workplace Substitution" pattern—trading physiological recovery (sleep) for academic effort (study). This leads to exponential stress growth, making immediate counseling the only viable pathway to prevent systemic burnout.</p>
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', margin: '1rem 0 2rem 0' }}>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-          Proceed to the evaluation module to see how effectively our internal models can predict these high-risk candidates based on their data.
+      {/* CTA Section */}
+      <div className="card" style={{ textAlign: 'center', padding: '2.5rem', background: 'radial-gradient(circle at 50% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 70%), var(--card-bg)' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: '480px', margin: '0 auto 1.5rem' }}>
+          Proceed to the evaluation module to benchmark how accurately our ML models identify high-risk candidates from their behavioral metrics.
         </p>
-        <button onClick={() => navigate('/evaluate')} className="btn btn-primary" style={{ padding: '12px 24px', fontSize: '1rem', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <button onClick={() => navigate('/evaluate')} className="btn btn-primary" style={{ padding: '12px 28px', fontSize: '0.95rem', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           Evaluate Prediction Model <ArrowRight size={16} />
         </button>
       </div>

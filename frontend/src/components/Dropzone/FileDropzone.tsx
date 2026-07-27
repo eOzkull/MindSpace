@@ -138,16 +138,21 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
               <p className="text-secondary" style={{ fontSize: compact ? '0.85rem' : '0.925rem', margin: compact ? '0 0 0.75rem 0' : '0 0 1.25rem 0' }}>{subtitle}</p>
 
               {buttonText && !compact && (
-                <span
+                <div
+                  role="button"
+                  tabIndex={0}
                   className="btn btn-primary"
                   style={{
                     borderRadius: '9999px',
                     padding: '10px 24px',
                     margin: '0 auto',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
                   <Sparkles size={16} /> {buttonText}
-                </span>
+                </div>
               )}
 
               {selectedFile && (
