@@ -1,33 +1,26 @@
-import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import Layout from './components/Layout';
-import LoadingScreen from './components/LoadingScreen';
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import Results from './pages/Results';
+import Evaluate from './pages/Evaluate';
+import Compare from './pages/Compare';
+import Edit from './pages/Edit';
+import Predict from './pages/Predict';
+import Anomalies from './pages/Anomalies';
+import Recommendations from './pages/Recommendations';
+import NotFound from './pages/NotFound';
 import ErrorBoundary from './pages/ErrorBoundary';
 import './index.css';
 import './styles/charts.css';
 
-// Lazy-load every page
-const Home = lazy(() => import('./pages/Home'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Results = lazy(() => import('./pages/Results'));
-const Evaluate = lazy(() => import('./pages/Evaluate'));
-const Compare = lazy(() => import('./pages/Compare'));
-const Edit = lazy(() => import('./pages/Edit'));
-const Predict = lazy(() => import('./pages/Predict'));
-const Anomalies = lazy(() => import('./pages/Anomalies'));
-const Recommendations = lazy(() => import('./pages/Recommendations'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,                // data is marked stale immediately so navigation always fetches fresh state
-      gcTime: 300_000,            // keep unused cache in memory for 5 minutes
-      refetchOnMount: 'always',    // always refetch fresh backend data when navigating to any page
-      refetchOnWindowFocus: false, // prevent background refetches on tab switch
-      retry: 1,                   // retry once on failure
+      staleTime: 60000,
+      gcTime: 300000,
     },
   },
 });
@@ -37,22 +30,20 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <ErrorBoundary>
-          <Suspense fallback={<LoadingScreen message="Loading..." />}>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="results" element={<Results />} />
-                <Route path="evaluate" element={<Evaluate />} />
-                <Route path="compare" element={<Compare />} />
-                <Route path="edit" element={<Edit />} />
-                <Route path="predict" element={<Predict />} />
-                <Route path="anomalies" element={<Anomalies />} />
-                <Route path="recommendations" element={<Recommendations />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </Suspense>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="results" element={<Results />} />
+              <Route path="evaluate" element={<Evaluate />} />
+              <Route path="compare" element={<Compare />} />
+              <Route path="edit" element={<Edit />} />
+              <Route path="predict" element={<Predict />} />
+              <Route path="anomalies" element={<Anomalies />} />
+              <Route path="recommendations" element={<Recommendations />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
         </ErrorBoundary>
       </Router>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
@@ -61,4 +52,3 @@ function App() {
 }
 
 export default App;
-

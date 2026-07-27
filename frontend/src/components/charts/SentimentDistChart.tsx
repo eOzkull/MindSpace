@@ -9,7 +9,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
 
 interface SentimentDistChartProps {
   data: Array<Record<string, string | number>>;
@@ -29,6 +29,7 @@ export const SentimentDistChart: React.FC<SentimentDistChartProps> = ({
 
     if (scores.length === 0) return [];
 
+    // Fixed bins from -1 to +1
     const binWidth = 2 / bins;
     const buckets: Record<string, number> = {};
 
@@ -56,18 +57,22 @@ export const SentimentDistChart: React.FC<SentimentDistChartProps> = ({
   return (
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 12, right: 15, left: -20, bottom: 4 }}>
+        <BarChart data={chartData} margin={{ top: 10, right: 15, left: -20, bottom: 5 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
           <XAxis
-            {...DEFAULT_X_AXIS_PROPS}
             dataKey="range"
+            stroke="transparent"
+            tick={{ fill: CHART_COLORS.textMuted, fontSize: 10 }}
+            dy={8}
             interval="preserveStartEnd"
           />
           <YAxis
-            {...DEFAULT_Y_AXIS_PROPS}
+            stroke="transparent"
+            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
+            dx={-8}
           />
           <Tooltip
-            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
+            cursor={{ fill: 'var(--card-border)', opacity: 0.4 }}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const d = payload[0].payload;

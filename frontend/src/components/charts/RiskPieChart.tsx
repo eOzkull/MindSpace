@@ -1,15 +1,12 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import {
   PieChart,
   Pie,
   Cell,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_TOOLTIP_STYLE, CHART_ANIMATION_PROPS } from './chartUtils';
-import { chartEntrance } from '../../lib/motion';
+import { CHART_COLORS } from './chartUtils';
 
 interface RiskPieChartProps {
   data: Array<Record<string, string | number>>;
@@ -32,26 +29,14 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
     ].filter((item) => item.value > 0);
   }, [data]);
 
-  const total = chartData.reduce((sum, d) => sum + d.value, 0);
-
-  if (!data || data.length === 0) {
-    return (
-      <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-        No cohort risk data available
-      </div>
-    );
-  }
-
   return (
-    <motion.div {...chartEntrance} className="chart-container" style={{ width: '100%', height: 320 }}>
+    <div className="chart-container" style={{ width: '100%', height: 320 }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Tooltip
-            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0];
-                const pct = total > 0 ? ((item.value as number) / total * 100).toFixed(1) : '0';
                 return (
                   <div className="custom-chart-tooltip">
                     <div className="custom-chart-tooltip-title">{item.name}</div>
@@ -64,10 +49,6 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
                         Students:
                         <span className="custom-chart-tooltip-value">{item.value}</span>
                       </div>
-                      <div className="custom-chart-tooltip-item">
-                        Share:
-                        <span className="custom-chart-tooltip-value">{pct}%</span>
-                      </div>
                     </div>
                   </div>
                 );
@@ -75,40 +56,25 @@ export const RiskPieChart: React.FC<RiskPieChartProps> = ({ data }) => {
               return null;
             }}
           />
-          <Legend
-            verticalAlign="bottom"
-            height={36}
-            content={() => (
-              <ul className="custom-chart-legend" style={{ margin: 0, justifyContent: 'center' }}>
-                {chartData.map((entry) => (
-                  <li key={entry.name} className="custom-chart-legend-item">
-                    <span className="custom-chart-legend-marker" style={{ backgroundColor: entry.color }} />
-                    {entry.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          />
           <Pie
             data={chartData}
             dataKey="value"
             nameKey="name"
             cx="50%"
-            cy="45%"
-            outerRadius={95}
-            innerRadius={58}
+            cy="50%"
+            outerRadius={100}
+            innerRadius={60}
             paddingAngle={4}
-            {...CHART_ANIMATION_PROPS}
-            label={({ percent }) => (percent && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : '')}
-            labelLine={false}
+            label={({ name, percent }) => `${name}: ${percent !== undefined ? (percent * 100).toFixed(0) : 0}%`}
+            labelLine={{ stroke: CHART_COLORS.border, strokeWidth: 1 }}
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+              <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
         </PieChart>
       </ResponsiveContainer>
-    </motion.div>
+    </div>
   );
 };
 

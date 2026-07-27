@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useInsights } from '../hooks/useInsights';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
 import LoadingScreen from '../components/LoadingScreen';
-import { fadeUp, staggerContainer, staggerItem } from '../lib/motion';
-import { ChevronRight, AlertCircle, RefreshCw, Lightbulb } from 'lucide-react';
+import { ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
 
 type RecommendationItem = {
   id: string;
@@ -99,20 +97,15 @@ const MOCK_RECOMMENDATIONS: RecommendationItem[] = [
 ];
 
 const Recommendations: React.FC = () => {
-  const { data: insightsData, isLoading, isError, refetch } = useInsights();
-  const loading = isLoading;
+  const { data: insightsData, isLoading, isError, refetch, isFetching } = useInsights();
+  const loading = isLoading || isFetching;
   const error = isError ? 'Could not connect to live recommendations API. Running in offline evaluation mode.' : '';
 
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>(MOCK_RECOMMENDATIONS);
 
   useEffect(() => {
-    if (insightsData) {
-      const recList = Array.isArray(insightsData)
-        ? insightsData
-        : (insightsData as any)?.recommendations;
-      if (Array.isArray(recList) && recList.length > 0) {
-        setRecommendations(recList as RecommendationItem[]);
-      }
+    if (insightsData && Array.isArray(insightsData)) {
+      setRecommendations(insightsData as RecommendationItem[]);
     }
   }, [insightsData]);
 
@@ -131,25 +124,16 @@ const Recommendations: React.FC = () => {
           Active: 'Resolved',
           Resolved: 'Pending',
         };
-        const currentStatus: RecommendationItem['status'] = rec.status ?? 'Pending';
-        return { ...rec, status: nextStatusMap[currentStatus] };
+        return { ...rec, status: nextStatusMap[rec.status] };
       }),
     );
   };
 
   return (
-    <motion.div {...fadeUp} style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div className="top-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-            <Lightbulb size={18} style={{ color: 'var(--brand-primary)' }} /> Prescriptive Interventions
-          </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-            Actionable institutional policies based on Machine Learning cohort analysis.
-          </p>
-        </div>
-        <button onClick={() => refetch()} className="btn btn-outline" disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-          <RefreshCw className={loading ? "animate-spin" : ""} size={15} /> Re-evaluate Recommendations
+    <div className="recommendations-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div className="top-actions" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <button onClick={() => refetch()} className="btn btn-outline" disabled={loading}>
+          <RefreshCw className={loading ? "animate-spin" : ""} size={16} /> Re-evaluate Recommendations
         </button>
       </div>
 
@@ -164,81 +148,73 @@ const Recommendations: React.FC = () => {
       {loading ? (
         <LoadingScreen message="Loading Recommendations..." subtitle="Analyzing student cohort stats to determine action guidelines." />
       ) : (
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}
-        >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem' }}>
           {recommendations.map((item) => (
-            <motion.div
+            <div
               key={item.id}
-              variants={staggerItem}
               className="card"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                borderLeft: `4px solid ${item.impact === 'High' ? 'var(--danger)' : 'var(--brand-primary)'}`
+                borderLeft: `4px solid var(--${item.impact === 'High' ? 'danger' : 'brand-primary'})`,
               }}
             >
-              {/* Top Section */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <span className="badge badge-medium" style={{ background: 'var(--input-bg)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                  {item.category}
-                </span>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <span className={`badge badge-${item.impact === 'High' ? 'high' : 'medium'}`} style={{ fontSize: '0.75rem' }}>
-                    {item.impact} Impact
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                  <span className="badge badge-low" style={{ background: 'var(--input-bg)', color: 'var(--text-muted)' }}>
+                    {item.category}
                   </span>
-                  <button
-                    onClick={() => handleToggleStatus(item.id)}
-                    className={`badge badge-${(item.status ?? 'pending').toLowerCase()}`}
-                    style={{ cursor: 'pointer', border: 'none', fontSize: '0.75rem' }}
-                    title="Click to toggle status"
-                  >
-                    {item.status ?? 'Pending'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Middle Section */}
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 0.35rem 0' }}>{item.title}</h3>
-
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <AlertCircle size={14} style={{ color: item.impact === 'High' ? 'var(--danger)' : 'var(--brand-primary)' }} /> Cohort Focus: {item.cohort}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <span className={`badge badge-${item.impact === 'High' ? 'high' : 'medium'}`}>
+                      {item.impact} Impact
+                    </span>
+                    <button
+                      onClick={() => handleToggleStatus(item.id)}
+                      className={`badge badge-${item.status.toLowerCase()}`}
+                      style={{ cursor: 'pointer', border: 'none' }}
+                      title="Click to toggle status"
+                    >
+                      {item.status}
+                    </button>
+                  </div>
                 </div>
 
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.5, margin: 0 }}>{item.actionablePlan}</p>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{item.title}</h3>
+
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={14} /> Cohort Focus: {item.cohort}
+                </div>
+
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5, margin: 0 }}>{item.actionablePlan}</p>
               </div>
 
-              {/* Bottom Section */}
               <div
                 style={{
-                  marginTop: '1.25rem',
-                  paddingTop: '0.75rem',
-                  borderTop: '1px solid var(--border-color)',
+                  marginTop: '1.5rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid var(--card-border)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}
               >
-                <span style={{ fontSize: '0.775rem', color: 'var(--text-muted)', fontWeight: 600 }}>ID: {item.id}</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>ID: {item.id}</span>
                 <button
                   onClick={() => handleToggleStatus(item.id)}
                   className="btn btn-outline"
-                  style={{ padding: '4px 10px', fontSize: '0.775rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  Change Status <ChevronRight size={13} />
+                  Change Status <ChevronRight size={14} />
                 </button>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
 export default Recommendations;
+

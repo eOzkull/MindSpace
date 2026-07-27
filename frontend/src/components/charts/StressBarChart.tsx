@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
 
 interface StressBarChartProps {
   data: Array<Record<string, string | number>>;
@@ -43,10 +43,15 @@ export const StressBarChart: React.FC<StressBarChartProps> = ({ data }) => {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 12, right: -10, left: -20, bottom: 4 }}
+          margin={{ top: 15, right: -10, left: -20, bottom: 5 }}
         >
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
-          <XAxis {...DEFAULT_X_AXIS_PROPS} dataKey="stress" />
+          <XAxis
+            dataKey="stress"
+            stroke="transparent"
+            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
+            dy={8}
+          />
           {/* Left Y-axis for Burnout (0 - 100) */}
           <YAxis
             yAxisId="left"
@@ -66,7 +71,6 @@ export const StressBarChart: React.FC<StressBarChartProps> = ({ data }) => {
             dx={8}
           />
           <Tooltip
-            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0].payload;

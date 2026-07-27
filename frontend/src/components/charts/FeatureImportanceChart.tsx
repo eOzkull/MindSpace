@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE, formatChartValue } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, formatChartValue } from './chartUtils';
 
 export interface FeatureImportanceData {
   feature: string;
@@ -33,7 +33,7 @@ export const FeatureImportanceChart: React.FC<FeatureImportanceChartProps> = ({ 
         <BarChart
           data={sortedData}
           layout="vertical"
-          margin={{ top: 12, right: 30, left: 20, bottom: 4 }}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid {...DEFAULT_GRID_PROPS} horizontal={true} vertical={false} />
           <XAxis 
@@ -47,10 +47,10 @@ export const FeatureImportanceChart: React.FC<FeatureImportanceChartProps> = ({ 
             dataKey="feature" 
             {...DEFAULT_Y_AXIS_PROPS}
             width={120}
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
+            tick={{ fill: CHART_COLORS.textSecondary, fontSize: 12 }}
           />
           <Tooltip
-            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
+            cursor={{ fill: 'var(--card-border)', opacity: 0.4 }}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const itemData = payload[0].payload as FeatureImportanceData;

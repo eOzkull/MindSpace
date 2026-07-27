@@ -202,14 +202,12 @@
   flex: 1;
   aspect-ratio: 1 / 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  gap: 1px;
 }
 
 .confusion-matrix-cell:hover {
@@ -218,21 +216,9 @@
   z-index: 10;
 }
 
-.confusion-matrix-cell--diagonal {
-  outline: 1.5px solid color-mix(in srgb, var(--brand-primary, #6c63ff) 60%, transparent);
-}
-
 .confusion-matrix-val {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
-  line-height: 1;
-}
-
-.confusion-matrix-pct {
-  font-size: 0.65rem;
-  font-weight: 500;
-  opacity: 0.75;
-  line-height: 1;
 }
 
 .confusion-matrix-x-label {

@@ -1,5 +1,4 @@
-import React, { useMemo, useId } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo } from 'react';
 import {
   AreaChart,
   Area,
@@ -9,18 +8,15 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE, CHART_ANIMATION_PROPS } from './chartUtils';
-import { chartEntrance } from '../../lib/motion';
+import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
 
 interface BurnoutAreaChartProps {
   data: Array<Record<string, string | number>>;
 }
 
 export const BurnoutAreaChart: React.FC<BurnoutAreaChartProps> = ({ data }) => {
-  const gradientId = useId();
-  const safeGradientId = `burnoutAreaGradient-${gradientId.replace(/:/g, '')}`;
-
   const chartData = useMemo(() => {
+    // Initialize 20 bins of size 5 (from 0 to 100)
     const bins = Array.from({ length: 20 }, (_, i) => {
       const start = i * 5;
       const end = start + 4;
@@ -42,37 +38,32 @@ export const BurnoutAreaChart: React.FC<BurnoutAreaChartProps> = ({ data }) => {
     return bins;
   }, [data]);
 
-  if (!data || data.length === 0) {
-    return (
-      <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-        No burnout distribution data available
-      </div>
-    );
-  }
-
   return (
-    <motion.div {...chartEntrance} className="chart-container" style={{ width: '100%', height: 320 }}>
+    <div className="chart-container" style={{ width: '100%', height: 320 }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
-          margin={{ top: 12, right: 12, left: -20, bottom: 4 }}
+          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
         >
           <defs>
-            <linearGradient id={safeGradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.35} />
+            <linearGradient id="burnoutGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.4} />
               <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
           <XAxis
-            {...DEFAULT_X_AXIS_PROPS}
             dataKey="range"
+            stroke="transparent"
+            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
+            dy={8}
           />
           <YAxis
-            {...DEFAULT_Y_AXIS_PROPS}
+            stroke="transparent"
+            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
+            dx={-8}
           />
           <Tooltip
-            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0].payload;
@@ -101,12 +92,11 @@ export const BurnoutAreaChart: React.FC<BurnoutAreaChartProps> = ({ data }) => {
             stroke={CHART_COLORS.primary}
             strokeWidth={2}
             fillOpacity={1}
-            fill={`url(#${safeGradientId})`}
-            {...CHART_ANIMATION_PROPS}
+            fill="url(#burnoutGradient)"
           />
         </AreaChart>
       </ResponsiveContainer>
-    </motion.div>
+    </div>
   );
 };
 
