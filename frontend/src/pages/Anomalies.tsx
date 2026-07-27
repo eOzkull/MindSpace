@@ -1,11 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAnomalies } from '../hooks/useAnomalies';
-import { ShieldAlert, RefreshCw, Info, AlertOctagon } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Info, AlertOctagon, ScanLine } from 'lucide-react';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
 import LoadingScreen from '../components/LoadingScreen';
 import DataTable from '../components/tables/DataTable';
 import { fadeUp } from '../lib/motion';
+
+interface AnomalyResponse {
+  anomalies: AnomalyItem[];
+  total_scanned: number;
+  total_flagged: number;
+  columns_scanned: string[];
+}
 
 interface AnomalyItem {
   id: string;
@@ -57,12 +64,17 @@ const MOCK_ANOMALIES: AnomalyItem[] = [
 ];
 
 const Anomalies: React.FC = () => {
-  const { data: fetchedAnomalies, isLoading, isError, refetch, isFetching } = useAnomalies();
-  const loading = isLoading || isFetching;
+  const { data: fetchedData, isLoading, isError, refetch } = useAnomalies();
+  const loading = isLoading;
   const error = isError ? 'Backend API scanning not available. Using offline cache data.' : '';
+
+  const response = fetchedData as AnomalyResponse | undefined;
   const anomalies: AnomalyItem[] = isError
     ? MOCK_ANOMALIES
-    : ((fetchedAnomalies as AnomalyItem[] | undefined) ?? []);
+    : (Array.isArray(response?.anomalies) ? response!.anomalies : []);
+  const totalScanned = response?.total_scanned ?? null;
+  const totalFlagged = response?.total_flagged ?? anomalies.length;
+  const columnsScanned = response?.columns_scanned ?? [];
 
   const tableColumns = React.useMemo(() => [
     {
@@ -127,6 +139,24 @@ const Anomalies: React.FC = () => {
           <RefreshCw className={loading ? "animate-spin" : ""} size={15} /> Re-scan Database
         </button>
       </div>
+
+      {!isError && !loading && totalScanned !== null && (
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Records Scanned', value: totalScanned.toLocaleString(), icon: <ScanLine size={16} /> },
+            { label: 'Anomalies Flagged', value: totalFlagged, icon: <AlertOctagon size={16} /> },
+            { label: 'Columns Monitored', value: columnsScanned.length, icon: <ShieldAlert size={16} /> },
+          ].map(({ label, value, icon }) => (
+            <div key={label} className="card" style={{ flex: '1 1 140px', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ color: 'var(--brand-primary)', opacity: 0.8 }}>{icon}</span>
+              <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, lineHeight: 1, color: 'var(--text-primary)' }}>{value}</div>
+                <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginTop: '2px' }}>{label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="card" style={{
         background: 'rgba(239, 68, 68, 0.03)',

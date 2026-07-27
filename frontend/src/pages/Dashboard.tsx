@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
   const currentPage = useAppStore(selectDashboardCurrentPage);
   const setCurrentPage = useAppStore((s) => s.setDashboardCurrentPage);
   const recordsPerPage = 10;
-  
+
   const expanded = useAppStore(selectDashboardExpanded);
   const setExpanded = useAppStore((s) => s.setDashboardExpanded);
 
@@ -100,10 +100,10 @@ const Dashboard: React.FC = () => {
       header: c.replace('_', ' ').toUpperCase(),
       render: c === 'risk'
         ? (value: any) => (
-            <span className={`badge badge-${String(value || '').toLowerCase()}`}>
-              {value}
-            </span>
-          )
+          <span className={`badge badge-${String(value || '').toLowerCase()}`}>
+            {value}
+          </span>
+        )
         : undefined,
     }));
   }, [columns]);
@@ -119,8 +119,8 @@ const Dashboard: React.FC = () => {
         </div>
         <h2 style={{ marginBottom: '0.5rem', fontSize: '1.25rem', fontWeight: 600 }}>{isNoDataset ? 'No Active Dataset' : 'Dashboard Unavailable'}</h2>
         <p className="text-secondary" style={{ marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
-          {isNoDataset 
-            ? 'Upload a student cohort CSV dataset from the Home page to unlock interactive visualizations and risk analytics.' 
+          {isNoDataset
+            ? 'Upload a student cohort CSV dataset from the Home page to unlock interactive visualizations and risk analytics.'
             : rawError}
         </p>
         <Link to="/" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
@@ -276,7 +276,7 @@ const Dashboard: React.FC = () => {
               <BurnoutAreaChart data={data} />
             </InsightCard>
           </motion.div>
-          
+
           <motion.div variants={staggerItem}>
             <InsightCard icon={PieChart} title="Burnout Risk Proportions" desc="Categorical slice of the cohort." takeaway="If High-risk exceeds 25%, the cohort needs structural support." reverse>
               <RiskPieChart data={data} />
@@ -292,10 +292,10 @@ const Dashboard: React.FC = () => {
           <motion.div variants={staggerItem}>
             <InsightCard icon={Grid} title="Feature Correlation Heatmap" desc="Strength and direction of linear relationships." takeaway="High positive correlations tell you which levers to pull first." reverse>
               {dashboard?.corr_matrix && (
-                <ConfusionMatrixHeatmap 
-                  matrix={dashboard.corr_matrix.data} 
-                  labels={dashboard.corr_matrix.columns.map((c: string) => c.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()))} 
-                  title="" 
+                <ConfusionMatrixHeatmap
+                  matrix={dashboard.corr_matrix.data}
+                  labels={dashboard.corr_matrix.columns.map((c: string) => c.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()))}
+                  title=""
                 />
               )}
             </InsightCard>

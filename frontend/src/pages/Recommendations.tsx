@@ -99,15 +99,20 @@ const MOCK_RECOMMENDATIONS: RecommendationItem[] = [
 ];
 
 const Recommendations: React.FC = () => {
-  const { data: insightsData, isLoading, isError, refetch, isFetching } = useInsights();
-  const loading = isLoading || isFetching;
+  const { data: insightsData, isLoading, isError, refetch } = useInsights();
+  const loading = isLoading;
   const error = isError ? 'Could not connect to live recommendations API. Running in offline evaluation mode.' : '';
 
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>(MOCK_RECOMMENDATIONS);
 
   useEffect(() => {
-    if (insightsData && Array.isArray(insightsData)) {
-      setRecommendations(insightsData as RecommendationItem[]);
+    if (insightsData) {
+      const recList = Array.isArray(insightsData)
+        ? insightsData
+        : (insightsData as any)?.recommendations;
+      if (Array.isArray(recList) && recList.length > 0) {
+        setRecommendations(recList as RecommendationItem[]);
+      }
     }
   }, [insightsData]);
 
@@ -126,7 +131,8 @@ const Recommendations: React.FC = () => {
           Active: 'Resolved',
           Resolved: 'Pending',
         };
-        return { ...rec, status: nextStatusMap[rec.status] };
+        const currentStatus: RecommendationItem['status'] = rec.status ?? 'Pending';
+        return { ...rec, status: nextStatusMap[currentStatus] };
       }),
     );
   };
@@ -187,11 +193,11 @@ const Recommendations: React.FC = () => {
                   </span>
                   <button
                     onClick={() => handleToggleStatus(item.id)}
-                    className={`badge badge-${item.status.toLowerCase()}`}
+                    className={`badge badge-${(item.status ?? 'pending').toLowerCase()}`}
                     style={{ cursor: 'pointer', border: 'none', fontSize: '0.75rem' }}
                     title="Click to toggle status"
                   >
-                    {item.status}
+                    {item.status ?? 'Pending'}
                   </button>
                 </div>
               </div>

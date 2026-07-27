@@ -31,8 +31,16 @@ const Results: React.FC = () => {
     : (response?.error ?? '');
   const data: ResultsResponse | null = response?.error ? null : (response ?? null);
 
-  if (loading || !data) return <LoadingScreen message="Summarizing Cohort Results..." subtitle="Reviewing clinical patterns and synthesizing recommendations." />;
-  if (error) return <div className="card flash-alert flash-danger"><AlertTriangle size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />{error}</div>;
+  if (loading) return <LoadingScreen message="Summarizing Cohort Results..." subtitle="Reviewing clinical patterns and synthesizing recommendations." />;
+  if (error || !data) {
+    return (
+      <motion.div {...fadeUp} className="card" style={{ padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto', borderLeft: '4px solid var(--danger)' }}>
+        <AlertTriangle size={36} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Results Unavailable</h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>{error || 'No active dataset loaded. Please upload a dataset first.'}</p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div {...fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

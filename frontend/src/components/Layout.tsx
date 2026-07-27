@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
     Brain, House, ChartPie, ListChecks, Crosshair, GitCompare, Moon, Sun,
     Sparkles, ShieldAlert, Lightbulb, Menu, X
 } from 'lucide-react';
 import { useAppStore, selectTheme, selectIsDarkMode } from '../store/appStore';
-import { fadeUp } from '../lib/motion';
 
 const Layout: React.FC = () => {
     const theme = useAppStore(selectTheme);
@@ -252,11 +250,7 @@ const Layout: React.FC = () => {
                     </div>
                 </header>
 
-                <AnimatePresence mode="wait">
-                    <motion.div key={location.pathname} {...fadeUp}>
-                        <Outlet />
-                    </motion.div>
-                </AnimatePresence>
+                <Outlet />
             </main>
         </div>
     );

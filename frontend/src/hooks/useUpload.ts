@@ -14,10 +14,16 @@ export const useUploadFile = () => {
   return useMutation<UploadResponse, Error, File>({
     mutationFn: uploadFile,
     onSuccess: () => {
+<<<<<<< HEAD
       queryClient.invalidateQueries({ queryKey: ['history'] });
       queryClient.invalidateQueries({ queryKey: ['evaluate'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['results'] });
+=======
+      // Invalidate and reset ALL queries across the app on dataset upload so all pages fetch fresh dataset results
+      queryClient.invalidateQueries();
+      queryClient.resetQueries();
+>>>>>>> 675db75 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
     },
   });
 };
@@ -27,7 +33,9 @@ export const useResetSession = () => {
   return useMutation<SuccessResponse, Error, void>({
     mutationFn: resetSession,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['history'] });
+      // Clear all cached query data when session is reset
+      queryClient.invalidateQueries();
+      queryClient.resetQueries();
     },
   });
 };

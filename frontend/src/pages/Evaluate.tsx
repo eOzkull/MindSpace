@@ -25,7 +25,6 @@ import {
   Network,
   Activity,
   Zap,
-  Image,
   AlertCircle
 } from 'lucide-react';
 
@@ -39,14 +38,14 @@ const Evaluate: React.FC = () => {
     : (response?.error ?? '');
   const data: EvaluateResponse | null = response?.error ? null : (response ?? null);
 
-  if (loading || !data || !data.metrics) return <LoadingScreen message="Evaluating Model..." subtitle="Reading accuracy, recall, and computing validation metrics." />;
+  if (loading) return <LoadingScreen message="Evaluating Model..." subtitle="Reading accuracy, recall, and computing validation metrics." />;
 
-  if (error) {
+  if (error || !data || !data.metrics) {
     return (
       <motion.div {...fadeUp} className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
         <AlertCircle size={48} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
         <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', fontWeight: 600 }}>Model Not Ready</h3>
-        <p className="insight-desc" style={{ color: 'var(--text-secondary)' }}>{error}</p>
+        <p className="insight-desc" style={{ color: 'var(--text-secondary)' }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
         {target === 'compare' && (
           <div style={{ marginTop: '1.5rem' }}>
             <Link to="/evaluate?dataset=primary" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -116,7 +115,7 @@ const Evaluate: React.FC = () => {
       )}
 
       {/* Verdict Card */}
-      <div className={`card verdict-card ${readyStatus}`} style={{ 
+      <div className={`card verdict-card ${readyStatus}`} style={{
         padding: '1.75rem',
         borderRadius: 'var(--radius-lg)',
         background: isReady ? 'rgba(40, 199, 111, 0.04)' : 'rgba(255, 171, 0, 0.04)',
@@ -144,8 +143,8 @@ const Evaluate: React.FC = () => {
               Deployment Readiness: {isReady ? 'Approved for Production' : 'Further Tuning Advised'}
             </h3>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.925rem', margin: 0 }}>
-              {isReady 
-                ? 'The model demonstrates robust predictive capabilities, exceeding the 85% F1-score and 80% Recall thresholds. It is highly reliable at identifying high-risk students without generating excessive false alarms.' 
+              {isReady
+                ? 'The model demonstrates robust predictive capabilities, exceeding the 85% F1-score and 80% Recall thresholds. It is highly reliable at identifying high-risk students without generating excessive false alarms.'
                 : 'The model shows promise but falls below our strict deployment thresholds (F1 > 85%, Recall > 80%). We recommend collecting more diverse samples or engineering additional features before using this model for automated outreach.'}
             </p>
           </div>
@@ -314,17 +313,6 @@ const Evaluate: React.FC = () => {
         </div>
       )}
 
-      {/* Visual Confusion Matrix Plot */}
-      <div className="card">
-        <div style={{ marginBottom: '1.25rem' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
-            <Image size={18} style={{ color: 'var(--brand-primary)' }} /> Visual Confusion Matrix
-          </h3>
-        </div>
-        <div style={{ maxWidth: '540px', margin: '0 auto' }}>
-          <img src={data.plot} alt="Confusion Matrix Plot" style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--input-bg)' }} />
-        </div>
-      </div>
     </motion.div>
   );
 };
