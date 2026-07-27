@@ -16,6 +16,7 @@ export const useUploadFile = () => {
     onSuccess: () => {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       queryClient.invalidateQueries({ queryKey: ['history'] });
       queryClient.invalidateQueries({ queryKey: ['evaluate'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -44,6 +45,10 @@ export const useUploadFile = () => {
 >>>>>>> 675db75 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
 >>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
 >>>>>>> 06ae799 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
+=======
+      // Invalidate ALL queries across the app on dataset upload so all pages fetch fresh dataset results
+      queryClient.invalidateQueries();
+>>>>>>> e543e2c (fix merge conflicts)
     },
   });
 };

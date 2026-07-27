@@ -47,11 +47,7 @@ const Evaluate: React.FC = () => {
       <motion.div {...fadeUp} className="card" style={{ borderLeft: '4px solid var(--danger)', padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
         <AlertCircle size={48} style={{ color: 'var(--danger)', marginBottom: '1rem', display: 'inline-block' }} />
         <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', fontWeight: 600 }}>Model Not Ready</h3>
-<<<<<<< HEAD
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
-=======
         <p className="insight-desc" style={{ color: 'var(--text-secondary)' }}>{error || 'No dataset loaded or evaluation metrics unavailable.'}</p>
->>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
         {target === 'compare' && (
           <div style={{ marginTop: '1.5rem' }}>
             <button onClick={() => navigate('/evaluate?dataset=primary')} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -83,11 +79,7 @@ const Evaluate: React.FC = () => {
       )}
 
       {/* Verdict Card */}
-<<<<<<< HEAD
       <div className="card" style={{
-=======
-      <div className={`card verdict-card ${readyStatus}`} style={{
->>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
         padding: '1.75rem',
         borderLeft: `4px solid var(--${isReady ? 'success' : 'warning'})`,
         background: isReady ? 'rgba(40, 199, 111, 0.03)' : 'rgba(255, 171, 0, 0.03)',
@@ -114,17 +106,10 @@ const Evaluate: React.FC = () => {
             <h3 style={{ marginBottom: '0.4rem', fontSize: '1.05rem', fontWeight: 600, color: isReady ? 'var(--success)' : 'var(--warning)' }}>
               {isReady ? '✓ Approved for Production Deployment' : '⚠ Further Tuning Advised'}
             </h3>
-<<<<<<< HEAD
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem', margin: 0 }}>
-              {isReady
-                ? 'The model exceeds the 85% F1-score and 80% Recall thresholds — reliably identifying high-risk students without excessive false alarms.'
-                : 'Falls below deployment thresholds (F1 > 85%, Recall > 80%). Recommend collecting more diverse samples or engineering additional features before automated outreach.'}
-=======
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.925rem', margin: 0 }}>
               {isReady
                 ? 'The model demonstrates robust predictive capabilities, exceeding the 85% F1-score and 80% Recall thresholds. It is highly reliable at identifying high-risk students without generating excessive false alarms.'
                 : 'The model shows promise but falls below our strict deployment thresholds (F1 > 85%, Recall > 80%). We recommend collecting more diverse samples or engineering additional features before using this model for automated outreach.'}
->>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
             </p>
           </div>
         </div>

@@ -326,45 +326,17 @@ const Dashboard: React.FC = () => {
           animate="animate"
           style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
         >
-<<<<<<< HEAD
           <ChartCard icon={BarChart2} title="Burnout Score Distribution" description="Histogram distribution showing how burnout scores are spread across the cohort population." takeaway="Peaks clustered above 60 indicate that a significant portion of this cohort is experiencing high stress levels.">
             <BurnoutAreaChart data={data} />
           </ChartCard>
-=======
-          <motion.div variants={staggerItem}>
-            <InsightCard icon={BarChart2} title="Burnout Score Distribution" desc="How burnout scores are spread across the whole student population." takeaway="Peaks clustered above 60 indicate that a significant portion of this cohort is under chronic pressure.">
-              <BurnoutAreaChart data={data} />
-            </InsightCard>
-          </motion.div>
-
-          <motion.div variants={staggerItem}>
-            <InsightCard icon={PieChart} title="Burnout Risk Proportions" desc="Categorical slice of the cohort." takeaway="If High-risk exceeds 25%, the cohort needs structural support." reverse>
-              <RiskPieChart data={data} />
-            </InsightCard>
-          </motion.div>
->>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
 
           <InsightCard icon={PieChart} title="Burnout Risk Proportions" desc="Categorical proportion of students categorized into Low, Medium, and High risk tiers." takeaway="If High-risk exceeds 25%, institutional support policies should be activated." layout="split" reverse>
             <RiskPieChart data={data} />
           </InsightCard>
 
-<<<<<<< HEAD
           <ChartCard icon={TrendingUp} title="Stress Level vs Avg Burnout" description="Average burnout score evaluated at each self-reported stress level step (1 to 10)." takeaway="The escalation from stress level 7 to 8 represents a steep non-linear increase in burnout risk.">
             <StressBarChart data={data} />
           </ChartCard>
-=======
-          <motion.div variants={staggerItem}>
-            <InsightCard icon={Grid} title="Feature Correlation Heatmap" desc="Strength and direction of linear relationships." takeaway="High positive correlations tell you which levers to pull first." reverse>
-              {dashboard?.corr_matrix && (
-                <ConfusionMatrixHeatmap
-                  matrix={dashboard.corr_matrix.data}
-                  labels={dashboard.corr_matrix.columns.map((c: string) => c.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()))}
-                  title=""
-                />
-              )}
-            </InsightCard>
-          </motion.div>
->>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
 
           <InsightCard icon={Grid} title="Feature Correlation Heatmap" desc="Linear correlation matrix between telemetry factors and burnout risk outcome." takeaway="High positive correlations indicate the strongest predictor vectors in the dataset." layout="split" reverse>
             {dashboard?.corr_matrix && (
