@@ -15,6 +15,13 @@ interface AnomalyResponse {
   columns_scanned: string[];
 }
 
+interface AnomalyResponse {
+  anomalies: AnomalyItem[];
+  total_scanned: number;
+  total_flagged: number;
+  columns_scanned: string[];
+}
+
 interface AnomalyItem {
   id: string;
   type: string;
@@ -142,6 +149,7 @@ const Anomalies: React.FC = () => {
       </div>
 
       {!isError && !loading && totalScanned !== null && (
+<<<<<<< HEAD
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="stats-grid">
           <motion.div variants={staggerItem}>
             <StatCard
@@ -171,6 +179,23 @@ const Anomalies: React.FC = () => {
             />
           </motion.div>
         </motion.div>
+=======
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Records Scanned', value: totalScanned.toLocaleString(), icon: <ScanLine size={16} /> },
+            { label: 'Anomalies Flagged', value: totalFlagged, icon: <AlertOctagon size={16} /> },
+            { label: 'Columns Monitored', value: columnsScanned.length, icon: <ShieldAlert size={16} /> },
+          ].map(({ label, value, icon }) => (
+            <div key={label} className="card" style={{ flex: '1 1 140px', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ color: 'var(--brand-primary)', opacity: 0.8 }}>{icon}</span>
+              <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, lineHeight: 1, color: 'var(--text-primary)' }}>{value}</div>
+                <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginTop: '2px' }}>{label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+>>>>>>> 5b96ee4 (fix anomaly bug, recommendations bug, reload errors, framer-motion react19 router error, client.ts errors, minor ui changes)
       )}
 
       <div className="card" style={{
