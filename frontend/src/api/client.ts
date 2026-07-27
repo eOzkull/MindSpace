@@ -39,10 +39,8 @@ async function _handle<T>(res: Response): Promise<T> {
 // - 'include':     needed locally so Flask session cookies cross the Vite→Flask
 //                  proxy boundary (different ports = cross-origin in dev)
 // ---------------------------------------------------------------------------
-const IS_DEV = import.meta.env.DEV;
-
 const BASE_INIT: RequestInit = {
-  credentials: IS_DEV ? 'include' : 'same-origin',
+  credentials: 'include',
 };
 
 export const apiClient = {

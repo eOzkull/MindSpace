@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useDashboard, useUpdateDashboard } from '../hooks/useDashboard';
 import type { DataRow } from '../types/dashboard';
 import type { UpdatePayload } from '../types/common';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
+import LoadingScreen from '../components/LoadingScreen';
+import DataTable from '../components/tables/DataTable';
+import { fadeUp } from '../lib/motion';
 import {
   Save,
   X,
   Table,
   PlusCircle
 } from 'lucide-react';
-import DataTable from '../components/tables/DataTable';
 
 const Edit: React.FC = () => {
   const { data: dashboard, isLoading: loading, error: queryError } = useDashboard();
@@ -51,7 +53,8 @@ const Edit: React.FC = () => {
           value={value ?? ''} 
           onChange={(e) => handleChange(i, col, e.target.value)} 
           placeholder="Empty" 
-          style={{ width: '100%', padding: '4px 8px', border: '1px solid var(--card-border)', background: 'transparent', color: 'var(--text-primary)', borderRadius: '4px' }}
+          className="filter-input"
+          style={{ width: '100%', padding: '6px 10px', fontSize: '0.85rem' }}
         />
       ),
       cellStyle: { padding: '4px' }
@@ -86,13 +89,11 @@ const Edit: React.FC = () => {
 
   if (loading || saving) {
     return (
-      <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <Spinner
-  size={64}
-  label={saving ? 'Recalculating Analysis...' : 'Loading Data...'}
-/>
-        <p style={{ color: 'var(--text-secondary)' }}>{saving ? 'Updating records and retraining the model. Please wait.' : 'Please wait.'}</p>
-      </div>
+      <LoadingScreen
+        variant="overlay"
+        message={saving ? 'Recalculating Analysis...' : 'Loading Data...'}
+        subtitle={saving ? 'Updating records and retraining the model. Please wait.' : 'Loading dataset grid for interactive editing.'}
+      />
     );
   }
 
@@ -107,7 +108,7 @@ const Edit: React.FC = () => {
   }
 
   return (
-    <>
+    <motion.div {...fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {saveError && (
         <ErrorBanner
           title="Save Failed"
@@ -115,22 +116,34 @@ const Edit: React.FC = () => {
           variant="danger"
         />
       )}
-      <div className="top-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '1.5rem' }}>
-        <button onClick={handleSave} className="btn btn-primary">
-          <Save size={16} /> Save & Analyze
-        </button>
-        <button onClick={() => navigate('/dashboard')} className="btn btn-outline">
-          <X size={16} /> Cancel
-        </button>
+      
+      <div className="top-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+            <Table size={18} style={{ color: 'var(--brand-primary)' }} /> Edit Dataset Records
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+            Modify values directly in the dataset grid and save to recalculate model parameters.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button onClick={() => navigate('/dashboard')} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+            <X size={15} /> Cancel
+          </button>
+          <button onClick={handleSave} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+            <Save size={15} /> Save & Analyze
+          </button>
+        </div>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Table size={20} /> Interactive Grid
+        <div style={{ padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem', fontWeight: 600, margin: 0 }}>
+            <Table size={16} style={{ color: 'var(--brand-primary)' }} /> Interactive Grid ({editRows.length} Rows)
           </h3>
-          <button type="button" onClick={handleAddRow} className="btn btn-outline" style={{ padding: '6px 14px', fontSize: '0.85rem' }}>
-            <PlusCircle size={16} /> Add Row
+          <button type="button" onClick={handleAddRow} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <PlusCircle size={15} /> Add Row
           </button>
         </div>
 
@@ -143,12 +156,14 @@ const Edit: React.FC = () => {
           theadStyle={{ position: 'sticky', top: 0, zIndex: 10 }}
         />
 
-        <div style={{ padding: '1.5rem', background: 'var(--card-bg)', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', gap: '12px', position: 'sticky', bottom: 0 }}>
-          <button onClick={() => navigate('/dashboard')} className="btn btn-outline">Cancel</button>
-          <button onClick={handleSave} className="btn btn-primary"><Save size={16} /> Save Changes</button>
+        <div style={{ padding: '1rem 1.5rem', background: 'var(--card-bg)', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '8px', position: 'sticky', bottom: 0 }}>
+          <button onClick={() => navigate('/dashboard')} className="btn btn-outline" style={{ fontSize: '0.85rem' }}>Cancel</button>
+          <button onClick={handleSave} className="btn btn-primary" style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Save size={15} /> Save Changes
+          </button>
         </div>
       </div>
-    </>
+    </motion.div>
   );
 };
 

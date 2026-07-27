@@ -1,57 +1,137 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { fadeIn } from '../lib/motion';
 
 interface LoadingScreenProps {
   message?: string;
   subtitle?: string;
+  variant?: 'inline' | 'overlay';
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
   message = 'Loading dashboard analytics...', 
-  subtitle = 'Please wait while we prepare your data.'
+  subtitle = 'Please wait while we prepare your data.',
+  variant = 'inline'
 }) => {
+  if (variant === 'overlay') {
+    return (
+      <motion.div
+        {...fadeIn}
+        className="loading-overlay"
+        role="status"
+        aria-live="polite"
+      >
+        <motion.div
+          animate={{ rotate: 360, opacity: [0.7, 1, 0.7] }}
+          transition={{
+            rotate: { repeat: Infinity, duration: 1, ease: 'linear' },
+            opacity: { repeat: Infinity, duration: 1.8, ease: 'easeInOut' },
+          }}
+          style={{
+            display: 'inline-flex',
+            marginBottom: '1.5rem',
+            padding: '16px',
+            borderRadius: '9999px',
+            background: 'rgba(139, 92, 246, 0.08)',
+            border: '1px solid rgba(139, 92, 246, 0.2)',
+            boxShadow: '0 0 24px rgba(139, 92, 246, 0.2)',
+          }}
+        >
+          <Loader2 size={42} style={{ color: 'var(--brand-primary)' }} />
+        </motion.div>
+        <h3 style={{ marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-primary)', fontSize: '1.25rem', textAlign: 'center' }}>
+          {message}
+        </h3>
+        {subtitle && (
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.925rem', textAlign: 'center', margin: 0, maxWidth: '450px' }}>
+            {subtitle}
+          </p>
+        )}
+      </motion.div>
+    );
+  }
+
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '5rem 2rem',
-      minHeight: '400px',
-      width: '100%',
-      background: 'var(--card-bg)',
-      border: '1px solid var(--card-border)',
-      borderRadius: 'var(--radius-lg)',
-      backdropFilter: 'var(--glass-blur)',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-      marginTop: '1rem',
-    }}>
-      <Loader2 
-        className="animate-spin" 
-        size={44} 
-        style={{ color: 'var(--brand-primary)', marginBottom: '1.25rem' }} 
+    <motion.div
+      {...fadeIn}
+      role="status"
+      aria-live="polite"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '5rem 2rem',
+        minHeight: '400px',
+        width: '100%',
+        background: 'radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 70%), var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        borderRadius: 'var(--radius-lg)',
+        backdropFilter: 'var(--glass-blur)',
+        boxShadow: 'var(--card-shadow)',
+        marginTop: '1rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+          pointerEvents: 'none',
+          opacity: 0.6,
+        }}
       />
+      <motion.div
+        animate={{ rotate: 360, opacity: [0.7, 1, 0.7] }}
+        transition={{
+          rotate: { repeat: Infinity, duration: 1, ease: 'linear' },
+          opacity: { repeat: Infinity, duration: 1.8, ease: 'easeInOut' },
+        }}
+        style={{
+          display: 'inline-flex',
+          marginBottom: '1.5rem',
+          padding: '12px',
+          borderRadius: '9999px',
+          background: 'rgba(139, 92, 246, 0.08)',
+          border: '1px solid rgba(139, 92, 246, 0.2)',
+          boxShadow: '0 0 20px rgba(139, 92, 246, 0.15)',
+          zIndex: 1,
+        }}
+      >
+        <Loader2 
+          size={36} 
+          style={{ color: 'var(--brand-primary)' }} 
+        />
+      </motion.div>
       <h3 style={{ 
         marginBottom: '0.5rem', 
-        fontWeight: 600, 
+        fontWeight: 700, 
         color: 'var(--text-primary)',
-        fontSize: '1.2rem',
-        textAlign: 'center'
+        fontSize: '1.25rem',
+        textAlign: 'center',
+        letterSpacing: '-0.02em',
+        zIndex: 1,
       }}>
         {message}
       </h3>
       <p style={{ 
         color: 'var(--text-secondary)', 
-        fontSize: '0.95rem',
+        fontSize: '0.925rem',
         textAlign: 'center',
         margin: 0,
         maxWidth: '450px',
-        lineHeight: 1.5
+        lineHeight: 1.5,
+        zIndex: 1,
       }}>
         {subtitle}
       </p>
-    </div>
+    </motion.div>
   );
 };
 
 export default LoadingScreen;
+
