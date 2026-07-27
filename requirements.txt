@@ -7,3 +7,5 @@ flask-cors
 pydantic>=2.0.0
 Flask-SQLAlchemy>=3.0.0
 scikit-learn
+
+

@@ -10,3 +10,8 @@ frontend/dist
 __pycache__
 documents
 sample_students.csv
+**/tests/**
+**/test/**
+**/testing/**
+**/docs/**
+
