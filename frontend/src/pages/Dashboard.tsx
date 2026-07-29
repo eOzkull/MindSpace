@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useDashboard } from '../hooks/useDashboard';
 import { fadeUp, staggerContainer, staggerItem, modalEntrance } from '../lib/motion';
 import {
@@ -221,15 +221,13 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        <AnimatePresence initial={false}>
-          {expanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              style={{ overflow: 'hidden' }}
-            >
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
               {/* Filter & Search Bar */}
               <div className="table-filters" style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <div style={{ position: 'relative', flex: '1', minWidth: '240px' }}>
@@ -307,8 +305,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+        )}
       </div>
 
       {/* Visual Charts Section */}
@@ -375,8 +372,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Floating Compare Action Panel */}
-      <AnimatePresence>
-        {selectedStudentRows.length >= 2 && selectedStudentRows.length <= 5 && (
+      {selectedStudentRows.length >= 2 && selectedStudentRows.length <= 5 && (
           <motion.div className="floating-action-panel" {...modalEntrance}>
             <div className="panel-content">
               <span className="panel-text">
@@ -392,8 +388,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+      )}
     </motion.div>
   );
 };
