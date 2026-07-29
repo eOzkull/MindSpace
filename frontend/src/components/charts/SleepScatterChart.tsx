@@ -10,7 +10,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface SleepScatterChartProps {
   data: Array<Record<string, string | number>>;
@@ -39,31 +39,26 @@ export const SleepScatterChart: React.FC<SleepScatterChartProps> = ({ data }) =>
   return (
     <div className="chart-container" style={{ width: '100%', height: 320 }}>
       <ResponsiveContainer width="100%" height="100%">
-        <ScatterChart
-          margin={{ top: 15, right: 15, left: -20, bottom: 5 }}
-        >
+        <ScatterChart margin={{ top: 12, right: 15, left: -20, bottom: 4 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
           <XAxis
+            {...DEFAULT_X_AXIS_PROPS}
             type="number"
             dataKey="sleep"
             name="Sleep"
             unit="h"
             domain={[3, 11]}
             tickCount={9}
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dy={8}
           />
           <YAxis
+            {...DEFAULT_Y_AXIS_PROPS}
             type="number"
             dataKey="burnout"
             name="Burnout"
             domain={[0, 100]}
-            stroke="transparent"
-            tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }}
-            dx={-8}
           />
           <Tooltip
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const sleepVal = payload.find(p => p.name === 'Sleep')?.value;
@@ -84,15 +79,14 @@ export const SleepScatterChart: React.FC<SleepScatterChartProps> = ({ data }) =>
                       <div className="custom-chart-tooltip-item">
                         Risk Tier:
                         <span
-                          className="badge"
                           style={{
                             backgroundColor: rawObj.color + '22',
                             color: rawObj.color,
                             border: `1px solid ${rawObj.color}44`,
                             padding: '2px 8px',
                             borderRadius: '4px',
-                            fontSize: '0.8rem',
-                            fontWeight: 'bold',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
                             marginLeft: 'auto',
                           }}
                         >
@@ -106,7 +100,6 @@ export const SleepScatterChart: React.FC<SleepScatterChartProps> = ({ data }) =>
               return null;
             }}
           />
-          {/* Reference line showing 5-hour sleep risk threshold */}
           <ReferenceLine
             x={5}
             stroke={CHART_COLORS.danger}

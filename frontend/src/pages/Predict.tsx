@@ -1,32 +1,29 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useAppStore, selectSelectedPredictionDataset } from '../store/appStore';
 import { useEvaluate } from '../hooks/usePrediction';
 import { useDebounce } from '../hooks/useDebounce';
-import { Sparkles, Brain, AlertTriangle, Moon, BookOpen, AlertCircle } from 'lucide-react';
+import { fadeUp } from '../lib/motion';
+import SegmentedControl from '../components/ui/SegmentedControl';
+import { Sparkles, Brain, AlertTriangle, Moon, BookOpen, AlertCircle, RefreshCw } from 'lucide-react';
 
 const Predict: React.FC = () => {
   const selectedDataset = useAppStore(selectSelectedPredictionDataset);
   const setSelectedDataset = useAppStore((s) => s.setSelectedPredictionDataset);
 
-  // Debounce remote prediction requests by 300ms via reusable hook
   const debouncedDataset = useDebounce(selectedDataset, 300);
-
-  // Reuse existing prediction hook to keep backend model metadata support intact
   const { data: evaluateData } = useEvaluate(debouncedDataset);
   const metrics = evaluateData?.metrics;
 
-  // Controlled form inputs
   const [studentId, setStudentId] = useState('ST-9021');
   const [sleepHours, setSleepHours] = useState(6.5);
   const [studyHours, setStudyHours] = useState(5.0);
   const [stressLevel, setStressLevel] = useState(5);
   const [feedbackText, setFeedbackText] = useState('Feeling a bit overwhelmed with assignments lately, but trying to keep up.');
 
-  // useMemo for deterministic calculations (reactive, immediate update)
   const result = useMemo(() => {
     let score = (stressLevel * 8) + (studyHours * 1.5) - (sleepHours * 4);
 
-    // Simple sentiment estimation from feedbackText (simulate VADER)
     let sentiment = 0.0;
     const lowerText = feedbackText.toLowerCase();
     if (lowerText.includes('overwhelmed') || lowerText.includes('stress') || lowerText.includes('tired') || lowerText.includes('hard')) {
@@ -39,18 +36,14 @@ const Predict: React.FC = () => {
       sentiment -= 0.5;
     }
 
-    // Sentiment adjustment
     score -= sentiment * 20;
 
-    // Adjust slightly based on selected prediction model dataset base
     if (selectedDataset === 'compare') {
       score += 5;
     }
 
-    // Clamp score
     score = Math.max(0, Math.min(100, Math.round(score)));
 
-    // Determine risk tier
     let risk: 'Low' | 'Medium' | 'High' = 'Low';
     if (score >= 70) {
       risk = 'High';
@@ -78,71 +71,101 @@ const Predict: React.FC = () => {
     setFeedbackText('');
   };
 
+  const getRiskColorVar = (risk: 'Low' | 'Medium' | 'High') => {
+    return risk === 'High' ? 'var(--danger)' : risk === 'Medium' ? 'var(--warning)' : 'var(--success)';
+  };
+
+  // SVG Gauge calculations
+  const gaugeRadius = 70;
+  const circumference = 2 * Math.PI * gaugeRadius;
+  const strokeDashoffset = circumference - (result.score / 100) * circumference;
+
+  const datasetOptions = [
+    { value: 'primary', label: 'Primary Cohort Model' },
+    ...(evaluateData?.compare_exists ? [{ value: 'compare', label: 'Compare Cohort Model' }] : [])
+  ];
+
   return (
-    <div className="predict-container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <div className="card" style={{ marginBottom: '2rem', padding: '1.25rem 1.75rem', background: 'var(--input-bg)' }}>
+    <motion.div {...fadeUp} style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {/* Active Model Top Strip */}
+      <div className="card" style={{ padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <Brain size={20} style={{ color: 'var(--brand-primary)' }} />
-            <span style={{ fontSize: '1.05rem', fontWeight: 500 }}>Active Model:</span>
-            {metrics && (
-              <span className="badge" style={{
-                fontSize: '0.8rem',
-                padding: '4px 10px',
-                background: 'rgba(59, 130, 246, 0.1)',
-                color: 'var(--brand-primary)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '4px',
-                fontWeight: 600
-              }}>
-                Accuracy: {(metrics.accuracy * 100).toFixed(1)}% | F1 Score: {metrics.f1}
-              </span>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(139, 92, 246, 0.12)',
+              border: '1px solid rgba(139, 92, 246, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--brand-primary)'
+            }}>
+              <Brain size={20} />
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', display: 'block' }}>Active Prediction Model</span>
+              {metrics ? (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
+                  <span className="badge badge-brand" style={{ fontSize: '0.75rem' }}>
+                    Accuracy: {(metrics.accuracy * 100).toFixed(1)}%
+                  </span>
+                  <span className="badge badge-brand" style={{ fontSize: '0.75rem' }}>
+                    F1 Score: {metrics.f1}
+                  </span>
+                </div>
+              ) : (
+                <span style={{ fontSize: '0.925rem', fontWeight: 600, color: 'var(--text-primary)' }}>Standard Cohort Classifier</span>
+              )}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setSelectedDataset('primary')}
-              className={`btn ${selectedDataset === 'primary' ? 'btn-primary' : 'btn-outline'}`}
-              style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
-            >
-              Primary Cohort Model
-            </button>
-            {evaluateData?.compare_exists && (
-              <button
-                onClick={() => setSelectedDataset('compare')}
-                className={`btn ${selectedDataset === 'compare' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
-              >
-                Compare Cohort Model
-              </button>
-            )}
-          </div>
+
+          <SegmentedControl
+            options={datasetOptions}
+            value={selectedDataset}
+            onChange={(val) => setSelectedDataset(val as 'primary' | 'compare')}
+          />
         </div>
       </div>
 
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
-        <div className="card">
-          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Sparkles size={20} style={{ color: 'var(--brand-primary)' }} /> Input Student Metrics
-          </h3>
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Student ID / Ref</label>
+      {/* Two Column Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem' }}>
+        {/* Left Form Panel */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '1.75rem' }}>
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+              <Sparkles size={18} style={{ color: 'var(--brand-primary)' }} /> Input Student Metrics
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+              Adjust features to dynamically calculate real-time burnout probability.
+            </p>
+          </div>
+
+          <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ fontWeight: 500, fontSize: '0.875rem' }}>Student ID / Identifier</label>
+                <span className="badge badge-brand" style={{ fontSize: '0.75rem' }}>{studentId}</span>
+              </div>
               <input
                 type="text"
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 className="filter-input"
-                style={{ width: '100%' }}
+                style={{ width: '100%', height: 'var(--input-height)' }}
                 required
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px', fontWeight: 500 }}>
-                  <Moon size={16} style={{ color: 'var(--brand-primary)' }} /> Sleep Hours: {sleepHours}h
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500, fontSize: '0.875rem' }}>
+                    <Moon size={15} style={{ color: 'var(--brand-primary)' }} /> Sleep Hours
+                  </label>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--brand-primary)' }}>{sleepHours}h</span>
+                </div>
                 <input
                   type="range"
                   min="3"
@@ -150,13 +173,21 @@ const Predict: React.FC = () => {
                   step="0.5"
                   value={sleepHours}
                   onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-                  style={{ width: '100%', accentColor: 'var(--brand-primary)' }}
+                  style={{
+                    width: '100%',
+                    cursor: 'pointer',
+                    '--range-pct': `${((sleepHours - 3) / 9) * 100}%`
+                  } as React.CSSProperties}
                 />
               </div>
+
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px', fontWeight: 500 }}>
-                  <BookOpen size={16} style={{ color: 'var(--brand-primary)' }} /> Study Hours: {studyHours}h
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500, fontSize: '0.875rem' }}>
+                    <BookOpen size={15} style={{ color: 'var(--brand-primary)' }} /> Study Hours
+                  </label>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--brand-primary)' }}>{studyHours}h</span>
+                </div>
                 <input
                   type="range"
                   min="1"
@@ -164,15 +195,22 @@ const Predict: React.FC = () => {
                   step="0.5"
                   value={studyHours}
                   onChange={(e) => setStudyHours(parseFloat(e.target.value))}
-                  style={{ width: '100%', accentColor: 'var(--brand-primary)' }}
+                  style={{
+                    width: '100%',
+                    cursor: 'pointer',
+                    '--range-pct': `${((studyHours - 1) / 13) * 100}%`
+                  } as React.CSSProperties}
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px', fontWeight: 500 }}>
-                <AlertCircle size={16} style={{ color: 'var(--brand-primary)' }} /> Self-Reported Stress (1 - 10): {stressLevel}
-              </label>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500, fontSize: '0.875rem' }}>
+                  <AlertCircle size={15} style={{ color: 'var(--brand-primary)' }} /> Self-Reported Stress (1–10)
+                </label>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: getRiskColorVar(result.risk) }}>{stressLevel}/10</span>
+              </div>
               <input
                 type="range"
                 min="1"
@@ -180,25 +218,32 @@ const Predict: React.FC = () => {
                 step="1"
                 value={stressLevel}
                 onChange={(e) => setStressLevel(parseInt(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--brand-primary)' }}
+                style={{
+                  width: '100%',
+                  cursor: 'pointer',
+                  '--range-pct': `${((stressLevel - 1) / 9) * 100}%`
+                } as React.CSSProperties}
               />
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Student Comments / Qualitative Feedback</label>
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500, fontSize: '0.875rem' }}>
+                Student Feedback / Qualitative Telemetry
+              </label>
               <textarea
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="Describe academic pressure, motivation level or feedback..."
                 style={{
                   width: '100%',
-                  height: '100px',
-                  padding: '10px',
+                  height: '90px',
+                  padding: '10px 12px',
                   borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--card-border)',
+                  border: '1px solid var(--input-border)',
                   background: 'var(--input-bg)',
                   color: 'var(--text-primary)',
                   fontFamily: 'inherit',
+                  fontSize: '0.875rem',
                   resize: 'vertical'
                 }}
               />
@@ -206,59 +251,96 @@ const Predict: React.FC = () => {
           </form>
         </div>
 
+        {/* Right Diagnostic Panel with Animated SVG Ring Gauge */}
         <div className="card" style={{
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          border: `2px solid var(--${result.risk === 'High' ? 'danger' : result.risk === 'Medium' ? 'info' : 'success'})`,
-          transition: 'border-color 0.2s ease'
+          padding: '1.75rem',
+          borderLeft: `4px solid ${getRiskColorVar(result.risk)}`,
+          transition: 'border-left-color 0.3s ease'
         }}>
           <div>
-            <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Diagnostic Results
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 1rem 0' }}>
+              Diagnostic Evaluation
             </h3>
-            <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-              <div style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Burnout Score Index</div>
-              <div style={{
-                fontSize: '4.5rem',
-                fontWeight: 800,
-                color: `var(--${result.risk === 'High' ? 'danger' : result.risk === 'Medium' ? 'info' : 'success'})`,
-                transition: 'color 0.2s ease'
-              }}>
-                {result.score}
+
+            {/* SVG Ring Gauge */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '1rem 0 1.5rem 0' }}>
+              <div style={{ position: 'relative', width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)' }}>
+                  {/* Background Track Circle */}
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r={gaugeRadius}
+                    fill="transparent"
+                    stroke="var(--input-bg)"
+                    strokeWidth="10"
+                  />
+                  {/* Animated Score Progress Arc */}
+                  <motion.circle
+                    cx="80"
+                    cy="80"
+                    r={gaugeRadius}
+                    fill="transparent"
+                    stroke={getRiskColorVar(result.risk)}
+                    strokeWidth="10"
+                    strokeDasharray={circumference}
+                    animate={{ strokeDashoffset }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                {/* Score Number in Gauge Center */}
+                <div style={{ position: 'absolute', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <motion.span
+                    key={result.score}
+                    initial={{ scale: 0.8, opacity: 0.5 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1, color: getRiskColorVar(result.risk) }}
+                  >
+                    {result.score}
+                  </motion.span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>
+                    Score Index
+                  </span>
+                </div>
               </div>
-              <div style={{ marginTop: '0.5rem' }}>
-                <span className={`badge badge-${result.risk.toLowerCase()}`} style={{
-                  fontSize: '1rem',
-                  padding: '6px 16px',
-                  fontWeight: 600
-                }}>
+
+              <div style={{ marginTop: '1rem' }}>
+                <span className={`badge badge-${result.risk.toLowerCase()}`} style={{ fontSize: '0.85rem', padding: '6px 16px', borderRadius: 'var(--radius-full)' }}>
                   {result.risk} Risk Tier
                 </span>
               </div>
             </div>
 
+            {/* Clinical Breakdown */}
             <div className="takeaway-box" style={{
               background: 'var(--input-bg)',
-              borderLeftColor: `var(--${result.risk === 'High' ? 'danger' : result.risk === 'Medium' ? 'info' : 'success'})`,
-              transition: 'border-left-color 0.2s ease'
+              borderLeft: `3px solid ${getRiskColorVar(result.risk)}`,
+              padding: '1rem',
+              borderRadius: 'var(--radius-sm)',
+              transition: 'border-left-color 0.3s ease'
             }}>
-              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <AlertTriangle size={16} /> Clinical Breakdown
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                <AlertTriangle size={15} style={{ color: getRiskColorVar(result.risk) }} /> Clinical Assessment
               </strong>
-              <p style={{ marginTop: '6px', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              <p style={{ marginTop: '6px', fontSize: '0.85rem', lineHeight: 1.5, color: 'var(--text-secondary)', margin: '6px 0 0 0' }}>
                 {result.explanation}
               </p>
             </div>
           </div>
 
-          <button onClick={handleReset} className="btn btn-outline" style={{ marginTop: '1.5rem' }}>
-            Clear Assessment
+          <button onClick={handleReset} className="btn btn-outline" style={{ marginTop: '1.5rem', width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.85rem' }}>
+            <RefreshCw size={15} /> Reset Form Inputs
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 export default Predict;
+

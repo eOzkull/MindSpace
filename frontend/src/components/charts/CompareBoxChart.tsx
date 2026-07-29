@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { CHART_COLORS, DEFAULT_GRID_PROPS } from './chartUtils';
+import { CHART_COLORS, DEFAULT_GRID_PROPS, DEFAULT_X_AXIS_PROPS, DEFAULT_Y_AXIS_PROPS, DEFAULT_TOOLTIP_STYLE } from './chartUtils';
 
 interface CompareBoxChartProps {
   dataA: Array<{ burnout_score?: number | string }>;
@@ -58,7 +58,7 @@ export const CompareBoxChart: React.FC<CompareBoxChartProps> = ({ dataA, dataB, 
       q3: stats[0].q3,
       max: stats[0].max,
       iqr: stats[0].q3 - stats[0].q1,
-      color: '#4facfe',
+      color: CHART_COLORS.info,
     },
     {
       name: labelB,
@@ -68,18 +68,19 @@ export const CompareBoxChart: React.FC<CompareBoxChartProps> = ({ dataA, dataB, 
       q3: stats[1].q3,
       max: stats[1].max,
       iqr: stats[1].q3 - stats[1].q1,
-      color: '#ff9f43',
+      color: CHART_COLORS.warning,
     }
   ];
 
   return (
     <div className="chart-container" style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 15, right: 15, left: -20, bottom: 5 }}>
+        <BarChart data={chartData} margin={{ top: 12, right: 15, left: -20, bottom: 4 }}>
           <CartesianGrid {...DEFAULT_GRID_PROPS} />
-          <XAxis dataKey="name" stroke="transparent" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} dy={8} />
-          <YAxis domain={[0, 100]} stroke="transparent" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} dx={-8} />
+          <XAxis {...DEFAULT_X_AXIS_PROPS} dataKey="name" />
+          <YAxis {...DEFAULT_Y_AXIS_PROPS} domain={[0, 100]} />
           <Tooltip
+            cursor={DEFAULT_TOOLTIP_STYLE.cursor}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const d = payload[0].payload;
@@ -112,7 +113,7 @@ export const CompareBoxChart: React.FC<CompareBoxChartProps> = ({ dataA, dataB, 
           <Bar dataKey="q1" stackId="stack" fill="transparent" />
           <Bar dataKey="iqr" stackId="stack" radius={[4, 4, 0, 0]}>
             {chartData.map((entry, idx) => (
-              <Cell key={idx} fill={entry.color} fillOpacity={0.7} />
+              <Cell key={idx} fill={entry.color} fillOpacity={0.8} />
             ))}
           </Bar>
         </BarChart>

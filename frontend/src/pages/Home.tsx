@@ -1,22 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useHistory, useUploadFile, useResetSession } from '../hooks/useUpload';
 import { ErrorBanner } from '../components/Banner/ErrorBanner';
-import { Spinner } from '../components/Spinner/Spinner';
-import {  
-  Upload, 
-  CloudUpload, 
-  Sparkles, 
-  CheckCircle2, 
-  History, 
-  Trash2, 
-  FileSpreadsheet, 
-  LayoutDashboard, 
-  CheckSquare, 
-  Moon, 
-  BookOpen, 
-  AlertTriangle, 
-  MessageSquare 
+import LoadingScreen from '../components/LoadingScreen';
+import FileDropzone from '../components/Dropzone/FileDropzone';
+import { fadeUp, staggerContainer, staggerItem } from '../lib/motion';
+import {
+  Upload,
+  History,
+  Trash2,
+  FileSpreadsheet,
+  LayoutDashboard,
+  CheckSquare,
+  Moon,
+  BookOpen,
+  AlertTriangle,
+  MessageSquare
 } from 'lucide-react';
 
 const Home: React.FC = () => {
@@ -27,41 +27,11 @@ const Home: React.FC = () => {
 
   const loading = uploadMutation.isPending;
   const [error, setError] = useState('');
-  const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleClear = async () => {
     resetMutation.mutate();
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const onDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  const onDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      setSelectedFile(file);
-      await handleUpload(file);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      await handleUpload(file);
-    }
   };
 
   const handleUpload = async (file: File) => {
@@ -83,101 +53,135 @@ const Home: React.FC = () => {
     });
   };
 
+  const featureItems = [
+    {
+      icon: Moon,
+      title: 'Sleep Hours',
+      description: 'Average nightly sleep duration (hours vector).',
+      color: 'var(--info)'
+    },
+    {
+      icon: BookOpen,
+      title: 'Study Hours',
+      description: 'Daily focused learning & study duration.',
+      color: 'var(--brand-primary)'
+    },
+    {
+      icon: AlertTriangle,
+      title: 'Stress Level',
+      description: 'Self-reported stress rating (scale 1–10).',
+      color: 'var(--danger)'
+    },
+    {
+      icon: MessageSquare,
+      title: 'Student Feedback',
+      description: 'Qualitative comments for VADER sentiment analysis.',
+      color: 'var(--success)'
+    }
+  ];
+
   return (
-    <>
+    <motion.div {...fadeUp} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {loading && (
-        <div id="loading-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 9999, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Spinner size={64} label="Analyzing Your Data..."/>
-          <p style={{ color: 'var(--text-secondary)' }}>Recalculating burnout metrics and training ML models. Please wait.</p>
-        </div>
+        <LoadingScreen
+          variant="overlay"
+          message="Analyzing Your Data..."
+          subtitle="Recalculating burnout metrics and training ML models. Please wait."
+        />
       )}
 
       {error && (
-  <ErrorBanner
-    title="Upload Failed"
-    message={error}
-    variant="danger"
-  />
-)}
+        <ErrorBanner
+          title="Upload Failed"
+          message={error}
+          variant="danger"
+        />
+      )}
 
-      <div className="stats-grid" style={{ marginBottom: '2.5rem' }}>
-        <div className="card" style={{ gridColumn: 'span 2', padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '1.75rem 1.75rem 0.5rem 1.75rem' }}>
-            <h2 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Upload size={24} style={{ color: 'var(--brand-primary)' }} /> New Session
+      {/* Centered Upload Hero Section */}
+      <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="card" style={{ padding: '2.5rem', background: 'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 70%), var(--card-bg)' }}>
+          <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-primary)', marginBottom: '1rem' }}>
+              <Upload size={24} />
+            </div>
+            <h2 style={{ marginBottom: '0.5rem', fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+              New Analysis Session
             </h2>
-            <p className="text-secondary">Upload a student dataset in CSV format to begin analysis.</p>
+            <p className="text-secondary" style={{ fontSize: '0.925rem', margin: '0 auto', maxWidth: '480px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              Upload a student cohort CSV dataset to run automated ML evaluations, risk predictions, and intervention guidelines.
+            </p>
           </div>
 
-          <div style={{ padding: '1.75rem' }}>
-            <label
-              className={`upload-zone ${dragOver ? 'dragover' : ''}`}
-              id="drop-zone"
-              htmlFor="file-upload"
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-            >
-              <div className="upload-zone-content">
-                <CloudUpload className="upload-icon" size={64} style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }} />
-                <h3 style={{ marginBottom: '8px' }}>Drag and drop your CSV</h3>
-                <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>or click to browse from your computer</p>
+          <FileDropzone
+            onFileDrop={(file) => {
+              setSelectedFile(file);
+              handleUpload(file);
+            }}
+            selectedFile={selectedFile}
+            isLoading={loading}
+            disabled={loading}
+            title="Drag and drop your CSV dataset"
+            subtitle="or click to browse files from your computer"
+            buttonText="Analyze Dataset"
+          />
 
-                <input
-                  type="file"
-                  id="file-upload"
-                  accept=".csv"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
-                <span className="btn btn-primary" style={{ margin: '0 auto' }}>
-                  <Sparkles size={16} /> Analyze Data
-                </span>
-                {selectedFile && (
-                  <p style={{ marginTop: '1.5rem', color: 'var(--success)', fontWeight: 500 }}>
-                    <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> {selectedFile.name}
-                  </p>
-                )}
-              </div>
-            </label>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1.25rem',
+            marginTop: '1.5rem',
+            fontSize: '0.8rem',
+            color: 'var(--text-muted)',
+            flexWrap: 'wrap'
+          }}>
+            <span>Accepted format: <strong>.csv</strong></span>
+            <span>•</span>
+            <span>Max size: <strong>50 MB</strong></span>
+            <span>•</span>
+            <span>Secure local processing</span>
           </div>
         </div>
 
+        {/* History Section */}
         {history.length > 0 && (
-          <div className="card" style={{ gridColumn: 'span 2' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <History size={20} /> Recent Logs
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+                <History size={18} style={{ color: 'var(--brand-primary)' }} />
+                Recent Dataset Logs
               </h3>
-              <button onClick={handleClear} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                <Trash2 size={16} /> Clear All
+              <button onClick={handleClear} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Trash2 size={14} /> Clear Logs
               </button>
             </div>
             <div className="table-wrapper">
-              <table>
+              <table style={{ tableLayout: 'auto' }}>
                 <thead>
                   <tr>
-                    <th>Dataset Name</th>
-                    <th>Records Analyzed</th>
-                    <th>Action</th>
+                    <th style={{ textAlign: 'left' }}>Dataset Name</th>
+                    <th style={{ textAlign: 'left' }}>Records Analyzed</th>
+                    <th style={{ textAlign: 'right' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {history.map((entry, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 500 }}>
-                        <FileSpreadsheet size={16} style={{ color: 'var(--brand-secondary)', marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} />
-                        {entry.filename}
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                          <FileSpreadsheet size={16} style={{ color: 'var(--brand-primary)' }} />
+                          <span>{entry.filename}</span>
+                        </div>
                       </td>
-                      <td>{entry.records} rows</td>
-                      <td>
+                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{entry.records} rows</td>
+                      <td style={{ textAlign: 'right' }}>
                         {idx === 0 ? (
-                          <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>
-                            <LayoutDashboard size={16} /> View Dashboard
+                          <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <LayoutDashboard size={14} /> View Dashboard
                           </button>
                         ) : (
-                          <span className="badge badge-medium">Archived</span>
+                          <span className="badge badge-resolved">Archived</span>
                         )}
                       </td>
                     </tr>
@@ -189,39 +193,72 @@ const Home: React.FC = () => {
         )}
       </div>
 
+      {/* System Requirements Grid */}
       <div className="card">
-        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <CheckSquare size={20} /> System Requirements
-        </h3>
-        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-          <div className="card feature-pill" style={{ '--accent': 'var(--info)' } as React.CSSProperties}>
-            <h4 style={{ color: 'var(--info)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Moon size={20} /> Sleep
-            </h4>
-            <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Average nightly sleep duration (hours).</p>
-          </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--brand-primary)' } as React.CSSProperties}>
-            <h4 style={{ color: 'var(--brand-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <BookOpen size={20} /> Study
-            </h4>
-            <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Daily focused learning hours.</p>
-          </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--danger)' } as React.CSSProperties}>
-            <h4 style={{ color: 'var(--danger)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertTriangle size={20} /> Stress
-            </h4>
-            <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Self-reported level (scale 1–10).</p>
-          </div>
-          <div className="card feature-pill" style={{ '--accent': 'var(--success)' } as React.CSSProperties}>
-            <h4 style={{ color: 'var(--success)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MessageSquare size={20} /> Feedback
-            </h4>
-            <p className="insight-desc" style={{ fontSize: '0.9rem', margin: 0 }}>Natural language student comments.</p>
-          </div>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+            <CheckSquare size={18} style={{ color: 'var(--brand-primary)' }} />
+            CSV Feature Requirements
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+            Telemetry columns recognized by the machine learning pipeline for accurate feature extraction.
+          </p>
         </div>
+
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1rem'
+          }}
+        >
+          {featureItems.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <motion.div
+                key={idx}
+                variants={staggerItem}
+                className="card"
+                style={{
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  borderLeft: `3px solid ${item.color}`,
+                  background: 'var(--card-bg)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '8px',
+                    backgroundColor: `color-mix(in srgb, ${item.color} 12%, transparent)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: item.color
+                  }}>
+                    <Icon size={18} />
+                  </div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                    {item.title}
+                  </h4>
+                </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  {item.description}
+                </p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </div>
-    </>
+    </motion.div>
   );
 };
 
 export default Home;
+
