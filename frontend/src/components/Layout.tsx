@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Brain, Moon, Sun, Menu, X, ChevronRight
 } from 'lucide-react';
@@ -55,17 +55,14 @@ const Layout: React.FC = () => {
       </header>
 
       {/* Mobile Backdrop */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="sidebar-backdrop"
-            onClick={toggleSidebar}
-          />
-        )}
-      </AnimatePresence>
+      {isSidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="sidebar-backdrop"
+          onClick={toggleSidebar}
+        />
+      )}
 
       {/* Sidebar Navigation */}
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`} aria-label="Main navigation">
@@ -160,11 +157,9 @@ const Layout: React.FC = () => {
           </div>
         </header>
 
-        <AnimatePresence mode="wait">
-          <motion.div key={location.pathname} {...pageTransition}>
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        <motion.div key={location.pathname} {...pageTransition}>
+          <Outlet />
+        </motion.div>
       </main>
     </div>
   );

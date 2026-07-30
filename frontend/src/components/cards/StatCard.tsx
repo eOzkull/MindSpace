@@ -21,7 +21,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   const precision = isNumeric && String(value).includes('.') ? (String(value).split('.')[1]?.length || 1) : 0;
 
   const count = useMotionValue(0);
-  const animatedDisplay = useTransform(count, (v) => v.toFixed(precision));
+  const animatedDisplay = useTransform(count, (v: number) => v.toFixed(precision));
   const [displayValue, setDisplayValue] = useState<string | number>(isNumeric ? 0 : value);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         duration: 0.8,
         ease: [0.16, 1, 0.3, 1],
       });
-      const unsubscribe = animatedDisplay.on('change', (latest) => {
+      const unsubscribe = animatedDisplay.on('change', (latest: string) => {
         setDisplayValue(latest);
       });
       return () => {

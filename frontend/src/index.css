@@ -16,12 +16,12 @@
 
     /* Brand */
     --brand-primary: #8b5cf6;
-    --brand-secondary: #3b82f6;
+    --brand-secondary: #06b6d4; /* Changed to cyan for a more vibrant tech feel */
     --brand-accent: #a78bfa;
     --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-    --brand-glow: 0 0 24px rgba(139, 92, 246, 0.25);
-    --brand-glow-sm: 0 0 16px rgba(139, 92, 246, 0.20);
-    --accent: var(--brand-primary); /* Alias for feature pills & cards */
+    --brand-glow: 0 0 32px rgba(139, 92, 246, 0.4);
+    --brand-glow-sm: 0 0 16px rgba(139, 92, 246, 0.25);
+    --accent: var(--brand-primary);
 
     /* Semantic */
     --success: #10b981;
@@ -195,6 +195,35 @@ body {
     display: flex;
     width: 100%;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+.app-container::before,
+.app-container::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.15;
+}
+
+.app-container::before {
+    top: -10%;
+    left: -10%;
+    width: 50vw;
+    height: 50vw;
+    background: var(--brand-primary);
+}
+
+.app-container::after {
+    bottom: -10%;
+    right: -10%;
+    width: 40vw;
+    height: 40vw;
+    background: var(--brand-secondary);
 }
 
 .sidebar {
@@ -335,13 +364,24 @@ body {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--card-shadow, 0 10px 30px -5px rgba(0, 0, 0, 0.3));
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
 }
 
 .card:hover {
     border-color: var(--card-hover-border);
-    box-shadow: var(--card-hover-shadow, 0 20px 40px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.05));
-    transform: translateY(-1px);
+    box-shadow: var(--card-hover-shadow, 0 20px 40px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.1));
+    transform: translateY(-4px);
 }
 
 
@@ -798,7 +838,47 @@ tbody tr:hover td {
     height: 8px;
     border-radius: 50%;
     display: inline-block;
-    flex-shrink: 0;
+}
+
+/* Premium Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.btn-primary:active {
+    transform: scale(0.96);
+}
+
+.nav-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--brand-primary);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
 }
 
 .custom-chart-tooltip-value {
@@ -936,13 +1016,25 @@ tbody tr:hover td {
 }
 
 .takeaway-box {
-    background: var(--info-bg);
+    background: linear-gradient(90deg, var(--info-bg) 0%, rgba(14, 165, 233, 0.02) 100%);
     border-left: 3px solid var(--info);
     border-radius: var(--radius-sm);
     padding: 0.875rem 1rem;
     font-size: 0.875rem;
     color: var(--text-secondary);
     line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.takeaway-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: radial-gradient(circle at 0% 50%, rgba(14, 165, 233, 0.1), transparent 50%);
+    pointer-events: none;
 }
 
 
