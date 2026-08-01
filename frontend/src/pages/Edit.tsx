@@ -21,7 +21,15 @@ const Edit: React.FC = () => {
   const error = queryError ? (queryError as Error).message || 'Failed to load dataset.' : '';
 
   const [editRows, setEditRows] = useState<DataRow[]>([]);
+  const [changes, setChanges] = useState<Record<string, UpdatePayload>>({});
   const [saveError, setSaveError] = useState('');
+
+  const getServerRowIndex = (i: number) => {
+    const originalLen = dashboard?.data?.length || 0;
+    if (i < originalLen) return i;
+    const totalRecords = dashboard?.stats?.total_records || originalLen;
+    return totalRecords + (i - originalLen);
+  };
   const updateMutation = useUpdateDashboard();
   const saving = updateMutation.isPending;
   const navigate = useNavigate();
@@ -34,13 +42,27 @@ const Edit: React.FC = () => {
 
   const handleAddRow = () => {
     const newRow = columns.reduce<DataRow>((acc, col) => ({ ...acc, [col]: '' }), {});
+    const rowIndex = editRows.length;
     setEditRows([...editRows, newRow]);
+
+    const serverRowIndex = getServerRowIndex(rowIndex);
+    const newChanges = { ...changes };
+    columns.forEach(col => {
+      newChanges[`${serverRowIndex}-${col}`] = { row: serverRowIndex, col, value: '' };
+    });
+    setChanges(newChanges);
   };
 
   const handleChange = (rowIndex: number, col: string, value: string) => {
     const newData = [...editRows];
     newData[rowIndex][col] = value;
     setEditRows(newData);
+
+    const serverRowIndex = getServerRowIndex(rowIndex);
+    setChanges(prev => ({
+      ...prev,
+      [`${serverRowIndex}-${col}`]: { row: serverRowIndex, col, value }
+    }));
   };
 
   const tableColumns = React.useMemo(() => {
@@ -63,14 +85,12 @@ const Edit: React.FC = () => {
 
   const handleSave = async () => {
     setSaveError('');
-    const updates: UpdatePayload[] = [];
-    editRows.forEach((row, rIdx) => {
-      columns.forEach(col => {
-        if (row[col] !== undefined) {
-          updates.push({ row: rIdx, col, value: row[col] });
-        }
-      });
-    });
+    const updates: UpdatePayload[] = Object.values(changes);
+    
+    if (updates.length === 0) {
+      navigate('/dashboard');
+      return;
+    }
     
     updateMutation.mutate(updates, {
       onSuccess: (res) => {

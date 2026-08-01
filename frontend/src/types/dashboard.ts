@@ -1,4 +1,5 @@
 export interface DashboardStats {
+  total_records: number;
   avg_burnout: number;
   median_burnout: number;
   std_burnout: number;
